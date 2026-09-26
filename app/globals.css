@@ -3,6 +3,9 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* 整站背景图。首页的视差层（components/home/ParallaxBackground.tsx）也取这个变量，
+     换图只改这里一处。 */
+  --bg-image: url('/images/bg.webp');
 }
 
 @theme inline {
@@ -10,6 +13,29 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+/*
+ * Marquee for a one-line label that outgrows its box. Starts with the text's
+ * beginning at the left edge, slides left until its end is visible, then
+ * reverses — `alternate` brings it back instead of jumping. Two 1.5s iterations
+ * is one round trip in 3s, so it settles back where it started and stops.
+ *
+ * The distance is the text's overflow in pixels, measured in AppItem and passed
+ * in as `--marquee-shift`; without it the animation is a no-op. AppItem decides
+ * when to run it (hover on a name that actually overflows).
+ */
+@theme {
+  --animate-marquee: marquee 1.5s linear 2 alternate;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(var(--marquee-shift, 0));
+    }
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -21,6 +47,17 @@
 
 body {
   background: var(--background);
+  /* Painted over the whole canvas: html sets no background of its own, so the
+     body's background propagates to it. `cover` fills the page at any aspect
+     ratio, cropping rather than distorting. `fixed` is what keeps it filled:
+     the canvas image is sized to the root element's box, which `h-full` pins to
+     the viewport, so without it anything below the fold (a page taller than the
+     window) scrolls into an uncovered band. */
+  background-attachment: fixed;
+  background-image: var(--bg-image);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
