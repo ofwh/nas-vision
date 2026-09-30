@@ -1,27 +1,14 @@
 'use client';
 
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { LiquidGlass } from '@/components/common/LiquidGlass';
+import type { AppItem as AppRecord } from '@/lib/services/apps';
+import { useApp } from '@/stores/app';
 
-/**
- * Per-app settings. Deliberately empty for now — fields get added here as the
- * app model grows, so consumers can already carry the object around.
- */
-export type AppItemConfig = Record<string, unknown>;
-
-export type AppItemProps = {
-  id: string;
-  name: string;
-  image: string;
-  url: string;
-  innerUrl: string;
-  config: AppItemConfig;
-};
-
-/** One honeycomb slot: a fixed 240x208 tile. */
-export function AppItem({ name, image }: AppItemProps) {
+export function AppItem({ name, image }: Pick<AppRecord, 'name' | 'image'>) {
+  const veil = useApp((state) => state.veil);
   const barRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
-  /** How far the name sticks out of its box, in px. 0 means it fits. */
   const [overflow, setOverflow] = useState(0);
 
   useEffect(() => {
@@ -29,10 +16,6 @@ export function AppItem({ name, image }: AppItemProps) {
     const text = textRef.current;
     if (!bar || !text) return;
 
-    // Measure the text against the box rather than the box's own scrollWidth:
-    // the transform the marquee applies would otherwise feed back into the
-    // measurement. Watching both boxes also catches the webfont swapping in,
-    // which changes how wide the same name is.
     const measure = () => setOverflow(Math.max(0, text.scrollWidth - bar.clientWidth));
     measure();
 
@@ -47,15 +30,21 @@ export function AppItem({ name, image }: AppItemProps) {
       <div className="h-full w-5" />
 
       <div className="h-full w-full pt-6.5">
-        <div className="flex h-40 w-full flex-col items-center justify-center gap-2.5">
-          {/* 图标容器 */}
-          <div className="h-32 w-32 rounded-full bg-blue-50">
-            {/* alt is empty on purpose: the name is rendered below as text. */}
+        <div className="flex h-40 w-full cursor-pointer flex-col items-center justify-center gap-2.5">
+          {/* 别在玻璃上写 opacity：会自建 backdrop 根，毛玻璃就看不到背景了 */}
+          {/* 放大走 transform，不占布局；长出来的部分靠 z-10 的文案盖住 */}
+          <LiquidGlass
+            className="h-32 w-32 rounded-full transition-transform duration-500 ease-out hover:scale-110"
+            contentClassName="h-full"
+            variant={veil ? 'veil' : 'glass'}
+          >
             {image ? <img src={image} alt="" className="h-full w-full rounded-full object-cover" /> : null}
-          </div>
+          </LiquidGlass>
 
-          {/* 文案容器 */}
-          <div ref={barRef} className="flex h-5.5 max-w-50 items-center overflow-hidden rounded-md text-sm">
+          <div
+            ref={barRef}
+            className="relative z-10 flex h-5.5 max-w-50 items-center overflow-hidden rounded-md text-sm text-white"
+          >
             <span
               ref={textRef}
               className={overflow > 0 ? 'group-hover:animate-marquee whitespace-nowrap' : 'whitespace-nowrap'}

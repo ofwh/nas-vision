@@ -5,6 +5,7 @@ build
 dist
 coverage
 public
+components/ui
 pnpm-lock.yaml
 AGENTS.md
 CLAUDE.md
