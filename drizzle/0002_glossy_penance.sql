@@ -1,0 +1,1 @@
+ALTER TABLE `apps` ADD `type` text DEFAULT 'url' NOT NULL;

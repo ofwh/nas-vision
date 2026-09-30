@@ -1,0 +1,1 @@
+ALTER TABLE `apps` ADD `external` integer DEFAULT 1 NOT NULL;
