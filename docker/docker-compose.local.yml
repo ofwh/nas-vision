@@ -1,0 +1,22 @@
+name: nas-vision
+
+services:
+  migrate:
+    image: nas-vision:migrate-latest
+    restart: 'no'
+    volumes:
+      - ${NAS_VISION_DATA:-./data}:/app/data
+
+  app:
+    image: nas-vision:latest
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+    ports:
+      - '3000:3000'
+    volumes:
+      - ${NAS_VISION_DATA:-./data}:/app/data
+      - ${NAS_VISION_UPLOADS:-./uploads}:/app/public/static/uploads

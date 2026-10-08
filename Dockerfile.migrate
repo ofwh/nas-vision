@@ -1,0 +1,24 @@
+# syntax=docker/dockerfile:1.7
+
+FROM node:24-bookworm-slim AS base
+
+FROM base AS deps
+WORKDIR /app
+RUN --mount=type=cache,id=npm-cache,target=/root/.npm \
+    npm install --cache=/root/.npm drizzle-kit drizzle-orm better-sqlite3
+
+FROM base AS runner
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+
+COPY drizzle ./drizzle
+COPY drizzle.config.ts ./
+COPY lib/db/schema ./lib/db/schema
+
+RUN mkdir -p /app/data && chown -R node:node /app/data
+
+ENV NODE_ENV=production
+
+USER node
+CMD ["npx", "drizzle-kit", "migrate"]

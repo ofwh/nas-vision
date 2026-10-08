@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NAS Vision
 
-## Getting Started
+## 环境变量
 
-First, run the development server:
+复制 `.env.example` 为 `.env`，按需修改认证密钥、数据目录和网络配置。
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 开发
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+安装项目依赖。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm install --frozen-lockfile
+```
 
-## Learn More
+创建数据目录并执行数据库迁移。
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+mkdir -p data
+pnpm db:migrate
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+启动开发服务。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm dev
+```
 
-## Deploy on Vercel
+## 构建
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+构建应用镜像，按需修改 `NEXT_PUBLIC_BASE_PATH` 路径前缀。
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+docker build -t nas-vision:latest .
+```
+
+构建数据库迁移镜像。
+
+```bash
+docker build -f Dockerfile.migrate -t nas-vision:migrate-latest .
+```
+
+## Docker Run 启动
+
+执行数据库迁移，成功后再启动应用。
+
+```bash
+docker run --rm -v "$(pwd)/docker/data:/app/data" nas-vision:migrate-latest
+```
+
+启动应用，映射端口 3000 并挂载数据目录。
+
+```bash
+docker run -d --name nas-vision --restart unless-stopped --env-file .env -p 3000:3000 -v "$(pwd)/docker/data:/app/data" -v "$(pwd)/docker/uploads:/app/public/static/uploads" nas-vision:latest
+```
+
+## Docker Compose 启动
+
+使用本地构建的镜像启动。
+
+```bash
+docker compose --env-file .env -f docker/docker-compose.local.yml up -d
+```
+
+使用 GHCR 镜像启动，需先配置已有网络名称和固定 IP。
+
+```bash
+docker compose --env-file .env -f docker/docker-compose.yml up -d --pull always
+```

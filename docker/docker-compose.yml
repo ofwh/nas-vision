@@ -1,0 +1,31 @@
+name: nas-vision
+
+services:
+  migrate:
+    image: ghcr.io/ofwh/nas-vision:migrate-latest
+    restart: 'no'
+    volumes:
+      - ${NAS_VISION_DATA:-./data}:/app/data
+
+  app:
+    image: ghcr.io/ofwh/nas-vision:latest
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+    # ports:
+    #   - '3000:3000'
+    volumes:
+      - ${NAS_VISION_DATA:-./data}:/app/data
+      - ${NAS_VISION_UPLOADS:-./uploads}:/app/public/static/uploads
+    networks:
+      nas-vision-network:
+        ipv4_address: ${NAS_VISION_IP_ADDRESS}
+
+networks:
+  nas-vision-network:
+    driver: bridge
+    external: true
+    name: ${NAS_VISION_BRIDGE_NETWORK}
