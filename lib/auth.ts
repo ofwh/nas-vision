@@ -7,6 +7,7 @@ import * as schema from './db/schema/better-auth';
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: 'sqlite', schema }),
+  trustedOrigins: ['*'],
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 6,
