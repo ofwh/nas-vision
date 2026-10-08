@@ -1,0 +1,18 @@
+{
+  "close": "Close",
+  "minimize": "Minimize",
+  "maximize": "Maximize",
+  "restore": "Restore",
+  "closeToast": "Close notification",
+  "loading": "Loading",
+  "done": "Done",
+  "edit": "Edit",
+  "save": "Save",
+  "saving": "Saving",
+  "delete": "Delete",
+  "deleting": "Deleting",
+  "noOptions": "No matching options",
+  "connectionFailed": "Unable to connect to the server. Please try again later.",
+  "saveFailed": "Unable to save. Please try again.",
+  "iframeBlocked": "Browser security restrictions prevent this page from being embedded."
+}

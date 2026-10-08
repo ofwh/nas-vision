@@ -1,0 +1,12 @@
+{
+  "title": "外观",
+  "description": "选择适合你的界面外观。",
+  "theme": "主题",
+  "auto": "自动",
+  "light": "浅色",
+  "dark": "深色",
+  "language": "语言",
+  "languageHint": "选择界面显示使用的语言。",
+  "veil": "磨砂特效",
+  "veilHint": "亚克力磨砂效果，消耗更多GPU性能"
+}

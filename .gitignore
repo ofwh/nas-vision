@@ -33,9 +33,17 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# local sqlite database
+/data/*.db
+/data/*.db-*
+
+# uploaded files
+/public/static/uploads
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+references

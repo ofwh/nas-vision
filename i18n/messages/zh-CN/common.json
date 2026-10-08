@@ -1,0 +1,18 @@
+{
+  "close": "关闭",
+  "minimize": "最小化",
+  "maximize": "最大化",
+  "restore": "还原",
+  "closeToast": "Close toast",
+  "loading": "加载中",
+  "done": "完成",
+  "edit": "编辑",
+  "save": "保存",
+  "saving": "保存中",
+  "delete": "删除",
+  "deleting": "删除中",
+  "noOptions": "没有匹配的选项",
+  "connectionFailed": "无法连接服务器，请稍后重试",
+  "saveFailed": "保存失败，请重试",
+  "iframeBlocked": "因浏览器安全限制，页面无法通过 iframe 访问"
+}
