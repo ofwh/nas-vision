@@ -44,7 +44,6 @@ export function AppList() {
       <Loading />
     </div>
   ) : (
-    // 动画挂在外层，不碰 Swiper 自己的根节点
     <div className="animate-in zoom-in-50 h-156 w-300 duration-500 ease-out">
       {/* observer：数据回来后页数会变，靠它重新量一遍 slides。 */}
       <Swiper

@@ -5,6 +5,7 @@ import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { useSession } from '@/lib/auth-client';
 import { useSidebarStore, visibleItems } from '@/stores/sidebar';
+import { useAppList } from '@/stores/app-list';
 
 const LABEL_KEYS: Record<string, 'home' | 'apps' | 'settings' | 'account' | 'appearance' | undefined> = {
   home: 'home',
@@ -31,6 +32,18 @@ const containerHeight = (itemCount: number) =>
   2 * CONTAINER_PADDING + itemCount * ITEM_SIZE + Math.max(0, itemCount - 1) * ITEM_GAP;
 
 export function Sidebar() {
+  const ready = useAppList((state) => state.status !== 'idle' && state.status !== 'loading');
+
+  if (!ready) return null;
+
+  return (
+    <div className="animate-in zoom-in-50 relative z-[1050] ml-[calc(100%_-_124px)] w-17 duration-500 ease-out">
+      <SidebarContent />
+    </div>
+  );
+}
+
+function SidebarContent() {
   const t = useTranslations('sidebar');
   const { data: session } = useSession();
   const allItems = useSidebarStore((state) => state.items);
@@ -86,14 +99,14 @@ export function Sidebar() {
           height: containerHeight(items.length),
         } as CSSProperties
       }
-      className="group z-[1050] ml-[calc(100%_-_124px)] w-17 shrink-0 rounded-[34px] transition-all duration-300 ease-out hover:w-[var(--sidebar-expand)]"
+      className="group w-17 shrink-0 rounded-[34px] transition-[width] duration-300 ease-out hover:w-[var(--sidebar-expand)] motion-reduce:transition-none"
     >
       <div
         aria-hidden
-        className={`pointer-events-none absolute right-3 left-3 rounded-full bg-black/25 duration-200 ease-out ${
-          hover.sliding ? 'transition-[top,opacity]' : 'transition-opacity'
+        className={`pointer-events-none absolute top-0 right-3 left-3 rounded-full bg-black/25 duration-200 ease-out motion-reduce:transition-none ${
+          hover.sliding ? 'transition-[transform,opacity]' : 'transition-opacity'
         } ${showHover ? 'opacity-100' : 'opacity-0'}`}
-        style={{ top: itemTop(hoveredItem ? hover.index : 0), height: ITEM_SIZE }}
+        style={{ transform: `translateY(${itemTop(hoveredItem ? hover.index : 0)}px)`, height: ITEM_SIZE }}
       />
 
       {items.map((item, index) => {

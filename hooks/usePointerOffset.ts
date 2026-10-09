@@ -64,7 +64,7 @@ const tick = (now: number) => {
 };
 
 const start = () => {
-  if (frame || !subscribers.size) return;
+  if (frame || !subscribers.size || document.hidden) return;
   last = performance.now();
   frame = requestAnimationFrame(tick);
 };
@@ -112,21 +112,31 @@ const onResize = () => {
   }, RESIZE_THROTTLE - elapsed);
 };
 
+const onVisibilityChange = () => {
+  if (document.hidden) {
+    if (frame) cancelAnimationFrame(frame);
+    frame = 0;
+  } else {
+    refreshCenter();
+    start();
+  }
+};
+
 const subscribe = (onFrame: Subscriber) => {
   if (!subscribers.size) {
-    x = targetX = 0;
-    y = targetY = 0;
-    pointerInside = false;
     refreshCenter();
   }
 
   subscribers.add(onFrame);
+  onFrame(x, y);
+  if (x !== targetX || y !== targetY) start();
 
   if (!listening) {
     listening = true;
     window.addEventListener('pointermove', onPointerMove);
     document.addEventListener('pointerout', onPointerOut);
     window.addEventListener('resize', onResize);
+    document.addEventListener('visibilitychange', onVisibilityChange);
   }
 
   return () => {
@@ -137,6 +147,7 @@ const subscribe = (onFrame: Subscriber) => {
     window.removeEventListener('pointermove', onPointerMove);
     document.removeEventListener('pointerout', onPointerOut);
     window.removeEventListener('resize', onResize);
+    document.removeEventListener('visibilitychange', onVisibilityChange);
     if (resizeTimer !== undefined) clearTimeout(resizeTimer);
     resizeTimer = undefined;
     if (frame) cancelAnimationFrame(frame);
@@ -149,8 +160,18 @@ export function usePointerOffset(onFrame: (offsetX: number, offsetY: number) => 
   const emit = useEffectEvent(onFrame);
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let unsubscribe: (() => void) | undefined;
+    const sync = () => {
+      unsubscribe?.();
+      unsubscribe = preference.matches ? undefined : subscribe((x, y) => emit(x, y));
+    };
 
-    return subscribe((x, y) => emit(x, y));
+    sync();
+    preference.addEventListener('change', sync);
+    return () => {
+      unsubscribe?.();
+      preference.removeEventListener('change', sync);
+    };
   }, []);
 }

@@ -22,7 +22,6 @@ const FILTER =
 
 const OVERLAY = 'absolute inset-0 z-10 rounded-[inherit] bg-[var(--glass-tint,rgb(255_255_255/0.08))]';
 
-// const VEIL = 'absolute inset-0 z-0 rounded-[inherit] backdrop-blur-[14px] [filter:saturate(85%)_brightness(0.88)]';
 const VEIL = 'absolute inset-0 z-0 rounded-[inherit] backdrop-blur-[14px]';
 
 const VEIL_OVERLAY = 'absolute inset-0 z-10 rounded-[inherit] bg-[var(--glass-tint,rgb(18_18_22/0.18))]';
@@ -59,13 +58,22 @@ export function GlassMask({ variant }: { variant?: GlassMaskVariant }) {
 
 export function LiquidGlass({ className, contentClassName, style, ref, variant, children }: LiquidGlassProps) {
   const specularRef = useRef<HTMLDivElement>(null);
+  const lastOffset = useRef({ x: '', y: '' });
 
   usePointerOffset((offsetX, offsetY) => {
     const specular = specularRef.current;
     if (!specular) return;
 
-    specular.style.setProperty('--glass-specular-x', `${(-offsetX * SPECULAR_REACH).toFixed(2)}px`);
-    specular.style.setProperty('--glass-specular-y', `${(-offsetY * SPECULAR_REACH).toFixed(2)}px`);
+    const x = `${(-offsetX * SPECULAR_REACH).toFixed(2)}px`;
+    const y = `${(-offsetY * SPECULAR_REACH).toFixed(2)}px`;
+    if (lastOffset.current.x !== x) {
+      specular.style.setProperty('--glass-specular-x', x);
+      lastOffset.current.x = x;
+    }
+    if (lastOffset.current.y !== y) {
+      specular.style.setProperty('--glass-specular-y', y);
+      lastOffset.current.y = y;
+    }
   });
 
   return (
