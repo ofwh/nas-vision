@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from 'zustand';
 import { useSession } from '@/lib/auth-client';
-import type { AppearanceConfig } from '@/lib/db/schema/config';
+import type { AppearanceConfig } from '@/lib/db/schema/appearance';
 import { createSettingsStore, SettingsContext } from '@/stores/settings';
 
 export function SettingsProvider({

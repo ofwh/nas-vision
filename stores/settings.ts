@@ -3,7 +3,7 @@
 import { createContext, useContext } from 'react';
 import { createStore, useStore } from 'zustand';
 import { fetchApi } from '@/lib/api/client';
-import type { AppearanceConfig } from '@/lib/db/schema/config';
+import type { AppearanceConfig } from '@/lib/db/schema/appearance';
 import type { ConfigRes } from '@/lib/services/config';
 
 type SettingsStore = AppearanceConfig & {

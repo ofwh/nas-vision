@@ -19,7 +19,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { useSettings } from '@/stores/settings';
 
 export type LiquidGlassDialogType = 'builtin' | 'url' | 'garfish';
 
@@ -152,10 +151,8 @@ export function LiquidGlassDialog({
 }: LiquidGlassDialogProps) {
   const t = useTranslations();
   const [maximized, setMaximized] = useState(false);
-  const veil = useSettings((state) => state.veil);
   const src = url ?? innerUrl;
   const frameSrc = type === 'url' ? src : undefined;
-  const glassVariant = veil ? 'veil' : 'glass';
   const autoHeight = size.height === undefined && style?.height === undefined;
 
   return (
@@ -185,7 +182,6 @@ export function LiquidGlassDialog({
               <LiquidGlass
                 className="h-10 shrink-0 rounded-full"
                 contentClassName="relative flex h-full min-w-0 items-center justify-center px-6"
-                variant={glassVariant}
               >
                 <DialogTitle className="flex min-w-0 items-center gap-2 text-[18px] font-bold">
                   {icon ? <span className="flex size-7 shrink-0 items-center justify-center">{icon}</span> : null}
@@ -219,7 +215,6 @@ export function LiquidGlassDialog({
                 autoHeight ? 'min-h-0 flex-auto' : 'h-full',
                 !fit && 'p-2',
               )}
-              variant={glassVariant}
             >
               {description ? (
                 <DialogDescription className="shrink-0 text-sm text-white/70">{description}</DialogDescription>
