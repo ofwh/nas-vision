@@ -5,14 +5,12 @@ import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Button } from '@/components/ui/button';
-import { useSettings } from '@/stores/settings';
 
-export function SecurityDialogClose({ onClose, disabled }: { onClose: () => void; disabled: boolean }) {
+export function SecurityCloseButton({ onClose, disabled }: { onClose: () => void; disabled: boolean }) {
   const t = useTranslations();
-  const veil = useSettings((state) => state.veil);
 
   return (
-    <LiquidGlass className="size-10 shrink-0 rounded-full" contentClassName="h-full" variant={veil ? 'veil' : 'glass'}>
+    <LiquidGlass className="size-10 shrink-0 rounded-full" contentClassName="h-full">
       <Button
         variant="ghost"
         size="icon-lg"

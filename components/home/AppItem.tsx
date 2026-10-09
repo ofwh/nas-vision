@@ -5,11 +5,25 @@ import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { LiquidGlassDialog } from '@/components/common/LiquidGlassDialog';
 import type { AppItem as AppRecord } from '@/lib/services/apps';
-import { useSettings } from '@/stores/settings';
+
+function AppUrlDialog({ name, url, onClose }: { name: string; url: string; onClose: () => void }) {
+  return (
+    <LiquidGlassDialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+      type="url"
+      title={name}
+      url={url}
+      size={{ width: 1280, height: 800 }}
+      style={{ width: 'min(1280px, 90vw)', height: '85vh' }}
+    />
+  );
+}
 
 export function AppItem({ name, image, type, url, innerUrl, external }: AppRecord) {
   const t = useTranslations();
-  const veil = useSettings((state) => state.veil);
   const barRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const [overflow, setOverflow] = useState(0);
@@ -66,7 +80,6 @@ export function AppItem({ name, image, type, url, innerUrl, external }: AppRecor
             <LiquidGlass
               className="h-32 w-32 rounded-full transition-transform duration-500 ease-out hover:scale-110"
               contentClassName="h-full"
-              variant={veil ? 'veil' : 'glass'}
             >
               {image ? <img src={image} alt="" className="h-full w-full rounded-full object-cover" /> : null}
             </LiquidGlass>
@@ -88,17 +101,7 @@ export function AppItem({ name, image, type, url, innerUrl, external }: AppRecor
 
         <div className="h-full w-5" />
       </div>
-      {open && (
-        <LiquidGlassDialog
-          open={open}
-          onOpenChange={setOpen}
-          type="url"
-          title={name}
-          url={address}
-          size={{ width: 1280, height: 800 }}
-          style={{ width: 'min(1280px, 90vw)', height: '85vh' }}
-        />
-      )}
+      {open ? <AppUrlDialog name={name} url={address} onClose={() => setOpen(false)} /> : null}
     </>
   );
 }

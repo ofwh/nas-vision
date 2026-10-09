@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/combobox';
 import { Switch } from '@/components/ui/switch';
 import { useSettings } from '@/stores/settings';
-import type { ConfigTheme } from '@/lib/db/schema/config';
+import type { ConfigTheme } from '@/lib/db/schema/appearance';
 
 export function Appearance() {
   const t = useTranslations();

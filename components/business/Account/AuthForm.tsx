@@ -1,12 +1,11 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState, type FormEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { UserRoundKey, UserRoundPlus } from 'lucide-react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
-import { useSettings } from '@/stores/settings';
 import { TwoFactorChallenge } from './TwoFactorChallenge';
 
 export type AuthMode = 'sign-in' | 'sign-up';
@@ -24,7 +23,6 @@ export function AuthForm({
   onSuccess: () => void;
 }) {
   const t = useTranslations();
-  const veil = useSettings((state) => state.veil);
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -35,7 +33,7 @@ export function AuthForm({
   const isSignUp = mode === 'sign-up';
   const AccountIcon = isSignUp ? UserRoundPlus : UserRoundKey;
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending) return;
     setError(null);
@@ -156,11 +154,7 @@ export function AuthForm({
             {error}
           </p>
         ) : null}
-        <LiquidGlass
-          className="mt-2 self-center rounded-full"
-          contentClassName="h-full"
-          variant={veil ? 'veil' : 'glass'}
-        >
+        <LiquidGlass className="mt-2 self-center rounded-full" contentClassName="h-full">
           <Button
             type="submit"
             variant="ghost"

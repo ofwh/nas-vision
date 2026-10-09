@@ -4,7 +4,6 @@ import { useTranslations } from 'next-intl';
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { useSession } from '@/lib/auth-client';
-import { useSettings } from '@/stores/settings';
 import { useSidebarStore, visibleItems } from '@/stores/sidebar';
 
 const LABEL_KEYS: Record<string, 'home' | 'apps' | 'settings' | 'account' | 'appearance' | undefined> = {
@@ -34,7 +33,6 @@ const containerHeight = (itemCount: number) =>
 export function Sidebar() {
   const t = useTranslations('sidebar');
   const { data: session } = useSession();
-  const veil = useSettings((state) => state.veil);
   const allItems = useSidebarStore((state) => state.items);
   const activeId = useSidebarStore((state) => state.activeId);
   const setActive = useSidebarStore((state) => state.setActive);
@@ -89,7 +87,6 @@ export function Sidebar() {
         } as CSSProperties
       }
       className="group z-[1050] ml-[calc(100%_-_124px)] w-17 shrink-0 rounded-[34px] transition-all duration-300 ease-out hover:w-[var(--sidebar-expand)]"
-      variant={veil ? 'veil' : 'glass'}
     >
       <div
         aria-hidden

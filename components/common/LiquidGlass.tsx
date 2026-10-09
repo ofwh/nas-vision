@@ -2,6 +2,7 @@
 
 import { type CSSProperties, type ReactNode, type Ref, useRef } from 'react';
 import { usePointerOffset } from '@/hooks/usePointerOffset';
+import { useSettings } from '@/stores/settings';
 
 /**
  * 液态玻璃容器。可调参数就地覆盖父容器的 CSS 变量：
@@ -43,8 +44,10 @@ const cn = (...classes: (string | undefined)[]) => classes.filter(Boolean).join(
 export type GlassMaskVariant = 'glass' | 'veil';
 
 /** 父容器要 `relative isolate`，内容压到 z-30 之上，否则被盖住、也点不到。 */
-export function GlassMask({ variant = 'glass' }: { variant?: GlassMaskVariant }) {
-  const [filter, overlay] = variant === 'veil' ? [VEIL, VEIL_OVERLAY] : [FILTER, OVERLAY];
+export function GlassMask({ variant }: { variant?: GlassMaskVariant }) {
+  const veil = useSettings((state) => state.veil);
+  const resolvedVariant = variant ?? (veil ? 'veil' : 'glass');
+  const [filter, overlay] = resolvedVariant === 'veil' ? [VEIL, VEIL_OVERLAY] : [FILTER, OVERLAY];
 
   return (
     <>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { authErrorMessage } from '@/lib/api/auth-error';
@@ -16,7 +16,7 @@ export function TwoFactorChallenge({ onSuccess, onCancel }: { onSuccess: () => v
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending || code.length !== 6) return;
     setPending(true);

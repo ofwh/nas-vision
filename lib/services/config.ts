@@ -1,7 +1,7 @@
 import { appError, type Result } from '@/lib/api';
 import * as repository from '@/lib/db/repositories/config';
 import type { AppearanceConfig } from '@/lib/db/schema';
-import { resolveAppearance, type AppearanceCookies } from '@/lib/appearance-config';
+import { resolveAppearance, type AppearanceCookies } from '@/lib/appearance';
 
 export type ConfigSaveParams = AppearanceConfig;
 export type ConfigRes = { config: AppearanceConfig };
@@ -19,7 +19,14 @@ export function save(input: ConfigSaveParams): Result<AppearanceConfig> {
   ) {
     return { ok: false, error: appError('common.INVALID_PARAMS') };
   }
-  return { ok: true, value: repository.upsert({ language: input.language, theme: input.theme, veil: input.veil }) };
+  return {
+    ok: true,
+    value: repository.upsert({
+      language: input.language,
+      theme: input.theme,
+      veil: input.veil,
+    }),
+  };
 }
 
 const configService = { list, save };

@@ -5,19 +5,72 @@ import { ChevronRight, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthForm, type AuthMode } from '@/components/business/Account/AuthForm';
-import { ChangePasswordDialog } from '@/components/business/Account/ChangePasswordDialog';
-import { TwoFactorDialog } from '@/components/business/Account/TwoFactorDialog';
+import { ChangePassword } from '@/components/business/Account/ChangePassword';
+import { TwoFactor } from '@/components/business/Account/TwoFactor';
+import { LiquidGlassDialog } from '@/components/common/LiquidGlassDialog';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Loading } from '@/components/common/Loading';
 import { Button } from '@/components/ui/button';
 import { authClient, useSession } from '@/lib/auth-client';
-import { useSettings } from '@/stores/settings';
+
+function ChangePasswordDialog({ onClose }: { onClose: () => void }) {
+  const t = useTranslations();
+  const [pending, setPending] = useState(false);
+
+  return (
+    <LiquidGlassDialog
+      open
+      header={false}
+      title={t('account.changePassword')}
+      size={{ width: 440 }}
+      style={{ maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100dvh - 32px)' }}
+      onOpenChange={(open) => {
+        if (!open && !pending) onClose();
+      }}
+    >
+      <ChangePassword onSuccess={onClose} onCancel={onClose} onPendingChange={setPending} />
+    </LiquidGlassDialog>
+  );
+}
+
+function TwoFactorDialog({
+  enabled,
+  onClose,
+  onUpdated,
+}: {
+  enabled: boolean;
+  onClose: () => void;
+  onUpdated: () => Promise<void>;
+}) {
+  const t = useTranslations();
+  const [pending, setPending] = useState(false);
+
+  return (
+    <LiquidGlassDialog
+      open
+      header={false}
+      title={t('account.twoFactorAuthentication')}
+      size={{ width: 460 }}
+      style={{ maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100dvh - 32px)' }}
+      onOpenChange={(open) => {
+        if (!open && !pending) onClose();
+      }}
+    >
+      <TwoFactor
+        enabled={enabled}
+        onSuccess={onClose}
+        onCancel={onClose}
+        onPendingChange={setPending}
+        onUpdated={onUpdated}
+      />
+    </LiquidGlassDialog>
+  );
+}
 
 export function Account() {
   const t = useTranslations();
   const router = useRouter();
   const { data: session, isPending, error: sessionError, refetch } = useSession();
-  const veil = useSettings((state) => state.veil);
   const [mode, setMode] = useState<AuthMode>('sign-in');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,11 +133,7 @@ export function Account() {
       <div className="pointer-events-none absolute top-0 left-0 z-10 flex h-18 w-full items-center justify-end gap-3 bg-linear-to-b from-[#545458]/65 via-[#545458]/30 to-transparent px-6">
         <h2 className="sr-only">{t('account.title')}</h2>
         {session ? (
-          <LiquidGlass
-            className="pointer-events-auto rounded-full"
-            contentClassName="h-full"
-            variant={veil ? 'veil' : 'glass'}
-          >
+          <LiquidGlass className="pointer-events-auto rounded-full" contentClassName="h-full">
             <Button
               variant="ghost"
               disabled={pending}
@@ -170,7 +219,7 @@ export function Account() {
                 ))}
               </div>
             </div>
-            <LiquidGlass className="mt-6 rounded-full" contentClassName="h-full" variant={veil ? 'veil' : 'glass'}>
+            <LiquidGlass className="mt-6 rounded-full" contentClassName="h-full">
               <Button
                 variant="ghost"
                 disabled={pending}

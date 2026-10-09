@@ -2,13 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
-import { useSettings } from '@/stores/settings';
 import { useAppList } from '@/stores/app-list';
 import { APP_PAGE_CAPACITY } from './AppPage';
 
 export function Indicator() {
   const t = useTranslations();
-  const veil = useSettings((state) => state.veil);
   const apps = useAppList((state) => state.apps);
   const status = useAppList((state) => state.status);
   const swiper = useAppList((state) => state.swiper);
@@ -17,7 +15,7 @@ export function Indicator() {
   if (status === 'idle' || status === 'loading' || count <= 1) return null;
 
   return (
-    <LiquidGlass className="h-6 rounded-full" variant={veil ? 'veil' : 'glass'}>
+    <LiquidGlass className="h-6 rounded-full">
       <nav aria-label={t('home.pagination')} className="flex h-6 items-center">
         {Array.from({ length: count }, (_, index) => (
           <button

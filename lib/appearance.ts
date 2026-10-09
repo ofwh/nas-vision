@@ -1,6 +1,10 @@
-import type { AppearanceConfig } from '@/lib/db/schema/config';
+import type { AppearanceConfig } from '@/lib/db/schema/appearance';
 
-export const defaultAppearance: AppearanceConfig = { language: 'zh-CN', theme: 'auto', veil: false };
+export const defaultAppearance: AppearanceConfig = {
+  language: 'zh-CN',
+  theme: 'auto',
+  veil: false,
+};
 
 export type AppearanceCookies = {
   language?: string;
