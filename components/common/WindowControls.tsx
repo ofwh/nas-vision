@@ -22,7 +22,7 @@ export function WindowControls({ maximized, onMaximize, className }: WindowContr
             variant="ghost"
             size="icon"
             aria-label={t('common.close')}
-            className="size-3.5 rounded-full border border-white/15 bg-white/15 p-0 text-white/70 shadow-inner backdrop-blur-md hover:bg-white/25 hover:text-white"
+            className="size-4 rounded-full border border-white/15 bg-white/15 p-0 text-white/70 shadow-inner backdrop-blur-md hover:bg-white/25 hover:text-white"
           />
         }
       >
@@ -34,7 +34,7 @@ export function WindowControls({ maximized, onMaximize, className }: WindowContr
             variant="ghost"
             size="icon"
             aria-label={t('common.minimize')}
-            className="size-3.5 rounded-full border border-white/15 bg-white/15 p-0 text-white/70 shadow-inner backdrop-blur-md hover:bg-white/25 hover:text-white"
+            className="size-4 rounded-full border border-white/15 bg-white/15 p-0 text-white/70 shadow-inner backdrop-blur-md hover:bg-white/25 hover:text-white"
           />
         }
       >
@@ -46,7 +46,7 @@ export function WindowControls({ maximized, onMaximize, className }: WindowContr
         aria-label={t(maximized ? 'common.restore' : 'common.maximize')}
         aria-pressed={maximized}
         onClick={onMaximize}
-        className="size-3.5 rounded-full border border-white/15 bg-white/15 p-0 text-white/70 shadow-inner backdrop-blur-md hover:bg-white/25 hover:text-white"
+        className="size-4 rounded-full border border-white/15 bg-white/15 p-0 text-white/70 shadow-inner backdrop-blur-md hover:bg-white/25 hover:text-white"
       >
         <Maximize2 className="size-2 opacity-0 group-hover/controls:opacity-100" aria-hidden />
       </Button>

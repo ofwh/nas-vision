@@ -1,19 +1,10 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { useSession } from '@/lib/auth-client';
-import { useSidebarStore, visibleItems } from '@/stores/sidebar';
-import { useAppList } from '@/stores/app-list';
-
-const LABEL_KEYS: Record<string, 'home' | 'apps' | 'settings' | 'account' | 'appearance' | undefined> = {
-  home: 'home',
-  apps: 'apps',
-  settings: 'settings',
-  account: 'account',
-  appearance: 'appearance',
-};
+import { selectSidebarItems, useSidebarStore, type SidebarItem } from '@/stores/sidebar';
 
 const ICON_SIZE = 24;
 const ICON_STROKE = 1.7;
@@ -31,31 +22,46 @@ const LABEL_RIGHT = ICON_PADDING + CONTAINER_PADDING;
 const containerHeight = (itemCount: number) =>
   2 * CONTAINER_PADDING + itemCount * ITEM_SIZE + Math.max(0, itemCount - 1) * ITEM_GAP;
 
-export function Sidebar() {
-  const ready = useAppList((state) => state.status !== 'idle' && state.status !== 'loading');
+export function Sidebar({ visible = true }: { visible?: boolean }) {
+  const { data: session } = useSession();
+  const signedIn = !!session;
+  const setSignedIn = useSidebarStore((state) => state.setSignedIn);
 
-  if (!ready) return null;
+  useEffect(() => {
+    setSignedIn(signedIn);
+  }, [setSignedIn, signedIn]);
+
+  const hasItems = useSidebarStore((state) => selectSidebarItems(state).length > 0);
 
   return (
-    <div className="animate-in zoom-in-50 relative z-[1050] ml-[calc(100%_-_124px)] w-17 duration-500 ease-out">
-      <SidebarContent />
-    </div>
+    <>
+      {visible && hasItems ? (
+        <div className="animate-in zoom-in-50 relative z-[1050] ml-[calc(100%_-_124px)] w-17 duration-500 ease-out">
+          <SidebarContent />
+        </div>
+      ) : null}
+      <SidebarOutlet />
+    </>
   );
 }
 
+function SidebarOutlet() {
+  const item = useSidebarStore((state) => state.items.find((item) => item.name === state.openedName));
+  const close = useSidebarStore((state) => state.close);
+
+  if (!item?.menu.render) return null;
+
+  return <SidebarView key={item.name} item={item} onClose={() => close(item.name)} />;
+}
+
+function SidebarView({ item, onClose }: { item: SidebarItem; onClose: () => void }) {
+  return item.menu.render?.({ onClose });
+}
+
 function SidebarContent() {
-  const t = useTranslations('sidebar');
-  const { data: session } = useSession();
-  const allItems = useSidebarStore((state) => state.items);
+  const items = useSidebarStore(useShallow(selectSidebarItems));
   const activeId = useSidebarStore((state) => state.activeId);
   const setActive = useSidebarStore((state) => state.setActive);
-
-  const signedIn = !!session;
-  const items = useMemo(() => visibleItems(allItems, signedIn), [allItems, signedIn]);
-
-  useEffect(() => {
-    if (!items.some((item) => item.id === activeId)) setActive('home');
-  }, [items, activeId, setActive]);
 
   const listRef = useRef<HTMLDivElement>(null);
   const [expandedWidth, setExpandedWidth] = useState(LABEL_LEFT + LABEL_RIGHT);
@@ -66,7 +72,8 @@ function SidebarContent() {
 
     const measure = () =>
       setExpandedWidth(
-        LABEL_LEFT + Math.max(...Array.from(labels, (label) => label.getBoundingClientRect().width)) + LABEL_RIGHT,
+        Math.max(...Array.from(labels, (label) => label.offsetLeft + Math.max(label.offsetWidth, label.scrollWidth))) +
+          LABEL_RIGHT,
       );
 
     measure();
@@ -79,7 +86,7 @@ function SidebarContent() {
 
   const [hover, setHover] = useState({ index: 0, visible: false, sliding: false });
   const hoveredItem = items[hover.index];
-  const showHover = hover.visible && !!hoveredItem && hoveredItem.id !== activeId;
+  const showHover = hover.visible && !!hoveredItem && hoveredItem.name !== activeId;
 
   useEffect(() => {
     const list = listRef.current;
@@ -110,14 +117,23 @@ function SidebarContent() {
       />
 
       {items.map((item, index) => {
-        const active = item.id === activeId;
-        const labelKey = LABEL_KEYS[item.id];
+        const active = item.name === activeId;
 
         return (
           <div
-            key={item.id}
+            key={item.name}
+            role="button"
+            tabIndex={0}
+            aria-label={item.menu.label}
+            aria-pressed={active}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                setActive(item.name);
+              }
+            }}
             onPointerEnter={() => setHover((prev) => ({ index, visible: true, sliding: prev.visible }))}
-            onClick={() => setActive(item.id)}
+            onClick={() => setActive(item.name)}
             className="group/item absolute inset-x-0 cursor-pointer"
             style={{ top: itemTop(index), height: ITEM_SIZE }}
           >
@@ -128,16 +144,16 @@ function SidebarContent() {
                 active ? 'text-white' : 'text-white/85'
               }`}
             >
-              <item.icon size={ICON_SIZE} strokeWidth={ICON_STROKE} aria-hidden />
+              <item.menu.icon size={ICON_SIZE} strokeWidth={ICON_STROKE} aria-hidden />
             </span>
 
             <span
               data-sidebar-label
-              className={`absolute top-1/2 left-14.5 -translate-y-1/2 text-sm whitespace-nowrap opacity-0 transition-[color,opacity] duration-200 group-hover:opacity-100 group-hover/item:text-white ${
+              className={`absolute top-1/2 left-14.5 w-max -translate-y-1/2 text-sm whitespace-nowrap opacity-0 transition-[color,opacity] duration-200 group-hover:opacity-100 group-hover/item:text-white ${
                 active ? 'text-white' : 'text-white/85'
               }`}
             >
-              {labelKey ? t(labelKey) : item.label}
+              {item.menu.label}
             </span>
           </div>
         );

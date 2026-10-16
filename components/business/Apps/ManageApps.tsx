@@ -7,7 +7,8 @@ import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { EditApp } from '@/components/business/Apps/EditApp';
 import { ManageAppRow } from '@/components/business/Apps/ManageAppRow';
-import { LiquidGlassDialog } from '@/components/common/LiquidGlassDialog';
+import { WindowContent } from '@/components/common/SplitWindowModal';
+import { LiquidGlassModal } from '@/components/common/LiquidGlassModal';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Loading } from '@/components/common/Loading';
 import { Button } from '@/components/ui/button';
@@ -20,19 +21,18 @@ function EditAppDialog({ id, onClose }: { id?: string; onClose: () => void }) {
   const [pending, setPending] = useState(false);
 
   return (
-    <LiquidGlassDialog
+    <LiquidGlassModal
       open
       size={{ width: 480, height: 760 }}
       style={{ maxHeight: '75vh' }}
       title={id ? t('apps.editTitle') : t('apps.createTitle')}
       fit
-      header={false}
       onOpenChange={(open) => {
         if (!open && !pending) onClose();
       }}
     >
       <EditApp id={id} onSuccess={onClose} onCancel={onClose} onPendingChange={setPending} />
-    </LiquidGlassDialog>
+    </LiquidGlassModal>
   );
 }
 
@@ -81,38 +81,42 @@ export function ManageApps() {
   const loading = status === 'idle' || status === 'loading';
 
   return (
-    <div className="relative h-full min-h-0 overflow-hidden">
-      <div className="pointer-events-none absolute top-0 left-0 z-10 flex h-18 w-full items-center justify-end gap-3 bg-linear-to-b from-[#545458]/65 via-[#545458]/30 to-transparent px-6">
-        <LiquidGlass className="pointer-events-auto rounded-full" contentClassName="h-full">
-          <Button
-            variant="ghost"
-            aria-pressed={removing}
-            disabled={busy}
-            onClick={() => {
-              setRemoving((value) => !value);
-              setPendingId(null);
-              setDeleteError(null);
-            }}
-            className="h-10 rounded-full px-5 text-white hover:bg-white/15 hover:text-white"
-          >
-            {removing ? t('common.done') : t('common.edit')}
-          </Button>
-        </LiquidGlass>
-        <LiquidGlass className="pointer-events-auto size-10 rounded-full" contentClassName="h-full">
-          <Button
-            variant="ghost"
-            size="icon-lg"
-            disabled={busy}
-            aria-label={t('apps.add')}
-            title={t('apps.add')}
-            onClick={() => setEditing({})}
-            className="rounded-full text-white hover:bg-white/15 hover:text-white"
-          >
-            <Plus aria-hidden className="size-5" />
-          </Button>
-        </LiquidGlass>
-      </div>
-      <div className="flex h-full min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain p-5 pt-18">
+    <WindowContent
+      title={t('settings.apps')}
+      right={
+        <>
+          <LiquidGlass className="pointer-events-auto rounded-full" contentClassName="h-full">
+            <Button
+              variant="ghost"
+              aria-pressed={removing}
+              disabled={busy}
+              onClick={() => {
+                setRemoving((value) => !value);
+                setPendingId(null);
+                setDeleteError(null);
+              }}
+              className="h-10 rounded-full px-5 text-white hover:bg-white/15 hover:text-white"
+            >
+              {removing ? t('common.done') : t('common.edit')}
+            </Button>
+          </LiquidGlass>
+          <LiquidGlass className="pointer-events-auto size-10 rounded-full" contentClassName="h-full">
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              disabled={busy}
+              aria-label={t('apps.add')}
+              title={t('apps.add')}
+              onClick={() => setEditing({})}
+              className="rounded-full text-white hover:bg-white/15 hover:text-white"
+            >
+              <Plus aria-hidden className="size-5" />
+            </Button>
+          </LiquidGlass>
+        </>
+      }
+    >
+      <div className="flex min-h-0 flex-col gap-3 p-5">
         {loading ? (
           <div className="flex h-40 items-center justify-center">
             <Loading />
@@ -172,6 +176,6 @@ export function ManageApps() {
       </div>
 
       {editing ? <EditAppDialog id={editing.id} onClose={() => setEditing(null)} /> : null}
-    </div>
+    </WindowContent>
   );
 }
