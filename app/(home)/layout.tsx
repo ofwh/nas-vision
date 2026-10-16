@@ -3,13 +3,14 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { connection } from 'next/server';
 import { cookies, headers } from 'next/headers';
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import { Geist, Geist_Mono, Inter } from 'next/font/google';
 import configService from '@/lib/services/config';
 import { auth } from '@/lib/auth';
 import { SettingsProvider } from '@/components/business/Appearance/SettingsProvider';
 import { GlassFilter } from '@/components/common/GlassFilter';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import './globals.css';
+import '../globals.css';
 import { cn } from '@/lib/utils';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
@@ -29,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('title'), description: t('description') };
 }
 
-export default async function RootLayout({ children }: LayoutProps<'/'>) {
+export default async function HomeLayout({ children }: { children: ReactNode }) {
   await connection();
   const session = await auth.api.getSession({ headers: await headers() });
   const cookieStore = await cookies();

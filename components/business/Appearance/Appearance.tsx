@@ -2,6 +2,7 @@
 
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { WindowContent } from '@/components/common/SplitWindowModal';
 import { Badge } from '@/components/ui/badge';
 import {
   Combobox,
@@ -32,12 +33,9 @@ export function Appearance() {
 
   const { theme, veil, saving, save } = useSettings((state) => state);
   return (
-    <div className="h-full min-h-0 overflow-y-auto p-8 text-white">
-      <div className="mx-auto max-w-140 space-y-7">
-        <header>
-          <h2 className="text-xl font-semibold">{t('appearance.title')}</h2>
-          <p className="mt-2 text-sm text-white/55">{t('appearance.description')}</p>
-        </header>
+    <WindowContent title={t('appearance.title')}>
+      <div className="mx-auto max-w-140 space-y-7 p-8">
+        <p className="text-sm text-white/55">{t('appearance.description')}</p>
         <section className="rounded-xl border border-white/10 bg-white/5 p-5" aria-labelledby="theme-label">
           <h3 id="theme-label" className="text-sm font-medium">
             {t('appearance.theme')}
@@ -133,6 +131,6 @@ export function Appearance() {
           </div>
         </section>
       </div>
-    </div>
+    </WindowContent>
   );
 }

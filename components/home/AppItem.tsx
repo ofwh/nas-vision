@@ -3,19 +3,18 @@
 import { useTranslations } from 'next-intl';
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
-import { LiquidGlassDialog } from '@/components/common/LiquidGlassDialog';
+import { WindowModal } from '@/components/common/WindowModal';
 import type { AppItem as AppRecord } from '@/lib/services/apps';
 
 function AppUrlDialog({ name, url, onClose }: { name: string; url: string; onClose: () => void }) {
   return (
-    <LiquidGlassDialog
+    <WindowModal
       open
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
-      type="url"
       title={name}
-      url={url}
+      src={url}
       size={{ width: 1280, height: 800 }}
       style={{ width: 'min(1280px, 90vw)', height: '85vh' }}
     />

@@ -1,8 +1,7 @@
 import { ParallaxBackground } from '@/components/home/ParallaxBackground';
-import { Sidebar } from '@/components/home/Sidebar';
-import { SidebarPages } from '@/components/home/SidebarPages';
 import { AppList } from '@/components/home/AppList';
 import { Indicator } from '@/components/home/Indicator';
+import { HomeSidebar } from './HomeSidebar';
 
 export default function Home() {
   return (
@@ -10,7 +9,7 @@ export default function Home() {
       <ParallaxBackground />
 
       <aside className="flex min-w-31 flex-1 flex-col justify-center">
-        <Sidebar />
+        <HomeSidebar />
       </aside>
 
       <div className="flex w-300 flex-none flex-col">
@@ -26,8 +25,6 @@ export default function Home() {
       </div>
 
       <aside className="flex min-w-31 flex-1 flex-col justify-center" />
-
-      <SidebarPages />
     </div>
   );
 }
