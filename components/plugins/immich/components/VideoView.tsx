@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FullscreenButton, useContainerAttach } from '@videojs/react';
 import { Video, VideoPlayer } from '@videojs/react/video';
-import { ChevronLeft, ChevronRight, LoaderCircle, Maximize, Pause, Play, X } from 'lucide-react';
+import { LoaderCircle, Maximize, Pause, Play, SkipBack, SkipForward, X } from 'lucide-react';
 import { WindowModal } from '@/components/common/WindowModal';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Button } from '@/components/ui/button';
@@ -131,7 +131,7 @@ function Playback({ video, onClose, onPrevious, onNext }: VideoViewProps) {
             disabled={!onPrevious}
             onClick={onPrevious}
           >
-            <ChevronLeft aria-hidden className="size-4" />
+            <SkipBack aria-hidden className="size-4" />
           </Button>
           <Button
             variant="ghost"
@@ -141,7 +141,7 @@ function Playback({ video, onClose, onPrevious, onNext }: VideoViewProps) {
             aria-label={paused ? '播放' : '暂停'}
             title={paused ? '播放' : '暂停'}
           >
-            {paused ? <Play aria-hidden className="size-4" /> : <Pause aria-hidden className="size-4" />}
+            {paused ? <Play aria-hidden className="size-5" /> : <Pause aria-hidden className="size-5" />}
           </Button>
           <Button
             variant="ghost"
@@ -152,7 +152,7 @@ function Playback({ video, onClose, onPrevious, onNext }: VideoViewProps) {
             disabled={!onNext}
             onClick={onNext}
           >
-            <ChevronRight aria-hidden className="size-4" />
+            <SkipForward aria-hidden className="size-4" />
           </Button>
           <ProgressControl />
           <VolumeControl />
