@@ -97,6 +97,7 @@ export function LiquidGlassModal({
   onClose,
   title,
   size = DEFAULT_SIZE,
+  radius = CONTENT_RADIUS,
   style,
   modal = true,
   transparent = false,
@@ -158,7 +159,7 @@ export function LiquidGlassModal({
             <ModalSurface
               transparent={transparent}
               className={cn('flex min-h-0 min-w-0 flex-col', hasAutoHeight ? 'flex-auto' : 'flex-1')}
-              style={{ borderRadius: CONTENT_RADIUS, '--window-radius': `${CONTENT_RADIUS}px` } as CSSProperties}
+              style={{ borderRadius: radius, '--window-radius': `${radius}px` } as CSSProperties}
               contentClassName={cn(
                 'relative flex min-h-0 min-w-0 flex-col overflow-hidden',
                 hasAutoHeight ? 'flex-auto' : 'flex-1',

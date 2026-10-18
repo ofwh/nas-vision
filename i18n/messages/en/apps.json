@@ -38,5 +38,13 @@
   "showSecret": "Show value",
   "hideSecret": "Hide value",
   "pluginUnavailable": "Plugin is unavailable or disabled",
-  "loadingPlugin": "Loading plugin configuration…"
+  "loadingPlugin": "Loading plugin configuration…",
+  "windowMode": "Window mode",
+  "controlsMode": "Standard mode",
+  "floatingMode": "Floating button",
+  "alwaysOnTop": "Always On Top",
+  "windowResize": "Resize window",
+  "defaultWidth": "Default width",
+  "defaultHeight": "Default height",
+  "windowSizeInvalid": "Window width and height must be positive integers"
 }

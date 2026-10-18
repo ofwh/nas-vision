@@ -13,6 +13,7 @@ export type LiquidGlassModalProps = {
   onClose?: () => void;
   title: string;
   size?: ModalSize;
+  radius?: number;
   style?: CSSProperties;
   modal?: boolean;
   transparent?: boolean;

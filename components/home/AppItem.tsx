@@ -9,7 +9,19 @@ import { Loading } from '@/components/common/Loading';
 import { useAppList } from '@/stores/app-list';
 import type { AppItem as AppRecord } from '@/lib/services/apps';
 
-function AppUrlDialog({ name, url, onClose }: { name: string; url: string; onClose: () => void }) {
+function AppUrlDialog({
+  name,
+  url,
+  config,
+  onClose,
+}: {
+  name: string;
+  url: string;
+  config: AppRecord['config'];
+  onClose: () => void;
+}) {
+  const width = typeof config.width === 'number' && config.width > 0 ? config.width : 1280;
+  const height = typeof config.height === 'number' && config.height > 0 ? config.height : 800;
   return (
     <WindowModal
       open
@@ -18,8 +30,11 @@ function AppUrlDialog({ name, url, onClose }: { name: string; url: string; onClo
       }}
       title={name}
       src={url}
-      size={{ width: 1280, height: 800 }}
-      style={{ width: 'min(1280px, 90vw)', height: '85vh' }}
+      mode={config.mode === 'floating' ? 'floating' : 'controls'}
+      top={config.top === true}
+      resizable={config.resize === true}
+      size={{ width, height }}
+      style={{ width: `min(${width}px, 90vw)`, height: `min(${height}px, 85vh)` }}
     />
   );
 }
@@ -42,7 +57,6 @@ function AppPluginDialog({
     <WindowModal
       open
       title={name}
-      className="-m-2.5 [--window-radius:10px]"
       mode={plugin.manifest?.mode}
       header={plugin.manifest?.header}
       onOpenChange={(value) => {
@@ -179,7 +193,7 @@ export function AppItem({ id, name, image, type, url, innerUrl, external, config
         <div className="h-full w-5" />
       </div>
       {page.isOpen ? <AppPluginDialog name={name} page={page} plugin={plugin} onClose={closePlugin} /> : null}
-      {open ? <AppUrlDialog name={name} url={address} onClose={() => setOpen(false)} /> : null}
+      {open ? <AppUrlDialog name={name} url={address} config={config} onClose={() => setOpen(false)} /> : null}
     </>
   );
 }

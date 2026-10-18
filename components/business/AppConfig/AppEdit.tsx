@@ -54,6 +54,15 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
       return;
     }
 
+    if (
+      form.type === 'url' &&
+      form.external === 'iframe' &&
+      ![form.width, form.height].every((value) => Number.isSafeInteger(Number(value)) && Number(value) > 0)
+    ) {
+      setError(t('apps.windowSizeInvalid'));
+      return;
+    }
+
     const params: JsonObject = {
       name: form.name,
       type: form.type,
@@ -63,7 +72,17 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
       permission: form.permission,
       url: form.url,
       innerUrl: form.innerUrl,
-      config: form.type === 'plugin' ? { pluginName } : app?.type === 'url' ? app.config : {},
+      config:
+        form.type === 'plugin'
+          ? { pluginName }
+          : {
+              ...(app?.type === 'url' ? app.config : {}),
+              mode: form.mode,
+              top: form.top,
+              resize: form.resize,
+              width: Number(form.width) || 1280,
+              height: Number(form.height) || 800,
+            },
     };
     if (id) params.id = id;
 

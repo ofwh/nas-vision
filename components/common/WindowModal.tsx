@@ -146,6 +146,7 @@ export function WindowModal({
   mode,
   header,
   style,
+  radius = 30,
   fit = true,
   transparent = false,
   className,
@@ -166,6 +167,7 @@ export function WindowModal({
     <WindowFooterContext.Provider value={footerContext}>
       <LiquidGlassModal
         {...props}
+        radius={radius}
         transparent={transparent}
         title={title}
         header={
@@ -196,14 +198,22 @@ export function WindowModal({
           <div
             className={cn(
               'flex min-h-0 flex-1 flex-col',
-              !hasContentRenderer && (showHeader && resolvedHeaderMode === 'controls' ? 'px-5 pb-5' : 'p-5'),
-              hasContentRenderer && !fit && 'p-5',
+              hasContentRenderer
+                ? fit
+                  ? '[--content-gap:0px]'
+                  : 'p-5 [--content-gap:calc(var(--spacing)*5)]'
+                : resolvedHeaderMode === 'floating'
+                  ? 'p-2.5 [--content-gap:calc(var(--spacing)*2.5)]'
+                  : showHeader && resolvedHeaderMode === 'controls'
+                    ? 'px-5 pb-5 [--content-gap:calc(var(--spacing)*5)]'
+                    : 'p-5 [--content-gap:calc(var(--spacing)*5)]',
             )}
           >
             <div
               className={cn(
                 'flex min-h-0 flex-1 flex-col overflow-auto overscroll-contain',
-                mode === 'floating' && 'rounded-[var(--window-radius)]',
+                (resolvedHeaderMode === 'controls' || resolvedHeaderMode === 'floating') &&
+                  'rounded-[max(0px,calc(var(--window-radius)-var(--content-gap)))]',
                 className,
               )}
             >
