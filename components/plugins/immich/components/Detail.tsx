@@ -129,12 +129,12 @@ export default function Detail({
             id={image.id}
             name={image.name}
             size="preview"
-            className="h-full w-full rounded-xl [&_img]:object-contain"
+            className="h-full w-full [&_img]:object-contain"
             onDimensions={(width, height) => {
               if (width > 0 && height > 0) setDimensions({ id: image.id, ratio: width / height });
             }}
           />
-          <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-center gap-2 rounded-t-xl bg-gradient-to-b from-black/70 to-transparent px-14 py-5 opacity-0 transition-opacity duration-300 ease-out group-hover/image:opacity-100 motion-reduce:transition-none">
+          <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-center gap-2 bg-gradient-to-b from-black/70 to-transparent px-14 py-5 opacity-0 transition-opacity duration-300 ease-out group-hover/image:opacity-100 motion-reduce:transition-none">
             <p className="min-w-0 text-center text-sm font-medium break-all">{image.name}</p>
             {data?.isFavorite ? <Star className="size-4 shrink-0 fill-amber-300 text-amber-300" /> : null}
           </div>
@@ -175,7 +175,7 @@ export default function Detail({
               </LiquidGlass>
             </div>
           ) : null}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 max-h-full overflow-y-auto rounded-b-xl bg-gradient-to-t from-black/85 to-black/50 p-4 opacity-0 transition-opacity duration-300 ease-out group-hover/image:pointer-events-auto group-hover/image:opacity-100 motion-reduce:transition-none">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 max-h-full overflow-y-auto bg-gradient-to-t from-black/85 to-black/50 p-4 opacity-0 transition-opacity duration-300 ease-out group-hover/image:pointer-events-auto group-hover/image:opacity-100 motion-reduce:transition-none">
             {isLoading ? (
               <p role="status" className="text-sm text-white/50">
                 正在读取拍摄信息…
