@@ -30,5 +30,11 @@
     "TWO_FACTOR_ALREADY_ENABLED": "认证器已启用，请关闭弹窗并刷新账户信息",
     "SECURITY_FAILED": "账户安全设置或验证失败，请重试",
     "COPY_FAILED": "复制失败，请选中设置密钥后手动复制"
+  },
+  "plugin": {
+    "NOT_FOUND": "插件不存在。",
+    "DISABLED": "插件已停用。",
+    "ENDPOINT_NOT_FOUND": "插件接口不存在。",
+    "REQUEST_FAILED": "插件请求失败，请稍后重试。"
   }
 }

@@ -30,5 +30,11 @@
     "TWO_FACTOR_ALREADY_ENABLED": "An authenticator is already enabled. Close this dialog and refresh your account.",
     "SECURITY_FAILED": "Unable to update or verify account security. Please try again.",
     "COPY_FAILED": "Unable to copy. Please select and copy the setup key manually."
+  },
+  "plugin": {
+    "NOT_FOUND": "Plugin not found.",
+    "DISABLED": "Plugin is disabled.",
+    "ENDPOINT_NOT_FOUND": "Plugin endpoint not found.",
+    "REQUEST_FAILED": "Plugin request failed. Please try again."
   }
 }

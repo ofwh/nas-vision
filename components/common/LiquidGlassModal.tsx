@@ -1,36 +1,95 @@
 'use client';
 
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
-import { type CSSProperties, type ReactNode } from 'react';
+import { type CSSProperties, useRef } from 'react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
-import { Dialog, DialogDescription, DialogOverlay, DialogPortal, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogOverlay, DialogPortal, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import type { LiquidGlassModalProps, ModalSize } from '@/types/window';
+import type { LiquidGlassProps } from '@/types/glass';
 
-export type LiquidGlassModalSize = {
-  width: number;
-  height?: number;
-};
-
-export type LiquidGlassModalProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onClose?: () => void;
-  title: ReactNode;
-  size?: LiquidGlassModalSize;
-  style?: CSSProperties;
-  description?: ReactNode;
-  closeOnOverlay?: boolean;
-  fit?: boolean;
-  resizable?: boolean;
-  header?: ReactNode;
-  footer?: ReactNode;
-  className?: string;
-  children?: ReactNode;
-};
-
-const DEFAULT_SIZE: LiquidGlassModalSize = { width: 480, height: 400 };
+const DEFAULT_SIZE: ModalSize = { width: 480, height: 400 };
 
 const CONTENT_RADIUS = 20;
+
+function resize(popup: HTMLElement, width: number, height: number) {
+  popup.style.width = `${Math.max(240, Math.min(width, window.innerWidth - 48))}px`;
+  popup.style.height = `${Math.max(160, Math.min(height, window.innerHeight - 48))}px`;
+}
+
+function ResizeHandle() {
+  const drag = useRef<{ pointerId: number; x: number; y: number; width: number; height: number } | null>(null);
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label="调整弹窗大小"
+      title="拖动调整大小，或使用方向键"
+      className="absolute right-1 bottom-1 z-20 size-8 cursor-nwse-resize touch-none rounded-br-2xl text-white opacity-20 transition-opacity duration-200 ease-out outline-none select-none hover:opacity-90 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-white/50 motion-reduce:transition-none"
+      onPointerDown={(event) => {
+        if (event.button !== 0) return;
+        const popup = event.currentTarget.parentElement;
+        if (!popup) return;
+        event.preventDefault();
+        event.stopPropagation();
+        event.currentTarget.focus({ preventScroll: true });
+        const rect = popup.getBoundingClientRect();
+        drag.current = {
+          pointerId: event.pointerId,
+          x: event.clientX,
+          y: event.clientY,
+          width: rect.width,
+          height: rect.height,
+        };
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }}
+      onPointerMove={(event) => {
+        const start = drag.current;
+        const popup = event.currentTarget.parentElement;
+        if (!start || !popup || event.pointerId !== start.pointerId) return;
+        resize(popup, start.width + (event.clientX - start.x) * 2, start.height + (event.clientY - start.y) * 2);
+      }}
+      onPointerUp={(event) => {
+        if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }}
+      onLostPointerCapture={() => {
+        drag.current = null;
+      }}
+      onKeyDown={(event) => {
+        const popup = event.currentTarget.parentElement;
+        if (!popup || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const rect = popup.getBoundingClientRect();
+        const step = event.shiftKey ? 50 : 10;
+        resize(
+          popup,
+          rect.width + (event.key === 'ArrowRight' ? step : event.key === 'ArrowLeft' ? -step : 0),
+          rect.height + (event.key === 'ArrowDown' ? step : event.key === 'ArrowUp' ? -step : 0),
+        );
+      }}
+    >
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute right-0.5 bottom-0.5 size-4 overflow-visible"
+        viewBox="0 0 16 16"
+        fill="none"
+      >
+        <path d="M 12 2 A 10 10 0 0 1 2 12" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+      </svg>
+    </div>
+  );
+}
+
+function ModalSurface({ transparent, ...props }: Omit<LiquidGlassProps, 'ref' | 'variant'> & { transparent: boolean }) {
+  if (!transparent) return <LiquidGlass {...props} />;
+  return (
+    <div style={props.style} className={cn('relative overflow-hidden bg-transparent text-white', props.className)}>
+      <div className={cn('relative', props.contentClassName)}>{props.children}</div>
+    </div>
+  );
+}
 
 export function LiquidGlassModal({
   open,
@@ -39,8 +98,10 @@ export function LiquidGlassModal({
   title,
   size = DEFAULT_SIZE,
   style,
-  description,
-  closeOnOverlay = false,
+  modal = true,
+  transparent = false,
+  top = false,
+  closeOnOverlay = true,
   fit = true,
   resizable = false,
   header,
@@ -48,7 +109,7 @@ export function LiquidGlassModal({
   className,
   children,
 }: LiquidGlassModalProps) {
-  const autoHeight = size.height === undefined && style?.height === undefined;
+  const hasAutoHeight = size.height === undefined && style?.height === undefined;
 
   return (
     <Dialog
@@ -57,17 +118,25 @@ export function LiquidGlassModal({
         onOpenChange(next);
         if (!next) onClose?.();
       }}
-      modal={true}
+      modal={modal}
       disablePointerDismissal={!closeOnOverlay}
     >
-      <DialogPortal>
-        <DialogOverlay className="bg-black/25 supports-backdrop-filter:backdrop-blur-none" />
+      <DialogPortal className={cn(top && 'relative z-[1100]')}>
+        {modal ? (
+          <DialogOverlay
+            forceRender
+            className={cn(
+              'supports-backdrop-filter:backdrop-blur-none',
+              transparent ? 'bg-transparent' : 'bg-black/25',
+            )}
+          />
+        ) : null}
 
         <DialogPrimitive.Viewport className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
           <DialogPrimitive.Popup
             className={cn(
-              'pointer-events-auto flex flex-col gap-3 outline-none',
-              resizable && 'min-h-40 min-w-60 resize overflow-auto',
+              'pointer-events-auto relative flex flex-col gap-3 outline-none',
+              resizable && 'min-h-40 min-w-60',
               className,
             )}
             style={{
@@ -78,37 +147,39 @@ export function LiquidGlassModal({
           >
             <DialogTitle className="sr-only">{title}</DialogTitle>
             {header != null ? (
-              <LiquidGlass
-                className="shrink-0 rounded-full"
-                contentClassName="flex min-w-0 items-center justify-center px-6 py-2"
+              <ModalSurface
+                transparent={transparent}
+                className="max-w-full shrink-0 self-center rounded-full"
+                contentClassName="flex min-w-0 items-center justify-center p-1"
               >
                 {header}
-              </LiquidGlass>
+              </ModalSurface>
             ) : null}
-
-            <LiquidGlass
-              className={cn('min-h-0', autoHeight ? 'flex flex-auto flex-col' : 'flex-1')}
-              style={{ borderRadius: CONTENT_RADIUS }}
+            <ModalSurface
+              transparent={transparent}
+              className={cn('flex min-h-0 min-w-0 flex-col', hasAutoHeight ? 'flex-auto' : 'flex-1')}
+              style={{ borderRadius: CONTENT_RADIUS, '--window-radius': `${CONTENT_RADIUS}px` } as CSSProperties}
               contentClassName={cn(
-                'flex flex-col gap-4 overflow-auto overscroll-contain',
-                autoHeight ? 'min-h-0 flex-auto' : 'h-full',
-                !fit && 'p-2',
+                'relative flex min-h-0 min-w-0 flex-col overflow-hidden',
+                hasAutoHeight ? 'flex-auto' : 'flex-1',
               )}
             >
-              {description ? (
-                <DialogDescription className="shrink-0 text-sm text-white/70">{description}</DialogDescription>
-              ) : null}
-
-              {children}
-            </LiquidGlass>
+              <div className={cn('flex min-h-0 flex-1 flex-col overflow-auto overscroll-contain', !fit && 'p-5')}>
+                {children}
+              </div>
+            </ModalSurface>
             {footer != null ? (
-              <LiquidGlass
-                className="max-w-full shrink-0 self-center rounded-full"
-                contentClassName="flex items-center justify-center gap-2 px-4 py-2"
-              >
-                {footer}
-              </LiquidGlass>
+              <div className="absolute bottom-0 left-1/2 z-10 max-w-full shrink-0 -translate-x-1/2 translate-y-1/2 self-center">
+                <ModalSurface
+                  transparent={transparent}
+                  className="rounded-full"
+                  contentClassName="flex items-center justify-center gap-2 p-2"
+                >
+                  {footer}
+                </ModalSurface>
+              </div>
             ) : null}
+            {resizable ? <ResizeHandle /> : null}
           </DialogPrimitive.Popup>
         </DialogPrimitive.Viewport>
       </DialogPortal>

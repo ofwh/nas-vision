@@ -29,5 +29,14 @@
   "deleteNamed": "Delete {name}",
   "confirmDeleteNamed": "Confirm deletion of {name}",
   "reorderNamed": "Reorder {name}",
-  "sortFailed": "Unable to save app order: {error}"
+  "sortFailed": "Unable to save app order: {error}",
+  "pluginType": "Plugin",
+  "plugin": "Plugin name",
+  "pluginRequired": "Select a plugin and wait for its configuration to load",
+  "pluginOptions": "Plugin configuration",
+  "urlOptions": "Page configuration",
+  "showSecret": "Show value",
+  "hideSecret": "Hide value",
+  "pluginUnavailable": "Plugin is unavailable or disabled",
+  "loadingPlugin": "Loading plugin configuration…"
 }

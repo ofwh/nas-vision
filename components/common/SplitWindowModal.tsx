@@ -1,8 +1,14 @@
 'use client';
 
-import { Suspense, isValidElement, useState, type LazyExoticComponent, type ReactElement, type ReactNode } from 'react';
+import { Suspense, isValidElement, useState } from 'react';
 import { Loading } from '@/components/common/Loading';
-import { WindowModal, type WindowModalProps } from '@/components/common/WindowModal';
+import { WindowModal } from '@/components/common/WindowModal';
+import type {
+  SplitWindowMenuItem,
+  SplitWindowModalProps,
+  WindowContentElement,
+  WindowContentProps,
+} from '@/types/window';
 import {
   Sidebar,
   SidebarContent,
@@ -18,14 +24,6 @@ import {
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 
-export type WindowContentProps = {
-  title: ReactNode;
-  left?: ReactNode;
-  right?: ReactNode;
-  children?: ReactNode;
-  className?: string;
-};
-
 export function WindowContent({ title, left, right, children, className }: WindowContentProps) {
   return (
     <section className={cn('flex h-full min-h-0 min-w-0 flex-col text-white', className)}>
@@ -40,38 +38,6 @@ export function WindowContent({ title, left, right, children, className }: Windo
     </section>
   );
 }
-
-type WindowContentElement = ReactElement<WindowContentProps, typeof WindowContent>;
-type WindowContentComponent = () => WindowContentElement;
-
-export type SplitWindowMenuItem = {
-  type: 'item';
-  id: string;
-  label: ReactNode;
-  icon?: ReactNode;
-  disabled?: boolean;
-  content: WindowContentElement | WindowContentComponent | LazyExoticComponent<WindowContentComponent>;
-};
-
-export type SplitWindowMenuGroup = {
-  type: 'group';
-  id: string;
-  label?: ReactNode;
-  items: SplitWindowMenuItem[];
-};
-
-export type SplitWindowSidebar = {
-  header?: ReactNode;
-  footer?: ReactNode;
-  items: (SplitWindowMenuItem | SplitWindowMenuGroup)[];
-};
-
-export type SplitWindowModalProps = Omit<WindowModalProps, 'src' | 'children'> & {
-  sidebar: SplitWindowSidebar;
-  /** 初始激活的菜单 id。 */
-  active?: string;
-  onChange?: (id: string) => void;
-};
 
 function isWindowContentElement(content: SplitWindowMenuItem['content']): content is WindowContentElement {
   return isValidElement(content);

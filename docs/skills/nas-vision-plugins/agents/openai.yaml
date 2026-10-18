@@ -1,0 +1,4 @@
+interface:
+  display_name: 'NAS Vision 插件开发'
+  short_description: '指导 NAS Vision 插件目录、注册、配置、钩子与前后端数据交互的通用实现'
+  default_prompt: '使用 $nas-vision-plugins 实现当前插件需求，复用插件注册、配置和数据交互机制，不依赖其他业务插件。'

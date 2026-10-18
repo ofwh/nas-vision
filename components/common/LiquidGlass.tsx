@@ -1,21 +1,9 @@
 'use client';
 
-import { type CSSProperties, type ReactNode, type Ref, useRef } from 'react';
+import { useRef } from 'react';
 import { usePointerOffset } from '@/hooks/usePointerOffset';
 import { useSettings } from '@/stores/settings';
-
-/**
- * 液态玻璃容器。可调参数就地覆盖父容器的 CSS 变量：
- * --glass-tint / --glass-highlight / --glass-text / --glass-specular-glow。
- */
-export type LiquidGlassProps = {
-  className?: string;
-  contentClassName?: string;
-  style?: CSSProperties;
-  ref?: Ref<HTMLDivElement>;
-  variant?: GlassMaskVariant;
-  children: ReactNode;
-};
+import type { GlassMaskVariant, LiquidGlassProps } from '@/types/glass';
 
 const FILTER =
   'absolute inset-0 z-0 rounded-[inherit] backdrop-blur-[4px] [filter:url(#lensFilter)_saturate(120%)_brightness(1.15)]';
@@ -39,8 +27,6 @@ const CONTAINER =
 const CONTENT = 'relative z-30';
 
 const cn = (...classes: (string | undefined)[]) => classes.filter(Boolean).join(' ');
-
-export type GlassMaskVariant = 'glass' | 'veil';
 
 /** 父容器要 `relative isolate`，内容压到 z-30 之上，否则被盖住、也点不到。 */
 export function GlassMask({ variant }: { variant?: GlassMaskVariant }) {
