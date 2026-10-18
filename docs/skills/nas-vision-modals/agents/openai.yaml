@@ -1,0 +1,4 @@
+interface:
+  display_name: 'NAS Vision 弹窗组件'
+  short_description: '基于 NAS Vision 现有玻璃弹窗组件，指导模式、布局和插件窗口接入'
+  default_prompt: '使用 $nas-vision-modals 为当前页面接入现有弹窗组件，并按实际需求配置模式、头部和 footer。'

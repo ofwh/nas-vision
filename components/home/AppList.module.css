@@ -1,0 +1,47 @@
+.launching {
+  pointer-events: none;
+  animation: launch-list 350ms ease-out forwards;
+}
+
+.restoring {
+  animation: restore-list 350ms ease-out;
+}
+
+@keyframes restore-list {
+  from {
+    transform: scale(3);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes launch-list {
+  from {
+    transform: scale(1);
+    opacity: 1;
+    visibility: visible;
+  }
+  50% {
+    transform: scale(2);
+    opacity: 0.35;
+  }
+  to {
+    transform: scale(3);
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .restoring {
+    animation: none;
+  }
+
+  .launching {
+    animation: none;
+    visibility: hidden;
+  }
+}

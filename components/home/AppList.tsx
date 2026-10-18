@@ -1,16 +1,19 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Swiper as SwiperInstance } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import { Loading } from '@/components/common/Loading';
 import { useSession } from '@/lib/auth-client';
 import { useAppList } from '@/stores/app-list';
+import styles from './AppList.module.css';
 import { AppItem } from './AppItem';
 import { AppPage, APP_PAGE_CAPACITY } from './AppPage';
 
 export function AppList() {
+  const activePluginId = useAppList((state) => state.activePluginId);
+  const [hasLaunched, setHasLaunched] = useState(false);
   const allApps = useAppList((state) => state.apps);
   const { data: session, isPending } = useSession();
   const signedIn = !!session;
@@ -44,7 +47,12 @@ export function AppList() {
       <Loading />
     </div>
   ) : (
-    <div className="animate-in zoom-in-50 h-156 w-300 duration-500 ease-out">
+    <div
+      className={`h-156 w-300 ${activePluginId ? styles.launching : hasLaunched ? styles.restoring : 'animate-in zoom-in-50 duration-500 ease-out'}`}
+      onAnimationStart={(event) => {
+        if (event.target === event.currentTarget && activePluginId !== null) setHasLaunched(true);
+      }}
+    >
       {/* observer：数据回来后页数会变，靠它重新量一遍 slides。 */}
       <Swiper
         id="app-list"

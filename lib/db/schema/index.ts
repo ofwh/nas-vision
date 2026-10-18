@@ -2,3 +2,4 @@ export * from './better-auth';
 export * from './types';
 export * from './apps';
 export * from './appearance';
+export * from './plugins';

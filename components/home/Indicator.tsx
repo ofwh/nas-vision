@@ -7,12 +7,13 @@ import { APP_PAGE_CAPACITY } from './AppPage';
 
 export function Indicator() {
   const t = useTranslations();
+  const activePluginId = useAppList((state) => state.activePluginId);
   const apps = useAppList((state) => state.apps);
   const status = useAppList((state) => state.status);
   const swiper = useAppList((state) => state.swiper);
   const activeIndex = useAppList((state) => state.activeIndex);
   const count = Math.max(1, Math.ceil(apps.length / APP_PAGE_CAPACITY));
-  if (status === 'idle' || status === 'loading' || count <= 1) return null;
+  if (activePluginId !== null || status === 'idle' || status === 'loading' || count <= 1) return null;
 
   return (
     <LiquidGlass className="h-6 rounded-full">

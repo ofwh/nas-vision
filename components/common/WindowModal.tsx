@@ -1,27 +1,41 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { ExternalLink } from 'lucide-react';
-import { type ReactNode, useEffect, useState } from 'react';
-import { LiquidGlassModal, type LiquidGlassModalProps } from '@/components/common/LiquidGlassModal';
-import { Loading } from '@/components/common/Loading';
+import { ExternalLink, X } from 'lucide-react';
+import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { LiquidGlassModal } from '@/components/common/LiquidGlassModal';
+import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { WindowControls } from '@/components/common/WindowControls';
+import { Button } from '@/components/ui/button';
+import { DialogClose } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
+import { Loading } from '@/components/common/Loading';
 import { fetchApi } from '@/lib/api/client';
 import type { IframeCheckRes } from '@/lib/services/iframe';
+import type { HeaderContent, WindowModalProps } from '@/types/window';
 
-export type WindowModalProps = Omit<LiquidGlassModalProps, 'header' | 'children'> & {
-  src?: string;
-  children?: ReactNode | ((controls: ReactNode) => ReactNode);
-};
+const WindowFooterContext = createContext<{
+  target: HTMLDivElement | null;
+  setHasContent: (hasContent: boolean) => void;
+} | null>(null);
 
-const EMBED_RADIUS = 12;
+export function WindowFooter({ children }: { children: ReactNode }) {
+  const context = useContext(WindowFooterContext);
+  const setHasContent = context?.setHasContent;
+  useEffect(() => {
+    setHasContent?.(true);
+    return () => setHasContent?.(false);
+  }, [setHasContent]);
+  return context?.target ? createPortal(children, context.target) : null;
+}
 
 /** 状态只由 /api/public/iframe 决定，iframe 自身的事件不回写。 */
-type EmbedStatus = 'checking' | 'allowed' | 'blocked';
+type IframeAccessStatus = 'checking' | 'allowed' | 'blocked';
 
-function IframeContent({ src, title }: { src: string; title: ReactNode }) {
+function IframeContent({ src, title }: { src: string; title: string }) {
   const t = useTranslations();
-  const [status, setStatus] = useState<EmbedStatus>('checking');
+  const [status, setStatus] = useState<IframeAccessStatus>('checking');
 
   useEffect(() => {
     let alive = true;
@@ -36,7 +50,7 @@ function IframeContent({ src, title }: { src: string; title: ReactNode }) {
   }, [src]);
 
   return (
-    <div className="relative size-full min-h-0 overflow-hidden" style={{ borderRadius: EMBED_RADIUS }}>
+    <div className="relative size-full min-h-0 overflow-hidden">
       {status === 'blocked' ? (
         <div className="flex size-full flex-col items-center justify-center gap-3 px-6 text-center">
           <p className="text-sm text-white/80">{t('common.iframeBlocked')}</p>
@@ -56,10 +70,9 @@ function IframeContent({ src, title }: { src: string; title: ReactNode }) {
       ) : (
         <iframe
           src={src}
-          title={typeof title === 'string' ? title : undefined}
+          title={title}
           allow="fullscreen; autoplay; clipboard-read; clipboard-write; encrypted-media; picture-in-picture; display-capture; screen-wake-lock; web-share; geolocation; camera; microphone"
           className="size-full border-0 bg-transparent"
-          style={{ borderRadius: EMBED_RADIUS }}
         />
       )}
 
@@ -68,33 +81,150 @@ function IframeContent({ src, title }: { src: string; title: ReactNode }) {
   );
 }
 
-export function WindowModal({ src, title, style, children, footer, ...props }: WindowModalProps) {
+function ControlsHeader({ title, controls, header }: { title: string; controls: ReactNode; header?: HeaderContent }) {
+  return (
+    <header className="grid min-h-12 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-3 px-5 text-white">
+      <div className="flex min-w-0 items-center gap-2">{controls}</div>
+      <span className="max-w-full truncate text-center text-sm font-semibold">{header?.center ?? title}</span>
+      <div className="flex min-w-0 items-center justify-end gap-2">{header?.right}</div>
+    </header>
+  );
+}
+
+function FloatingHeader({
+  title,
+  header,
+  transparent,
+}: {
+  title: string;
+  header?: HeaderContent;
+  transparent: boolean;
+}) {
+  const t = useTranslations();
+  const Surface = transparent ? 'div' : LiquidGlass;
+  return (
+    <header className="pointer-events-none absolute inset-x-5 top-3.5 z-40 grid min-h-12 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-3 text-white">
+      <div className="pointer-events-auto flex min-w-0 items-center gap-3">
+        <Surface className="shrink-0 rounded-full">
+          <DialogClose
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full"
+                aria-label={t('common.close')}
+                title={t('common.close')}
+              />
+            }
+          >
+            <X aria-hidden />
+          </DialogClose>
+        </Surface>
+        <div className="flex min-w-0 items-center gap-2">{header?.left}</div>
+      </div>
+      <span className="max-w-full truncate text-center text-sm font-semibold">{header?.center ?? title}</span>
+      <div className="pointer-events-auto flex min-w-0 items-center justify-end gap-2">{header?.right}</div>
+    </header>
+  );
+}
+
+function HeaderLayout({ header }: { header?: HeaderContent }) {
+  return (
+    <header className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-2 text-white">
+      <div className="flex min-w-0 items-center gap-2">{header?.left}</div>
+      <div className="min-w-0 text-center">{header?.center}</div>
+      <div className="flex min-w-0 items-center justify-end gap-2">{header?.right}</div>
+    </header>
+  );
+}
+
+export function WindowModal({
+  src,
+  title,
+  children,
+  footer,
+  mode,
+  header,
+  style,
+  fit = true,
+  transparent = false,
+  className,
+  ...props
+}: WindowModalProps) {
   const [maximized, setMaximized] = useState(false);
-  const controls = <WindowControls maximized={maximized} onMaximize={() => setMaximized((value) => !value)} />;
+  const showHeader = header !== false;
+  const controls = showHeader ? (
+    <WindowControls maximized={maximized} onMaximize={() => setMaximized((value) => !value)} />
+  ) : null;
+  const resolvedHeaderMode = mode ?? 'controls';
+  const hasContentRenderer = typeof children === 'function';
+  const [footerTarget, setFooterTarget] = useState<HTMLDivElement | null>(null);
+  const [hasFooterContent, setHasFooterContent] = useState(false);
+  const footerContext = useMemo(() => ({ target: footerTarget, setHasContent: setHasFooterContent }), [footerTarget]);
 
   return (
-    <LiquidGlassModal
-      {...props}
-      title={title}
-      footer={footer}
-      style={{
-        ...style,
-        ...(maximized ? { width: 'calc(100vw - 48px)', height: 'calc(100dvh - 48px)' } : {}),
-      }}
-    >
-      {typeof children === 'function' ? (
-        children(controls)
-      ) : (
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="relative flex h-12 shrink-0 items-center justify-center px-24 text-white">
-            <div className="absolute left-5">{controls}</div>
-            <span className="truncate text-sm font-semibold">{title}</span>
+    <WindowFooterContext.Provider value={footerContext}>
+      <LiquidGlassModal
+        {...props}
+        transparent={transparent}
+        title={title}
+        header={
+          showHeader && mode === 'native' ? (
+            <HeaderLayout header={typeof header === 'object' ? header : undefined} />
+          ) : undefined
+        }
+        style={{ ...style, ...(maximized ? { width: 'calc(100vw - 48px)', height: 'calc(100dvh - 48px)' } : {}) }}
+        footer={
+          hasFooterContent ? (
+            <div className="flex min-w-0 items-center gap-2">
+              {footer}
+              <div ref={setFooterTarget} className="min-w-0 flex-1" />
+            </div>
+          ) : (
+            footer
+          )
+        }
+      >
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          {showHeader && !hasContentRenderer && resolvedHeaderMode === 'controls' ? (
+            <ControlsHeader
+              title={title}
+              controls={controls}
+              header={typeof header === 'object' ? header : undefined}
+            />
+          ) : null}
+          <div
+            className={cn(
+              'flex min-h-0 flex-1 flex-col',
+              !hasContentRenderer && (showHeader && resolvedHeaderMode === 'controls' ? 'px-5 pb-5' : 'p-5'),
+              hasContentRenderer && !fit && 'p-5',
+            )}
+          >
+            <div
+              className={cn(
+                'flex min-h-0 flex-1 flex-col overflow-auto overscroll-contain',
+                mode === 'floating' && 'rounded-[var(--window-radius)]',
+                className,
+              )}
+            >
+              {typeof children === 'function' ? (
+                children(controls)
+              ) : children !== undefined ? (
+                children
+              ) : src ? (
+                <IframeContent key={src} src={src} title={title} />
+              ) : null}
+            </div>
           </div>
-          <div className="min-h-0 flex-1 px-2 pt-0 pb-2">
-            {children !== undefined ? children : src ? <IframeContent key={src} src={src} title={title} /> : null}
-          </div>
+          {showHeader && !hasContentRenderer && mode === 'floating' ? (
+            <FloatingHeader
+              title={title}
+              header={typeof header === 'object' ? header : undefined}
+              transparent={transparent}
+            />
+          ) : null}
         </div>
-      )}
-    </LiquidGlassModal>
+      </LiquidGlassModal>
+    </WindowFooterContext.Provider>
   );
 }

@@ -10,6 +10,8 @@ type AppListStore = {
   apps: AppItem[];
   swiper: Swiper | null;
   activeIndex: number;
+  activePluginId: string | null;
+  setActivePluginId: (id: string | null) => void;
   setSwiper: (swiper: Swiper | null) => void;
   setActiveIndex: (activeIndex: number) => void;
   status: AppListStatus;
@@ -38,6 +40,8 @@ export const useAppList = create<AppListStore>((set, get) => {
     apps: [],
     swiper: null,
     activeIndex: 0,
+    activePluginId: null,
+    setActivePluginId: (activePluginId) => set({ activePluginId }),
     status: 'idle',
     error: null,
     sorting: false,

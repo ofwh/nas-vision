@@ -15,6 +15,13 @@
       "when": 1791527144649,
       "tag": "0001_fluffy_kate_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792222831589,
+      "tag": "0002_smiling_bushwacker",
+      "breakpoints": true
     }
   ]
 }

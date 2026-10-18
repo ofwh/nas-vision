@@ -29,5 +29,14 @@
   "deleteNamed": "删除 {name}",
   "confirmDeleteNamed": "确认删除 {name}",
   "reorderNamed": "调整 {name} 的排序",
-  "sortFailed": "排序保存失败：{error}"
+  "sortFailed": "排序保存失败：{error}",
+  "pluginType": "插件",
+  "plugin": "插件名称",
+  "pluginRequired": "请选择插件并等待配置加载完成",
+  "pluginOptions": "插件配置",
+  "urlOptions": "页面配置",
+  "showSecret": "显示内容",
+  "hideSecret": "隐藏内容",
+  "pluginUnavailable": "插件不存在或已停用",
+  "loadingPlugin": "正在加载插件配置…"
 }
