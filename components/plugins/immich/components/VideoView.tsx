@@ -164,7 +164,7 @@ function Playback({ video, onClose, onPrevious, onNext }: VideoViewProps) {
     >
       {() => (
         <div
-          className={`${styles.frame} group/video relative min-h-0 w-full flex-1 overflow-hidden rounded-xl bg-black text-white`}
+          className={`${styles.frame} group/video relative min-h-0 w-full flex-1 overflow-hidden bg-black text-white`}
         >
           <Video
             ref={bindMedia}

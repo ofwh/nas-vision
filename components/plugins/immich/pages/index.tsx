@@ -34,10 +34,10 @@ function Gallery({ directory, mode }: { directory?: string; mode?: ImmichMode })
   const root = data ? `/${data.mode}` : '/';
   const navigate = (id: string) => navigation.navigate(`${root}/directory/${encodeURIComponent(id)}`);
   return (
-    <div className="relative h-full w-full min-w-0 overflow-hidden rounded-[var(--window-radius,20px)] text-zinc-100">
+    <div className="relative h-full w-full min-w-0 overflow-hidden text-zinc-100">
       <ScrollArea
         ref={setScrollArea}
-        className="h-full w-full min-w-0 overflow-hidden rounded-[var(--window-radius,20px)] [&_[data-slot=scroll-area-thumb]]:bg-white/35 [&_[data-slot=scroll-area-thumb]]:hover:bg-white/55 [&_[data-slot=scroll-area-viewport]]:overscroll-contain"
+        className="h-full w-full min-w-0 overflow-hidden [&_[data-slot=scroll-area-thumb]]:bg-white/35 [&_[data-slot=scroll-area-thumb]]:hover:bg-white/55 [&_[data-slot=scroll-area-viewport]]:overscroll-contain"
       >
         <main className="flex min-h-full w-full min-w-0 flex-col">
           {isLoading ? (
