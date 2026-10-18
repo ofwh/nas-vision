@@ -38,5 +38,13 @@
   "showSecret": "显示内容",
   "hideSecret": "隐藏内容",
   "pluginUnavailable": "插件不存在或已停用",
-  "loadingPlugin": "正在加载插件配置…"
+  "loadingPlugin": "正在加载插件配置…",
+  "windowMode": "打开模式",
+  "controlsMode": "标准模式",
+  "floatingMode": "浮动按钮",
+  "alwaysOnTop": "最顶层",
+  "windowResize": "窗口调整",
+  "defaultWidth": "默认宽度",
+  "defaultHeight": "默认高度",
+  "windowSizeInvalid": "窗口宽度和高度须为正整数"
 }

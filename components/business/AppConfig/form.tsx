@@ -12,6 +12,11 @@ export type AppForm = {
   external: AppOpenMode;
   permission: AppPermission;
   status: boolean;
+  mode: 'controls' | 'floating';
+  top: boolean;
+  resize: boolean;
+  width: string;
+  height: string;
 };
 
 export function toForm(app?: AppRecord): AppForm {
@@ -24,6 +29,11 @@ export function toForm(app?: AppRecord): AppForm {
     external: app?.external ?? 'newtab',
     permission: app?.permission ?? 'public',
     status: app ? app.status === 1 : true,
+    mode: app?.config.mode === 'floating' ? 'floating' : 'controls',
+    top: app?.config.top === true,
+    resize: app?.config.resize === true,
+    width: String(typeof app?.config.width === 'number' && app.config.width > 0 ? app.config.width : 1280),
+    height: String(typeof app?.config.height === 'number' && app.config.height > 0 ? app.config.height : 800),
   };
 }
 
@@ -57,7 +67,7 @@ export function SwitchField({
   return (
     <label className="flex h-12 cursor-pointer items-center justify-between gap-3 px-4">
       <span className="text-sm text-white/70">{label}</span>
-      <Switch checked={checked} onCheckedChange={onCheckedChange} />
+      <Switch className="ml-auto shrink-0" checked={checked} onCheckedChange={onCheckedChange} />
     </label>
   );
 }

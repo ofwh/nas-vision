@@ -166,7 +166,7 @@ function PluginSelect({
           )}
           onValueChange={(items) => onChange(multipleValue(items))}
         >
-          <ComboboxChips className="max-w-64 text-white">
+          <ComboboxChips className="ml-auto max-w-64 justify-end text-white">
             <ComboboxValue>
               {(items: PluginFieldOption[]) => (
                 <>
@@ -191,7 +191,7 @@ function PluginSelect({
             onChange(details.reason === 'item-press' && selected ? '' : (item?.value ?? ''));
           }}
         >
-          <ComboboxInput aria-label={field.label} className="combobox-input" />
+          <ComboboxInput aria-label={field.label} className="combobox-input ml-auto" />
           {content}
         </Combobox>
       )}
@@ -266,7 +266,7 @@ export function AppPluginConfigForm({
             if (next !== name) onNameChange(next);
           }}
         >
-          <ComboboxInput aria-label={t('apps.plugin')} className="combobox-input" disabled={listLoading} />
+          <ComboboxInput aria-label={t('apps.plugin')} className="combobox-input ml-auto" disabled={listLoading} />
           <ComboboxContent>
             <ComboboxEmpty>{t('common.noOptions')}</ComboboxEmpty>
             <ComboboxList>
@@ -302,6 +302,7 @@ export function AppPluginConfigForm({
             <label key={field.key} className="flex h-12 items-center justify-between px-4">
               <span className="text-sm text-white/70">{field.label}</span>
               <Switch
+                className="ml-auto shrink-0"
                 checked={loaded.values[field.key] === true}
                 onCheckedChange={(value) => update(field.key, value)}
               />
