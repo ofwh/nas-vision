@@ -1,5 +1,6 @@
-import type { PluginModule } from '@/lib/plugins/types';
+import type { PluginModule } from '@/types/plugins';
+import * as immich from './immich';
 
-export const plugins: Readonly<Record<string, PluginModule>> = {};
+export const plugins: Readonly<Record<string, PluginModule>> = { immich };
 
 export default plugins;
