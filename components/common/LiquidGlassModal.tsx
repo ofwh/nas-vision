@@ -15,10 +15,12 @@ export type LiquidGlassModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onClose?: () => void;
-  title: ReactNode;
+  title: string;
   size?: LiquidGlassModalSize;
   style?: CSSProperties;
   description?: ReactNode;
+  modal?: boolean;
+  top?: boolean;
   closeOnOverlay?: boolean;
   fit?: boolean;
   resizable?: boolean;
@@ -40,7 +42,9 @@ export function LiquidGlassModal({
   size = DEFAULT_SIZE,
   style,
   description,
-  closeOnOverlay = false,
+  modal = true,
+  top = false,
+  closeOnOverlay = true,
   fit = true,
   resizable = false,
   header,
@@ -57,16 +61,18 @@ export function LiquidGlassModal({
         onOpenChange(next);
         if (!next) onClose?.();
       }}
-      modal={true}
+      modal={modal}
       disablePointerDismissal={!closeOnOverlay}
     >
-      <DialogPortal>
-        <DialogOverlay className="bg-black/25 supports-backdrop-filter:backdrop-blur-none" />
+      <DialogPortal className={cn(top && 'relative z-[1100]')}>
+        {modal ? (
+          <DialogOverlay forceRender className="bg-black/25 supports-backdrop-filter:backdrop-blur-none" />
+        ) : null}
 
         <DialogPrimitive.Viewport className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
           <DialogPrimitive.Popup
             className={cn(
-              'pointer-events-auto flex flex-col gap-3 outline-none',
+              'pointer-events-auto relative flex flex-col gap-3 outline-none',
               resizable && 'min-h-40 min-w-60 resize overflow-auto',
               className,
             )}
@@ -79,35 +85,33 @@ export function LiquidGlassModal({
             <DialogTitle className="sr-only">{title}</DialogTitle>
             {header != null ? (
               <LiquidGlass
-                className="shrink-0 rounded-full"
-                contentClassName="flex min-w-0 items-center justify-center px-6 py-2"
+                className="max-w-full shrink-0 self-center rounded-full"
+                contentClassName="flex min-w-0 items-center justify-center p-1"
               >
                 {header}
               </LiquidGlass>
             ) : null}
-
             <LiquidGlass
               className={cn('min-h-0', autoHeight ? 'flex flex-auto flex-col' : 'flex-1')}
-              style={{ borderRadius: CONTENT_RADIUS }}
+              style={{ borderRadius: CONTENT_RADIUS, '--window-radius': `${CONTENT_RADIUS}px` } as CSSProperties}
               contentClassName={cn(
-                'flex flex-col gap-4 overflow-auto overscroll-contain',
+                'relative flex min-h-0 flex-col overflow-hidden',
                 autoHeight ? 'min-h-0 flex-auto' : 'h-full',
-                !fit && 'p-2',
               )}
             >
-              {description ? (
-                <DialogDescription className="shrink-0 text-sm text-white/70">{description}</DialogDescription>
-              ) : null}
-
-              {children}
+              <div className={cn('flex min-h-0 flex-1 flex-col overflow-auto overscroll-contain', !fit && 'p-5')}>
+                {description ? (
+                  <DialogDescription className="shrink-0 text-sm text-white/70">{description}</DialogDescription>
+                ) : null}
+                {children}
+              </div>
             </LiquidGlass>
             {footer != null ? (
-              <LiquidGlass
-                className="max-w-full shrink-0 self-center rounded-full"
-                contentClassName="flex items-center justify-center gap-2 px-4 py-2"
-              >
-                {footer}
-              </LiquidGlass>
+              <div className="absolute bottom-0 left-1/2 z-10 max-w-full shrink-0 -translate-x-1/2 translate-y-1/2 self-center">
+                <LiquidGlass className="rounded-full" contentClassName="flex items-center justify-center gap-2 p-2">
+                  {footer}
+                </LiquidGlass>
+              </div>
             ) : null}
           </DialogPrimitive.Popup>
         </DialogPrimitive.Viewport>

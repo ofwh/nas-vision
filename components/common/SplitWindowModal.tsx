@@ -66,7 +66,9 @@ export type SplitWindowSidebar = {
   items: (SplitWindowMenuItem | SplitWindowMenuGroup)[];
 };
 
-export type SplitWindowModalProps = Omit<WindowModalProps, 'src' | 'children'> & {
+type SplitWindowBaseProps<T> = T extends WindowModalProps ? Omit<T, 'src' | 'children'> : never;
+
+export type SplitWindowModalProps = SplitWindowBaseProps<WindowModalProps> & {
   sidebar: SplitWindowSidebar;
   /** 初始激活的菜单 id。 */
   active?: string;

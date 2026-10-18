@@ -1,9 +1,13 @@
 'use client';
 
+import { X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { WindowModal } from '@/components/common/WindowModal';
+import { PluginPageContext, usePlugin } from '@/hooks/usePlugin';
+import { Loading } from '@/components/common/Loading';
+import { useAppList } from '@/stores/app-list';
 import type { AppItem as AppRecord } from '@/lib/services/apps';
 
 function AppUrlDialog({ name, url, onClose }: { name: string; url: string; onClose: () => void }) {
@@ -21,8 +25,69 @@ function AppUrlDialog({ name, url, onClose }: { name: string; url: string; onClo
   );
 }
 
-export function AppItem({ name, image, type, url, innerUrl, external }: AppRecord) {
+function AppPluginDialog({
+  name,
+  page,
+  plugin,
+  onClose,
+}: {
+  name: string;
+  page: ReturnType<typeof usePlugin>['page'];
+  plugin: ReturnType<typeof usePlugin>['app'];
+  onClose: () => void;
+}) {
   const t = useTranslations();
+  const PluginView = plugin.component;
+  const size = plugin.manifest?.size;
+  return (
+    <WindowModal
+      open
+      title={name}
+      mode="float"
+      className="-m-2.5 [--window-radius:10px]"
+      header={{
+        left: [{ id: 'close', icon: <X aria-hidden />, label: t('common.close'), onClick: onClose }],
+      }}
+      onOpenChange={(value) => {
+        if (!value) onClose();
+      }}
+      size={size}
+      style={size ? { width: `min(${size.width}px, 90vw)`, height: `min(${size.height}px, 85vh)` } : undefined}
+    >
+      <PluginPageContext.Provider value={{ ...page, close: onClose }}>
+        {plugin.isLoading ? (
+          <Loading />
+        ) : PluginView && !plugin.error ? (
+          <PluginView path={page.path} />
+        ) : (
+          <p role="alert" className="p-6 text-white/70">
+            {t('apps.pluginUnavailable')}
+          </p>
+        )}
+      </PluginPageContext.Provider>
+    </WindowModal>
+  );
+}
+
+export function AppItem({ id, name, image, type, url, innerUrl, external, config }: AppRecord) {
+  const t = useTranslations();
+  const { page, app: plugin } = usePlugin(
+    type === 'plugin' && typeof config.pluginName === 'string' ? config.pluginName : '',
+  );
+  const activePluginId = useAppList((state) => state.activePluginId);
+  const setActivePluginId = useAppList((state) => state.setActivePluginId);
+  const launchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closePlugin = () => {
+    page.close();
+    setActivePluginId(null);
+  };
+  useEffect(
+    () => () => {
+      if (launchTimer.current) clearTimeout(launchTimer.current);
+      if (useAppList.getState().activePluginId === id) useAppList.getState().setActivePluginId(null);
+    },
+    [id],
+  );
   const barRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const [overflow, setOverflow] = useState(0);
@@ -30,7 +95,20 @@ export function AppItem({ name, image, type, url, innerUrl, external }: AppRecor
   const address = url.trim() || innerUrl.trim();
 
   const openPage = () => {
-    if (type !== 'url' || !address) return;
+    if (type === 'plugin') {
+      if (typeof config.pluginName !== 'string' || activePluginId !== null) return;
+      setActivePluginId(id);
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      launchTimer.current = setTimeout(
+        () => {
+          launchTimer.current = null;
+          page.open();
+        },
+        reducedMotion ? 0 : 350,
+      );
+      return;
+    }
+    if (!address) return;
     let target: URL;
     try {
       target = new URL(address, window.location.href);
@@ -70,7 +148,7 @@ export function AppItem({ name, image, type, url, innerUrl, external }: AppRecor
           <button
             type="button"
             onClick={openPage}
-            disabled={!address}
+            disabled={type === 'plugin' ? !config.pluginName : !address}
             aria-label={t('home.openNamed', { name })}
             className="flex h-40 w-full cursor-pointer flex-col items-center justify-center gap-2.5 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:cursor-default"
           >
@@ -100,6 +178,7 @@ export function AppItem({ name, image, type, url, innerUrl, external }: AppRecor
 
         <div className="h-full w-5" />
       </div>
+      {page.isOpen ? <AppPluginDialog name={name} page={page} plugin={plugin} onClose={closePlugin} /> : null}
       {open ? <AppUrlDialog name={name} url={address} onClose={() => setOpen(false)} /> : null}
     </>
   );

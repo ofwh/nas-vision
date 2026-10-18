@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { LayoutGrid, Palette, UserRound } from 'lucide-react';
 import { Account } from '@/components/business/Account/Account';
 import { Appearance } from '@/components/business/Appearance/Appearance';
-import { ManageApps } from '@/components/business/Apps/ManageApps';
+import { AppConfig } from '@/components/business/AppConfig/AppConfig';
 import { SplitWindowModal, type SplitWindowMenuItem } from '@/components/common/SplitWindowModal';
 import { useSession } from '@/lib/auth-client';
 
@@ -30,7 +30,7 @@ export function SettingsDialog({ initialPage, onClose }: { initialPage: Settings
       id: 'apps',
       label: t('settings.apps'),
       icon: <LayoutGrid strokeWidth={1.7} />,
-      content: ManageApps,
+      content: AppConfig,
     });
   }
 

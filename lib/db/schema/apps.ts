@@ -7,7 +7,7 @@ export type AppPermission = 'public' | 'signed-in';
 
 export type AppConfig = JsonObject;
 
-export type AppType = 'url';
+export type AppType = 'url' | 'plugin';
 
 export type AppOpenMode = 'newtab' | 'iframe' | 'replace';
 

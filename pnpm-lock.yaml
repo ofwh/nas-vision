@@ -41,6 +41,9 @@ importers:
       is-localhost-ip:
         specifier: ^3.0.1
         version: 3.0.1
+      ky:
+        specifier: ^2.2.0
+        version: 2.2.0
       lucide-react:
         specifier: ^1.48.0
         version: 1.48.0(react@19.2.8)
@@ -65,6 +68,9 @@ importers:
       swiper:
         specifier: ^14.2.0
         version: 14.2.0
+      swr:
+        specifier: ^2.5.1
+        version: 2.5.1(react@19.2.8)
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
@@ -2350,6 +2356,10 @@ packages:
     resolution: {integrity: sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==}
     engines: {node: '>= 0.8'}
 
+  dequal@2.0.3:
+    resolution: {integrity: sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==}
+    engines: {node: '>=6'}
+
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
@@ -3327,6 +3337,10 @@ packages:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
 
+  ky@2.2.0:
+    resolution: {integrity: sha512-4+B63kyZt+Y8snQiUGydK1vgY9xYQJZEh9K/nIAIEts+gYJzy1EiAw3BbK8xpWRuWUpN70SNCMjqRGTm75xxIA==}
+    engines: {node: '>=22'}
+
   kysely@0.29.6:
     resolution: {integrity: sha512-hHaB8C/rfzDDtr/t8YZwxAuPJTT0zHyaPoVzcXwDYhYNAgH/4sIfVhi/XLLIY+bL/FqaIJnjATDbi8ObSELmxg==}
     engines: {node: '>=22.0.0'}
@@ -4215,6 +4229,11 @@ packages:
   swiper@14.2.0:
     resolution: {integrity: sha512-GsL4M9Fq7Sg22OyL3SjdNj/0bxTfIxPJJHHW394Li0u5vYtExi0a09iBUc8CuLafJi5pAlH2AHUe1PocxHl45g==}
     engines: {node: '>= 4.7.0'}
+
+  swr@2.5.1:
+    resolution: {integrity: sha512-BRw55e8r0B7SpDN20CAzoQAHl7y1yP7/Zt7oqUjMv0vSt2u2Xnkm88Ws+VypbV9BXHQVuSuyVq7zMjO16wSExw==}
+    peerDependencies:
+      react: ^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   systeminformation@5.33.13:
     resolution: {integrity: sha512-GtyakkchTQKymM1WeAB652zi3rM1q00RKdc+jZe9KGstuc/mWUwAnQGN/RE5gVYvHIR8xYOUIUD9irVKDtA0wA==}
@@ -6370,6 +6389,8 @@ snapshots:
 
   depd@2.0.0: {}
 
+  dequal@2.0.3: {}
+
   detect-libc@2.1.2: {}
 
   diff@8.0.4: {}
@@ -7457,6 +7478,8 @@ snapshots:
 
   kleur@4.1.5: {}
 
+  ky@2.2.0: {}
+
   kysely@0.29.6: {}
 
   language-subtag-registry@0.3.23: {}
@@ -8379,6 +8402,12 @@ snapshots:
   supports-preserve-symlinks-flag@1.0.0: {}
 
   swiper@14.2.0: {}
+
+  swr@2.5.1(react@19.2.8):
+    dependencies:
+      dequal: 2.0.3
+      react: 19.2.8
+      use-sync-external-store: 1.7.0(react@19.2.8)
 
   systeminformation@5.33.13: {}
 
