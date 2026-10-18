@@ -1,0 +1,34 @@
+.folders {
+  transform: translateX(0);
+  animation: folders 180ms ease-out;
+}
+
+.albums {
+  transform: translateX(calc(100% + 0.5rem));
+  animation: albums 180ms ease-out;
+}
+
+@keyframes folders {
+  from {
+    transform: translateX(calc(100% + 0.5rem));
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes albums {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(100% + 0.5rem));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folders,
+  .albums {
+    animation: none;
+  }
+}

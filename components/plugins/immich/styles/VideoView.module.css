@@ -1,0 +1,162 @@
+.button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  color: white;
+  cursor: pointer;
+}
+.button:hover {
+  background: rgb(255 255 255 / 15%);
+}
+.button:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+.button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.seek,
+.volume {
+  position: relative;
+  align-items: center;
+  height: 2rem;
+  touch-action: none;
+  cursor: pointer;
+}
+.seek {
+  display: flex;
+}
+.volume {
+  display: flex;
+  justify-content: center;
+  width: 1rem;
+  height: 6rem;
+}
+.seek:focus-visible,
+.volume:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+:global([role='dialog']):fullscreen:has(.frame) {
+  width: 100vw !important;
+  height: 100dvh !important;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  background: black;
+}
+
+.volumeIcon {
+  position: relative;
+  display: block;
+  width: 1rem;
+  height: 1rem;
+}
+.volumeIcon > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+.volumeIcon[data-level='off'] .volumeOff,
+.volumeIcon[data-level='low'] .volumeLow,
+.volumeIcon[data-level='high'] .volumeHigh {
+  opacity: 1;
+}
+
+.volumeButton[aria-expanded] {
+  background: transparent;
+  color: white;
+}
+.volumeButton[aria-expanded]:hover {
+  background: rgb(255 255 255 / 15%);
+}
+
+:global([role='dialog']):fullscreen:has(.frame) > :global(.absolute):has(.controls) {
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  translate: -50% 0;
+}
+
+:global([role='dialog']):fullscreen:has(.frame) > div:has(.frame) {
+  --window-radius: 0px !important;
+  border-radius: 0 !important;
+}
+:global([role='dialog']):fullscreen .frame {
+  border-radius: 0;
+}
+:global([role='dialog']):fullscreen:has(.frame) > :global(.absolute):has(.controls),
+:global([role='dialog']):fullscreen .overlay,
+:global([role='dialog']):fullscreen :global([data-video-overlay]) {
+  transition:
+    opacity 250ms ease,
+    visibility 0s;
+}
+:global([role='dialog']):fullscreen[data-controls-hidden='true']:has(.frame) {
+  cursor: none;
+}
+:global([role='dialog']):fullscreen[data-controls-hidden='true'] > :global(.absolute):has(.controls),
+:global([role='dialog']):fullscreen[data-controls-hidden='true'] .overlay,
+:global([role='dialog']):fullscreen[data-controls-hidden='true'] :global([data-video-overlay]) {
+  opacity: 0 !important;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 250ms ease,
+    visibility 0s 250ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  :global([role='dialog']):fullscreen:has(.frame) > :global(.absolute):has(.controls),
+  :global([role='dialog']):fullscreen .overlay,
+  :global([role='dialog']):fullscreen :global([data-video-overlay]) {
+    transition: none;
+  }
+}
+
+.portal {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.seek [data-slot='slider-track'],
+.volume [data-slot='slider-track'] {
+  background: rgb(255 255 255 / 20%);
+}
+.seek [data-slot='slider-track'] {
+  height: 0.25rem;
+}
+.seek [data-slot='slider-track']::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: var(--video-buffer, 0%);
+  background: rgb(255 255 255 / 35%);
+}
+.seek [data-slot='slider-range'],
+.volume [data-slot='slider-range'] {
+  position: relative;
+  background: white;
+}
+.seek [data-slot='slider-thumb'],
+.volume [data-slot='slider-thumb'] {
+  width: 0.625rem;
+  height: 0.625rem;
+  border: 0;
+}
+.volume > div {
+  min-height: 0;
+  height: 6rem;
+}
+.volume [data-slot='slider-track'] {
+  width: 0.25rem;
+}

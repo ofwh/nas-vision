@@ -1,0 +1,107 @@
+{
+  "id": "immich",
+  "name": "Immich",
+  "description": "浏览自部署 Immich 的目录、相册、照片和视频，查看照片信息与播放视频。",
+  "icon": "/static/icons/Immich.png",
+  "status": "on",
+  "size": {
+    "width": 1280,
+    "height": 800
+  },
+  "resizable": true,
+  "top": true,
+  "mode": "floating",
+  "configs": [
+    {
+      "label": "服务地址（如 http://immich-server:2283，可带 /api）",
+      "key": "serverUrl",
+      "type": "input",
+      "value": "",
+      "defaults": ""
+    },
+    {
+      "label": "认证方式",
+      "key": "authMode",
+      "type": "combobox",
+      "value": "apiKey",
+      "defaults": "apiKey",
+      "options": [
+        {
+          "label": "API Key",
+          "value": "apiKey",
+          "description": "需要 asset.read、asset.view；目录模式需 folder.read，相册模式需 album.read"
+        },
+        {
+          "label": "邮箱和密码",
+          "value": "password",
+          "description": "需在 Immich 启用密码登录；仅 OAuth 登录的服务请使用 API Key"
+        }
+      ]
+    },
+    {
+      "label": "API Key",
+      "key": "apiKey",
+      "type": "input",
+      "secret": true,
+      "value": "",
+      "defaults": "",
+      "conditions": {
+        "key": "authMode",
+        "value": "apiKey"
+      }
+    },
+    {
+      "label": "登录邮箱",
+      "key": "email",
+      "type": "input",
+      "value": "",
+      "defaults": "",
+      "conditions": {
+        "key": "authMode",
+        "value": "password"
+      }
+    },
+    {
+      "label": "登录密码",
+      "key": "password",
+      "type": "input",
+      "secret": true,
+      "value": "",
+      "defaults": "",
+      "conditions": {
+        "key": "authMode",
+        "value": "password"
+      }
+    },
+    {
+      "label": "展示模式",
+      "key": "directoryMode",
+      "type": "combobox",
+      "value": "folders",
+      "defaults": "folders",
+      "options": [
+        {
+          "label": "目录",
+          "value": "folders",
+          "description": "按 Immich 原始文件路径逐层浏览"
+        },
+        {
+          "label": "相册",
+          "value": "albums",
+          "description": "将相册作为目录展示"
+        }
+      ]
+    },
+    {
+      "label": "起始目录（可选，填写 Immich 容器内的原始目录路径）",
+      "key": "rootPath",
+      "type": "input",
+      "value": "",
+      "defaults": "",
+      "conditions": {
+        "key": "directoryMode",
+        "value": "folders"
+      }
+    }
+  ]
+}
