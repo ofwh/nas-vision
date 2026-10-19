@@ -42,7 +42,7 @@
   "windowMode": "打开模式",
   "controlsMode": "标准模式",
   "floatingMode": "浮动按钮",
-  "alwaysOnTop": "最顶层",
+  "alwaysOnTop": "置顶显示",
   "windowResize": "窗口调整",
   "defaultWidth": "默认宽度",
   "defaultHeight": "默认高度",
