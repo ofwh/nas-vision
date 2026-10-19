@@ -38,6 +38,7 @@ export function WindowModal({
       onOpenChange(false);
       onClose?.();
     };
+
     return {
       id: id ?? generatedId,
       state: !open ? 'closed' : maximized ? 'maximized' : 'normal',

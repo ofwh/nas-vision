@@ -25,7 +25,9 @@ function ChangePasswordDialog({ onClose }: { onClose: () => void }) {
       size={{ width: 440 }}
       style={{ maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100dvh - 32px)' }}
       onOpenChange={(open) => {
-        if (!open && !pending) onClose();
+        if (!open && !pending) {
+          onClose();
+        }
       }}
     >
       <ChangePassword onSuccess={onClose} onCancel={onClose} onPendingChange={setPending} />
@@ -52,7 +54,9 @@ function TwoFactorDialog({
       size={{ width: 460 }}
       style={{ maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100dvh - 32px)' }}
       onOpenChange={(open) => {
-        if (!open && !pending) onClose();
+        if (!open && !pending) {
+          onClose();
+        }
       }}
     >
       <TwoFactor
@@ -78,25 +82,35 @@ export function Account() {
   const [securityDialog, setSecurityDialog] = useState<'changePassword' | 'twoFactorAuthentication' | null>(null);
 
   async function handleEdit() {
-    if (!session || pending) return;
+    if (!session || pending) {
+      return;
+    }
+
     if (!editing) {
       setName(session.user.name);
       setError(null);
       setEditing(true);
+
       return;
     }
+
     if (!name.trim()) {
       setError(t('account.nicknameRequired'));
+
       return;
     }
+
     setPending(true);
     setError(null);
     try {
       const result = await authClient.updateUser({ name: name.trim() });
+
       if (result.error) {
         setError(result.error.message ?? t('common.saveFailed'));
+
         return;
       }
+
       setEditing(false);
       await refetch();
       router.refresh();
@@ -108,15 +122,21 @@ export function Account() {
   }
 
   async function handleSignOut() {
-    if (pending) return;
+    if (pending) {
+      return;
+    }
+
     setPending(true);
     setError(null);
     try {
       const result = await authClient.signOut();
+
       if (result.error) {
         setError(result.error.message ?? t('account.signOutFailed'));
+
         return;
       }
+
       setMode('sign-in');
       setEditing(false);
       router.refresh();
@@ -172,8 +192,13 @@ export function Account() {
                         autoFocus
                         className="w-full max-w-60 rounded-lg border border-white/20 bg-black/10 px-2 py-1 text-right outline-none focus:border-white/50"
                         onKeyDown={(event) => {
-                          if (event.key === 'Enter') void handleEdit();
-                          if (event.key === 'Escape') setEditing(false);
+                          if (event.key === 'Enter') {
+                            void handleEdit();
+                          }
+
+                          if (event.key === 'Escape') {
+                            setEditing(false);
+                          }
                         }}
                       />
                     ) : (

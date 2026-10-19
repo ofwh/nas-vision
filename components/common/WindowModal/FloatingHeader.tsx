@@ -18,6 +18,7 @@ export function FloatingHeader({
 }) {
   const t = useTranslations();
   const Surface = transparent ? 'div' : LiquidGlass;
+
   return (
     <header className="pointer-events-none absolute inset-x-5 top-3.5 z-40 grid min-h-12 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-3 text-white">
       <div className="pointer-events-auto flex min-w-0 items-center gap-3">

@@ -27,6 +27,7 @@ const geistMono = Geist_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata');
+
   return { title: t('title'), description: t('description') };
 }
 
@@ -40,6 +41,7 @@ export default async function HomeLayout({ children }: { children: ReactNode }) 
     veil: cookieStore.get('veil')?.value,
   });
   const locale = await getLocale();
+
   return (
     <html
       lang={locale}

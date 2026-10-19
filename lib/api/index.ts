@@ -53,6 +53,7 @@ export function errorResponse(error: AppError, locale: Locale = defaultLocale): 
 /** 唯一允许断言请求体的地方；JSON 解不出来必须回错误码，抛出去会变成 500。 */
 export async function readParams<T>(request: Request): Promise<Result<T>> {
   let body: unknown;
+
   try {
     body = await request.json();
   } catch {

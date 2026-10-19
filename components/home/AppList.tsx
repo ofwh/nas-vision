@@ -27,12 +27,18 @@ export function AppList() {
   const loading = status === 'idle' || status === 'loading';
 
   useEffect(() => {
-    if (!isPending) void list();
+    if (!isPending) {
+      void list();
+    }
   }, [isPending, signedIn, list]);
 
   useEffect(() => {
     const swiper = swiperRef.current;
-    if (!swiper || swiper.destroyed) return;
+
+    if (!swiper || swiper.destroyed) {
+      return;
+    }
+
     swiper.update();
     swiper.slideTo(Math.min(swiper.activeIndex, pageCount - 1));
   }, [pageCount]);
@@ -50,7 +56,9 @@ export function AppList() {
     <div
       className={`h-156 w-300 ${activePluginId ? styles.launching : hasLaunched ? styles.restoring : 'animate-in zoom-in-50 duration-500 ease-out'}`}
       onAnimationStart={(event) => {
-        if (event.target === event.currentTarget && activePluginId !== null) setHasLaunched(true);
+        if (event.target === event.currentTarget && activePluginId !== null) {
+          setHasLaunched(true);
+        }
       }}
     >
       {/* observer：数据回来后页数会变，靠它重新量一遍 slides。 */}

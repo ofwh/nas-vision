@@ -20,14 +20,20 @@ export function AppPreview({
   useEffect(() => {
     const bar = barRef.current;
     const text = textRef.current;
-    if (!bar || !text) return;
+
+    if (!bar || !text) {
+      return;
+    }
 
     const measure = () => setOverflow(Math.max(0, text.scrollWidth - bar.clientWidth));
+
     measure();
 
     const observer = new ResizeObserver(measure);
+
     observer.observe(bar);
     observer.observe(text);
+
     return () => observer.disconnect();
   }, [name]);
 

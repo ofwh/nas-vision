@@ -49,7 +49,9 @@ function SidebarOutlet() {
   const item = useSidebarStore((state) => state.items.find((item) => item.name === state.openedName));
   const close = useSidebarStore((state) => state.close);
 
-  if (!item?.menu.render) return null;
+  if (!item?.menu.render) {
+    return null;
+  }
 
   return <SidebarView key={item.name} item={item} onClose={() => close(item.name)} />;
 }
@@ -68,7 +70,10 @@ function SidebarContent() {
 
   useEffect(() => {
     const labels = listRef.current?.querySelectorAll<HTMLElement>('[data-sidebar-label]');
-    if (!labels?.length) return;
+
+    if (!labels?.length) {
+      return;
+    }
 
     const measure = () =>
       setExpandedWidth(
@@ -78,7 +83,9 @@ function SidebarContent() {
 
     measure();
     const observer = new ResizeObserver(measure);
+
     labels.forEach((label) => observer.observe(label));
+
     return () => observer.disconnect();
   }, [items]);
 
@@ -90,10 +97,15 @@ function SidebarContent() {
 
   useEffect(() => {
     const list = listRef.current;
-    if (!list) return;
+
+    if (!list) {
+      return;
+    }
 
     const onLeave = () => setHover((prev) => ({ ...prev, visible: false, sliding: false }));
+
     list.addEventListener('pointerleave', onLeave);
+
     return () => list.removeEventListener('pointerleave', onLeave);
   }, []);
 

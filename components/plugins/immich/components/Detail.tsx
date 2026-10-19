@@ -13,7 +13,11 @@ import MediaInfo, { type MediaInfoItem } from './MediaInfo';
 
 function date(value: string): string {
   const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return value;
+
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+
   const year = String(parsed.getFullYear()).padStart(4, '0');
   const [month, day, hours, minutes, seconds] = [
     parsed.getMonth() + 1,
@@ -22,8 +26,10 @@ function date(value: string): string {
     parsed.getMinutes(),
     parsed.getSeconds(),
   ].map((part) => String(part).padStart(2, '0'));
+
   return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
 }
+
 function bytes(value: number): string {
   return value >= 1024 * 1024 ? `${(value / 1024 / 1024).toFixed(1)} MB` : `${(value / 1024).toFixed(1)} KB`;
 }
@@ -68,9 +74,13 @@ export default function Detail({
     ['光圈', exif.fNumber == null ? null : `ƒ/${exif.fNumber}`],
     ['快门', exif.exposureTime ? `${exif.exposureTime} s` : null],
   ];
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+        return;
+      }
+
       if (event.key === 'ArrowLeft' && onPrevious) {
         event.preventDefault();
         onPrevious();
@@ -79,7 +89,9 @@ export default function Detail({
         onNext();
       }
     };
+
     window.addEventListener('keydown', onKeyDown);
+
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onPrevious, onNext]);
 
@@ -92,7 +104,9 @@ export default function Detail({
       modal
       closeOnOverlay
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open) {
+          onClose();
+        }
       }}
       style={{ width: `min(90vw, ${90 * ratio}vh)`, height: `min(90vh, ${90 / ratio}vw)` }}
       footer={
@@ -131,7 +145,9 @@ export default function Detail({
             size="preview"
             className="h-full w-full [&_img]:object-contain"
             onDimensions={(width, height) => {
-              if (width > 0 && height > 0) setDimensions({ id: image.id, ratio: width / height });
+              if (width > 0 && height > 0) {
+                setDimensions({ id: image.id, ratio: width / height });
+              }
             }}
           />
           <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-center gap-2 bg-gradient-to-b from-black/70 to-transparent px-14 py-5 opacity-0 transition-opacity duration-300 ease-out group-hover/image:opacity-100 motion-reduce:transition-none">

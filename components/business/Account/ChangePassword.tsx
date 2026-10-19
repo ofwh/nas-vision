@@ -35,48 +35,71 @@ export function ChangePassword({
   function validatePasswordLength(value: string): boolean {
     if (value.length < 6) {
       setError(errorMessage({ code: 'account.PASSWORD_TOO_SHORT' }, locale));
+
       return false;
     }
+
     if (value.length > 128) {
       setError(errorMessage({ code: 'account.PASSWORD_TOO_LONG' }, locale));
+
       return false;
     }
+
     return true;
   }
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending) return;
+    if (pending) {
+      return;
+    }
+
     setError(null);
     if (!currentPassword) {
       setError(errorMessage({ code: 'account.CURRENT_PASSWORD_REQUIRED' }, locale));
+
       return;
     }
+
     if (!newPassword) {
       setError(errorMessage({ code: 'account.NEW_PASSWORD_REQUIRED' }, locale));
+
       return;
     }
+
     if (!confirmation) {
       setError(errorMessage({ code: 'account.CONFIRM_PASSWORD_REQUIRED' }, locale));
+
       return;
     }
+
     if (newPassword !== confirmation) {
       setError(errorMessage({ code: 'account.PASSWORD_MISMATCH' }, locale));
+
       return;
     }
-    if (!validatePasswordLength(newPassword)) return;
+
+    if (!validatePasswordLength(newPassword)) {
+      return;
+    }
+
     if (newPassword === currentPassword) {
       setError(errorMessage({ code: 'account.PASSWORD_UNCHANGED' }, locale));
+
       return;
     }
+
     setPending(true);
     onPendingChange?.(true);
     try {
       const result = await authClient.changePassword({ currentPassword, newPassword, revokeOtherSessions: true });
+
       if (result.error) {
         setError(authErrorMessage(result.error, locale));
+
         return;
       }
+
       onSuccess();
     } catch {
       setError(t('common.connectionFailed'));

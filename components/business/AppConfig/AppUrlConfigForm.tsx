@@ -2,8 +2,10 @@
 import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { FormGroup, FIELD_CONTROL_CLASS, type AppFormProps } from './form';
+
 export function AppUrlConfigForm({ form, update }: AppFormProps) {
   const t = useTranslations();
+
   return (
     <FormGroup label={t('apps.urlOptions')}>
       <Input

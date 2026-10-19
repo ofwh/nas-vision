@@ -42,7 +42,9 @@ export function HomeSidebar() {
 
   useEffect(() => {
     const { setType, unmount } = useSidebarStore.getState();
+
     setType('home');
+
     return () => {
       unmount('home');
       unmount('settings');

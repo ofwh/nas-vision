@@ -11,15 +11,21 @@ const video: PluginApiHandler = (request, config) =>
       signal: request.signal,
     });
     const headers = new Headers({ 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' });
+
     for (const name of ['Content-Type', 'Content-Length', 'Content-Range', 'Accept-Ranges']) {
       const value = response.headers.get(name);
-      if (value) headers.set(name, value);
+
+      if (value) {
+        headers.set(name, value);
+      }
     }
     if (response.status === 416) {
       await response.body?.cancel();
       headers.delete('Content-Length');
+
       return new Response(null, { status: 416, headers });
     }
+
     return new Response(response.body, { status: response.status, headers });
   });
 

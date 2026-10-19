@@ -5,8 +5,13 @@ import service, { type AppMoveParams, type AppMoveRes } from '@/lib/services/app
 export async function POST(request: Request) {
   return handleApi(async () => {
     const parsed = await readParams<AppMoveParams>(request);
-    if (!parsed.ok) return errorResponse(parsed.error);
+
+    if (!parsed.ok) {
+      return errorResponse(parsed.error);
+    }
+
     const result = service.move(parsed.value);
+
     return result.ok ? okResponse<AppMoveRes>({ app: result.value }) : errorResponse(result.error);
   }, 'apps.SORT_FAILED');
 }

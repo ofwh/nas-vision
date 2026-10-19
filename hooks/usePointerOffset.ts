@@ -46,31 +46,41 @@ const tick = (now: number) => {
   frame = 0;
 
   const dt = Math.min((now - last) / 1000, MAX_STEP);
+
   last = now;
 
   const alpha = 1 - Math.exp(-dt / TIME_CONSTANT);
+
   x += (targetX - x) * alpha;
   y += (targetY - y) * alpha;
 
   const settled = Math.abs(targetX - x) < SETTLE_EPSILON && Math.abs(targetY - y) < SETTLE_EPSILON;
+
   if (settled) {
     x = targetX;
     y = targetY;
   }
 
-  for (const onFrame of subscribers) onFrame(x, y);
+  for (const onFrame of subscribers) {
+    onFrame(x, y);
+  }
 
   frame = settled ? 0 : requestAnimationFrame(tick);
 };
 
 const start = () => {
-  if (frame || !subscribers.size || document.hidden) return;
+  if (frame || !subscribers.size || document.hidden) {
+    return;
+  }
+
   last = performance.now();
   frame = requestAnimationFrame(tick);
 };
 
 const onPointerMove = (event: PointerEvent) => {
-  if (event.pointerType === 'touch') return;
+  if (event.pointerType === 'touch') {
+    return;
+  }
 
   pointerInside = true;
   aim(event.clientX, event.clientY);
@@ -78,7 +88,9 @@ const onPointerMove = (event: PointerEvent) => {
 };
 
 const onPointerOut = (event: PointerEvent) => {
-  if (event.relatedTarget) return;
+  if (event.relatedTarget) {
+    return;
+  }
 
   pointerInside = false;
   targetX = 0;
@@ -91,7 +103,9 @@ const refreshCenter = () => {
   halfWidth = window.innerWidth / 2;
   halfHeight = window.innerHeight / 2;
 
-  if (!pointerInside) return;
+  if (!pointerInside) {
+    return;
+  }
 
   aim(pointerX, pointerY);
   start();
@@ -102,10 +116,14 @@ const onResize = () => {
 
   if (elapsed >= RESIZE_THROTTLE) {
     refreshCenter();
+
     return;
   }
 
-  if (resizeTimer !== undefined) return;
+  if (resizeTimer !== undefined) {
+    return;
+  }
+
   resizeTimer = setTimeout(() => {
     resizeTimer = undefined;
     refreshCenter();
@@ -114,7 +132,10 @@ const onResize = () => {
 
 const onVisibilityChange = () => {
   if (document.hidden) {
-    if (frame) cancelAnimationFrame(frame);
+    if (frame) {
+      cancelAnimationFrame(frame);
+    }
+
     frame = 0;
   } else {
     refreshCenter();
@@ -129,7 +150,9 @@ const subscribe = (onFrame: Subscriber) => {
 
   subscribers.add(onFrame);
   onFrame(x, y);
-  if (x !== targetX || y !== targetY) start();
+  if (x !== targetX || y !== targetY) {
+    start();
+  }
 
   if (!listening) {
     listening = true;
@@ -141,16 +164,24 @@ const subscribe = (onFrame: Subscriber) => {
 
   return () => {
     subscribers.delete(onFrame);
-    if (subscribers.size) return;
+    if (subscribers.size) {
+      return;
+    }
 
     listening = false;
     window.removeEventListener('pointermove', onPointerMove);
     document.removeEventListener('pointerout', onPointerOut);
     window.removeEventListener('resize', onResize);
     document.removeEventListener('visibilitychange', onVisibilityChange);
-    if (resizeTimer !== undefined) clearTimeout(resizeTimer);
+    if (resizeTimer !== undefined) {
+      clearTimeout(resizeTimer);
+    }
+
     resizeTimer = undefined;
-    if (frame) cancelAnimationFrame(frame);
+    if (frame) {
+      cancelAnimationFrame(frame);
+    }
+
     frame = 0;
   };
 };
@@ -169,6 +200,7 @@ export function usePointerOffset(onFrame: (offsetX: number, offsetY: number) => 
 
     sync();
     preference.addEventListener('change', sync);
+
     return () => {
       unsubscribe?.();
       preference.removeEventListener('change', sync);

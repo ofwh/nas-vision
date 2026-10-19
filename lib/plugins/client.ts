@@ -3,11 +3,14 @@ import { appError, errorMessage, type BaseResponse, type JsonObject } from '@/li
 
 export function pluginPath(name: string, path: string): string {
   const segments = path.split('/').filter(Boolean);
+
   if (!/^[a-zA-Z0-9_-]+$/.test(name) || !segments.length || segments.some((part) => !/^[a-zA-Z0-9_-]+$/.test(part))) {
     throw new Error(errorMessage(appError('plugin.INVALID_PATH')));
   }
+
   return `/api/plugin/${encodeURIComponent(name)}/${segments.map(encodeURIComponent).join('/')}`;
 }
+
 export async function pluginRequest<T>(
   url: string,
   params: JsonObject | FormData,
@@ -24,6 +27,10 @@ export async function pluginRequest<T>(
       retry: 0,
     })
     .json<BaseResponse<T>>();
-  if (response.code !== 0) throw new Error(response.error?.message ?? response.message);
+
+  if (response.code !== 0) {
+    throw new Error(response.error?.message ?? response.message);
+  }
+
   return response;
 }

@@ -35,22 +35,30 @@ export function AuthForm({
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending) return;
+    if (pending) {
+      return;
+    }
+
     setError(null);
     setPending(true);
     try {
       const result = isSignUp
         ? await authClient.signUp.email({ name, email, password, username })
         : await authClient.signIn.username({ username, password });
+
       if (result.error) {
         setError(result.error.message ?? (isSignUp ? t('account.signUpFailed') : t('account.signInFailed')));
+
         return;
       }
+
       if (result.data && 'twoFactorRedirect' in result.data && result.data.twoFactorRedirect) {
         setPassword('');
         setTwoFactorRequired(true);
+
         return;
       }
+
       onSuccess();
     } catch {
       setError(t('common.connectionFailed'));

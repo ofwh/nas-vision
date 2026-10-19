@@ -15,6 +15,7 @@ export function ControlsHeader({
   header?: HeaderContent;
 }) {
   const { maximized } = useWindow();
+
   return (
     <header
       className={cn(

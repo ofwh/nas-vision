@@ -13,6 +13,7 @@ export type LoadingProps = {
 
 export function Loading({ className }: LoadingProps) {
   const t = useTranslations();
+
   return (
     <div
       role="status"

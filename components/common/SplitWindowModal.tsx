@@ -66,7 +66,10 @@ export function SplitWindowModal({
             aria-current={item.id === current?.id ? 'page' : undefined}
             disabled={item.disabled}
             onClick={() => {
-              if (item.id === current?.id) return;
+              if (item.id === current?.id) {
+                return;
+              }
+
               setActiveId(item.id);
               onChange?.(item.id);
             }}

@@ -18,6 +18,7 @@ function resize(popup: HTMLElement, width: number, height: number) {
 
 function ResizeHandle() {
   const drag = useRef<{ pointerId: number; x: number; y: number; width: number; height: number } | null>(null);
+
   return (
     <div
       role="button"
@@ -28,13 +29,21 @@ function ResizeHandle() {
         'absolute right-0 bottom-0 z-20 size-8 cursor-nwse-resize touch-none rounded-br-(--window-radius) text-white opacity-20 transition-opacity duration-200 ease-out outline-none select-none [--handle-half-stroke:calc(var(--spacing)*0.625)] [--handle-radius:calc(var(--spacing)*3.25)] hover:opacity-90 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-white/50 motion-reduce:transition-none',
       )}
       onPointerDown={(event) => {
-        if (event.button !== 0) return;
+        if (event.button !== 0) {
+          return;
+        }
+
         const popup = event.currentTarget.parentElement;
-        if (!popup) return;
+
+        if (!popup) {
+          return;
+        }
+
         event.preventDefault();
         event.stopPropagation();
         event.currentTarget.focus({ preventScroll: true });
         const rect = popup.getBoundingClientRect();
+
         drag.current = {
           pointerId: event.pointerId,
           x: event.clientX,
@@ -47,11 +56,18 @@ function ResizeHandle() {
       onPointerMove={(event) => {
         const start = drag.current;
         const popup = event.currentTarget.parentElement;
-        if (!start || !popup || event.pointerId !== start.pointerId) return;
+
+        if (!start || !popup || event.pointerId !== start.pointerId) {
+          return;
+        }
+
         resize(popup, start.width + (event.clientX - start.x) * 2, start.height + (event.clientY - start.y) * 2);
       }}
       onPointerUp={(event) => {
-        if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+        if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+          return;
+        }
+
         event.currentTarget.releasePointerCapture(event.pointerId);
       }}
       onLostPointerCapture={() => {
@@ -59,11 +75,16 @@ function ResizeHandle() {
       }}
       onKeyDown={(event) => {
         const popup = event.currentTarget.parentElement;
-        if (!popup || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+
+        if (!popup || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+          return;
+        }
+
         event.preventDefault();
         event.stopPropagation();
         const rect = popup.getBoundingClientRect();
         const step = event.shiftKey ? 50 : 10;
+
         resize(
           popup,
           rect.width + (event.key === 'ArrowRight' ? step : event.key === 'ArrowLeft' ? -step : 0),
@@ -79,7 +100,10 @@ function ResizeHandle() {
 }
 
 function ModalSurface({ transparent, ...props }: Omit<LiquidGlassProps, 'ref' | 'variant'> & { transparent: boolean }) {
-  if (!transparent) return <LiquidGlass {...props} />;
+  if (!transparent) {
+    return <LiquidGlass {...props} />;
+  }
+
   return (
     <div style={props.style} className={cn('relative overflow-hidden bg-transparent text-white', props.className)}>
       <div className={cn('relative', props.contentClassName)}>{props.children}</div>
@@ -112,7 +136,9 @@ export function LiquidGlassModal({
       open={open}
       onOpenChange={(next) => {
         onOpenChange(next);
-        if (!next) onClose?.();
+        if (!next) {
+          onClose?.();
+        }
       }}
       modal={modal}
       disablePointerDismissal={!closeOnOverlay}

@@ -5,7 +5,11 @@ import type { PluginListParams } from '@/types/plugins';
 
 export async function POST(request: Request) {
   const parsed = await readParams<PluginListParams>(request);
-  if (!parsed.ok) return errorResponse(parsed.error);
+
+  if (!parsed.ok) {
+    return errorResponse(parsed.error);
+  }
+
   try {
     return okResponse(service.list());
   } catch {

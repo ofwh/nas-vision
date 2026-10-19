@@ -13,7 +13,10 @@ export function Indicator() {
   const swiper = useAppList((state) => state.swiper);
   const activeIndex = useAppList((state) => state.activeIndex);
   const count = Math.max(1, Math.ceil(apps.length / APP_PAGE_CAPACITY));
-  if (activePluginId !== null || status === 'idle' || status === 'loading' || count <= 1) return null;
+
+  if (activePluginId !== null || status === 'idle' || status === 'loading' || count <= 1) {
+    return null;
+  }
 
   return (
     <LiquidGlass className="h-6 rounded-full">
@@ -25,7 +28,9 @@ export function Indicator() {
             aria-label={t('home.page', { page: index + 1 })}
             aria-current={index === Math.min(activeIndex, count - 1) ? 'page' : undefined}
             onClick={() => {
-              if (swiper && !swiper.destroyed) swiper.slideTo(index);
+              if (swiper && !swiper.destroyed) {
+                swiper.slideTo(index);
+              }
             }}
             className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >

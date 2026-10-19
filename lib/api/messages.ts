@@ -16,5 +16,6 @@ export function formatMessage(
   locale: Locale = defaultLocale,
 ): string {
   const translate = createTranslator({ locale, messages: MESSAGES[locale] });
+
   return translate(code, params);
 }

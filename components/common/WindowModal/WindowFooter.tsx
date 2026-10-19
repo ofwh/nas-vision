@@ -11,9 +11,12 @@ export const WindowFooterContext = createContext<{
 export function WindowFooter({ children }: { children: ReactNode }) {
   const context = useContext(WindowFooterContext);
   const setHasContent = context?.setHasContent;
+
   useEffect(() => {
     setHasContent?.(true);
+
     return () => setHasContent?.(false);
   }, [setHasContent]);
+
   return context?.target ? createPortal(children, context.target) : null;
 }

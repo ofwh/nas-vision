@@ -38,6 +38,7 @@ export function insertAtEnd(values: AppBaseItem & { id: string }): AppItem {
   return db.transaction(
     () => {
       const rank = rankAfter(selectLastRank());
+
       return toItem(
         db
           .insert(apps)
@@ -52,16 +53,19 @@ export function insertAtEnd(values: AppBaseItem & { id: string }): AppItem {
 
 export function updateById(id: string, values: AppBaseItem): AppItem | null {
   const row = db.update(apps).set(values).where(eq(apps.id, id)).returning().get();
+
   return row ? toItem(row) : null;
 }
 
 export function updateStatusById(id: string, status: Flag): AppItem | null {
   const row = db.update(apps).set({ status }).where(eq(apps.id, id)).returning().get();
+
   return row ? toItem(row) : null;
 }
 
 export function updateRankById(id: string, rank: string): AppItem | null {
   const row = db.update(apps).set({ rank }).where(eq(apps.id, id)).returning().get();
+
   return row ? toItem(row) : null;
 }
 
@@ -76,17 +80,27 @@ export function moveBefore(id: string, beforeId: string | null): MoveResult {
   return db.transaction(
     () => {
       const current = selectAll();
-      if (!current.some((app) => app.id === id)) return { state: 'missing-app' };
+
+      if (!current.some((app) => app.id === id)) {
+        return { state: 'missing-app' };
+      }
+
       if (beforeId !== null && !current.some((app) => app.id === beforeId)) {
         return { state: 'missing-target' };
       }
+
       const ordered = orderBefore(current, id, beforeId);
       const ranks = generateNKeysBetween(null, null, ordered.length);
       let moved: AppItem | null = null;
+
       ordered.forEach((app, index) => {
         const updated = app.rank === ranks[index] ? app : updateRankById(app.id, ranks[index]);
-        if (app.id === id) moved = updated;
+
+        if (app.id === id) {
+          moved = updated;
+        }
       });
+
       return { state: 'moved', app: moved! };
     },
     { behavior: 'immediate' },

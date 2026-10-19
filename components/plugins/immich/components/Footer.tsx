@@ -23,17 +23,26 @@ function FolderName({ name }: { name: string }) {
   const container = useRef<HTMLDivElement>(null);
   const text = useRef<HTMLSpanElement>(null);
   const [overflow, setOverflow] = useState(0);
+
   useEffect(() => {
     const bar = container.current;
     const label = text.current;
-    if (!bar || !label) return;
+
+    if (!bar || !label) {
+      return;
+    }
+
     const measure = () => setOverflow(Math.max(0, label.scrollWidth - bar.clientWidth));
+
     measure();
     const observer = new ResizeObserver(measure);
+
     observer.observe(bar);
     observer.observe(label);
+
     return () => observer.disconnect();
   }, [name]);
+
   return (
     <div
       ref={container}
@@ -104,7 +113,9 @@ export default function Footer({
           <Tabs
             value={mode}
             onValueChange={(value) => {
-              if (value === 'folders' || value === 'albums') onModeChange(value);
+              if (value === 'folders' || value === 'albums') {
+                onModeChange(value);
+              }
             }}
           >
             <TabsList

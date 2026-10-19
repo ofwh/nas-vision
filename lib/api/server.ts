@@ -5,6 +5,7 @@ import { appError, errorResponse as response, type AppError, type ErrorCode } fr
 
 export async function errorResponse(error: AppError): Promise<Response> {
   const locale = await getLocale();
+
   return response(error, isLocale(locale) ? locale : defaultLocale);
 }
 

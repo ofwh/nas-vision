@@ -11,5 +11,6 @@ export default getRequestConfig(async () => {
     theme: cookieStore.get('theme')?.value,
     veil: cookieStore.get('veil')?.value,
   });
+
   return { locale, messages: { ...messages[locale], api: MESSAGES[locale] } };
 });

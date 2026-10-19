@@ -42,28 +42,41 @@ function LogoPicker({ value, onConfirm }: LogoPickerProps) {
 
   const upload = async (file: File) => {
     const form = new FormData();
+
     form.append('files', file);
 
     setBusy(true);
     const response = await fetchUpload<UploadRes>('/api/upload', form);
+
     setBusy(false);
 
     const url = response.data?.files[0]?.url;
-    if (!response.success || !url) return;
+
+    if (!response.success || !url) {
+      return;
+    }
 
     setUploaded(url);
     setSelected(url);
   };
 
   const drop = async () => {
-    if (!uploaded) return;
+    if (!uploaded) {
+      return;
+    }
 
     setBusy(true);
     const response = await fetchApi<UploadRemoveRes>('/api/upload/delete', { url: uploaded });
-    setBusy(false);
-    if (!response.success) return;
 
-    if (selected === uploaded) setSelected('');
+    setBusy(false);
+    if (!response.success) {
+      return;
+    }
+
+    if (selected === uploaded) {
+      setSelected('');
+    }
+
     setUploaded(null);
   };
 
@@ -131,9 +144,12 @@ function LogoPicker({ value, onConfirm }: LogoPickerProps) {
         className="hidden"
         onChange={(event) => {
           const file = event.target.files?.[0];
+
           // 清掉 value，同一个文件重选也还能触发 change
           event.target.value = '';
-          if (file) void upload(file);
+          if (file) {
+            void upload(file);
+          }
         }}
       />
 

@@ -48,14 +48,19 @@ export function LiquidGlass({ className, contentClassName, style, ref, variant, 
 
   usePointerOffset((offsetX, offsetY) => {
     const specular = specularRef.current;
-    if (!specular) return;
+
+    if (!specular) {
+      return;
+    }
 
     const x = `${(-offsetX * SPECULAR_REACH).toFixed(2)}px`;
     const y = `${(-offsetY * SPECULAR_REACH).toFixed(2)}px`;
+
     if (lastOffset.current.x !== x) {
       specular.style.setProperty('--glass-specular-x', x);
       lastOffset.current.x = x;
     }
+
     if (lastOffset.current.y !== y) {
       specular.style.setProperty('--glass-specular-y', y);
       lastOffset.current.y = y;

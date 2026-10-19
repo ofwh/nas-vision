@@ -3,8 +3,13 @@ import { twoFactorClient, usernameClient } from 'better-auth/client/plugins';
 
 const authFetch: typeof fetch = async (input, init) => {
   const response = await fetch(input, init);
-  if (!response.headers.get('Content-Type')?.includes('application/json')) return response;
+
+  if (!response.headers.get('Content-Type')?.includes('application/json')) {
+    return response;
+  }
+
   const body: unknown = await response.clone().json();
+
   if (
     !body ||
     typeof body !== 'object' ||
@@ -18,8 +23,10 @@ const authFetch: typeof fetch = async (input, init) => {
     typeof body.error.code !== 'string' ||
     !('message' in body.error) ||
     typeof body.error.message !== 'string'
-  )
+  ) {
     return response;
+  }
+
   const code = body.error.code;
   const status =
     code === 'account.SESSION_EXPIRED' || code === 'account.TWO_FACTOR_EXPIRED'
@@ -27,6 +34,7 @@ const authFetch: typeof fetch = async (input, init) => {
       : code === 'account.ACCOUNT_LOCKED'
         ? 429
         : 400;
+
   return Response.json({ code, message: body.error.message }, { status });
 };
 

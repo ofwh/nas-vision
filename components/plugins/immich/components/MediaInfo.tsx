@@ -7,6 +7,7 @@ type MediaInfoProps = {
 
 export default function MediaInfo({ firstRow, secondRow }: MediaInfoProps) {
   const secondRowItems = secondRow.filter(([, value]) => value !== null && value !== '');
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/90">

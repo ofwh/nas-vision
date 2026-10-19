@@ -27,21 +27,28 @@ export default function PhotoView({
     const rows: ImmichMedia[][] = [];
     let row: ImmichMedia[] = [];
     let totalRatio = 0;
+
     for (const image of images) {
       const ratio = aspectRatio(image);
+
       if (row.length && (totalRatio + ratio) * target + row.length * 4 > width) {
         rows.push(row);
         row = [];
         totalRatio = 0;
       }
+
       row.push(image);
       totalRatio += ratio;
     }
-    if (row.length) rows.push(row);
+    if (row.length) {
+      rows.push(row);
+    }
+
     return rows;
   }, [images, width, target]);
   const stride = target + 4;
   const { start, end } = visibleRows(rows.length, stride, viewport.top, viewport.height);
+
   return (
     <section aria-label="照片和视频">
       <div ref={listRef} className="relative" style={{ height: Math.max(0, rows.length * stride - 4) }}>

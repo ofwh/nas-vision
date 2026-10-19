@@ -19,6 +19,7 @@ export default function Photo({
   onDimensions?: (width: number, height: number) => void;
 }) {
   const { data, error, isLoading } = usePluginFetch<ImmichThumbnailRes>('immich', '/api/thumbnail', { id, size });
+
   return (
     <div className={`relative overflow-hidden bg-white/5 ${className}`}>
       {data ? (

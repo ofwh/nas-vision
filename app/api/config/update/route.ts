@@ -4,9 +4,14 @@ import service, { type ConfigRes, type ConfigSaveParams } from '@/lib/services/c
 
 export async function POST(request: Request) {
   const parsed = await readParams<ConfigSaveParams>(request);
-  if (!parsed.ok) return errorResponse(parsed.error);
+
+  if (!parsed.ok) {
+    return errorResponse(parsed.error);
+  }
+
   try {
     const result = service.save(parsed.value);
+
     return result.ok ? okResponse<ConfigRes>({ config: result.value }) : errorResponse(result.error);
   } catch {
     return errorResponse(appError('config.SAVE_FAILED'));

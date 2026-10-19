@@ -43,7 +43,9 @@ export function SettingsDialog({ initialPage, onClose }: { initialPage: Settings
       active={initialPage}
       sidebar={{ header: t('settings.title'), items }}
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open) {
+          onClose();
+        }
       }}
     />
   );

@@ -32,6 +32,7 @@ export function Appearance() {
   ];
 
   const { theme, veil, saving, save } = useSettings((state) => state);
+
   return (
     <WindowContent title={t('appearance.title')}>
       <div className="mx-auto max-w-140 space-y-7 p-8">
@@ -96,9 +97,16 @@ export function Appearance() {
               value={LANGUAGES.find((item) => item.value === locale) ?? null}
               disabled={saving}
               onValueChange={async (value) => {
-                if (!value || (value.value !== 'zh-CN' && value.value !== 'en')) return;
+                if (!value || (value.value !== 'zh-CN' && value.value !== 'en')) {
+                  return;
+                }
+
                 const saved = await save({ language: value.value });
-                if (!saved) return;
+
+                if (!saved) {
+                  return;
+                }
+
                 router.refresh();
               }}
             >
