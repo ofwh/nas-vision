@@ -12,5 +12,6 @@ export type LiquidGlassProps = {
   style?: CSSProperties;
   ref?: Ref<HTMLDivElement>;
   variant?: GlassMaskVariant;
+  transparent?: boolean;
   children: ReactNode;
 };
