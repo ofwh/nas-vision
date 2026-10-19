@@ -1,16 +1,15 @@
 'use client';
 
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
-import { type CSSProperties, useRef } from 'react';
+import { useRef } from 'react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Dialog, DialogOverlay, DialogPortal, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import type { LiquidGlassModalProps, ModalSize } from '@/types/window';
 import type { LiquidGlassProps } from '@/types/glass';
+import styles from '@/styles/LiquidGlassModal.module.css';
 
 const DEFAULT_SIZE: ModalSize = { width: 480, height: 400 };
-
-const CONTENT_RADIUS = 20;
 
 function resize(popup: HTMLElement, width: number, height: number) {
   popup.style.width = `${Math.max(240, Math.min(width, window.innerWidth - 48))}px`;
@@ -25,7 +24,9 @@ function ResizeHandle() {
       tabIndex={0}
       aria-label="调整弹窗大小"
       title="拖动调整大小，或使用方向键"
-      className="absolute right-1 bottom-1 z-20 size-8 cursor-nwse-resize touch-none rounded-br-2xl text-white opacity-20 transition-opacity duration-200 ease-out outline-none select-none hover:opacity-90 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-white/50 motion-reduce:transition-none"
+      className={cn(
+        'absolute right-0 bottom-0 z-20 size-8 cursor-nwse-resize touch-none rounded-br-(--window-radius) text-white opacity-20 transition-opacity duration-200 ease-out outline-none select-none [--handle-half-stroke:calc(var(--spacing)*0.625)] [--handle-radius:calc(var(--spacing)*3.25)] hover:opacity-90 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-white/50 motion-reduce:transition-none',
+      )}
       onPointerDown={(event) => {
         if (event.button !== 0) return;
         const popup = event.currentTarget.parentElement;
@@ -70,14 +71,9 @@ function ResizeHandle() {
         );
       }}
     >
-      <svg
-        aria-hidden
-        className="pointer-events-none absolute right-0.5 bottom-0.5 size-4 overflow-visible"
-        viewBox="0 0 16 16"
-        fill="none"
-      >
-        <path d="M 12 2 A 10 10 0 0 1 2 12" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-      </svg>
+      <span aria-hidden className={cn('pointer-events-none absolute right-5 bottom-5 size-0', styles.resizeCurve)}>
+        <span className={styles.resizeArc} />
+      </span>
     </div>
   );
 }
@@ -97,7 +93,6 @@ export function LiquidGlassModal({
   onClose,
   title,
   size = DEFAULT_SIZE,
-  radius = CONTENT_RADIUS,
   style,
   modal = true,
   transparent = false,
@@ -136,7 +131,7 @@ export function LiquidGlassModal({
         <DialogPrimitive.Viewport className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
           <DialogPrimitive.Popup
             className={cn(
-              'pointer-events-auto relative flex flex-col gap-3 outline-none',
+              'pointer-events-auto relative flex flex-col gap-3 outline-none [--window-radius:calc(var(--spacing)*5)]',
               resizable && 'min-h-40 min-w-60',
               className,
             )}
@@ -158,8 +153,10 @@ export function LiquidGlassModal({
             ) : null}
             <ModalSurface
               transparent={transparent}
-              className={cn('flex min-h-0 min-w-0 flex-col', hasAutoHeight ? 'flex-auto' : 'flex-1')}
-              style={{ borderRadius: radius, '--window-radius': `${radius}px` } as CSSProperties}
+              className={cn(
+                'flex min-h-0 min-w-0 flex-col rounded-(--window-radius)',
+                hasAutoHeight ? 'flex-auto' : 'flex-1',
+              )}
               contentClassName={cn(
                 'relative flex min-h-0 min-w-0 flex-col overflow-hidden',
                 hasAutoHeight ? 'flex-auto' : 'flex-1',
