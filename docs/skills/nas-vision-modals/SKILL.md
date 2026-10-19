@@ -11,7 +11,8 @@ description: 在 NAS Vision 项目使用、接入或调整 LiquidGlassModal、Wi
 
 - `components/common/LiquidGlassModal.tsx`：模态、玻璃容器、尺寸、footer 和缩放控制点。
 - `components/common/WindowModal.tsx`：窗口模式、头部、自定义内容、iframe 与 `WindowFooter`。
-- `types/window.ts`：`HeaderMode`、`HeaderContent` 和弹窗 props。
+- `components/common/WindowControls.tsx`、`hooks/useWindow.ts`：按钮配置、所属窗口上下文和状态控制。
+- `types/window.ts`：头部、控制按钮、窗口状态和弹窗 props。
 - 接入插件时再读 `types/plugins.ts`、`components/home/AppItem.tsx` 与目标插件的 manifest。
 - 需要侧栏时读 `components/common/SplitWindowModal.tsx`；交互排查可参考 `components/plugins/plugin-debug/pages/index.tsx`。
 
@@ -25,6 +26,8 @@ description: 在 NAS Vision 项目使用、接入或调整 LiquidGlassModal、Wi
 
 使用受控的 `open` / `onOpenChange`。`onClose` 在关闭时也会执行，不要在两个回调中重复提交同一个业务副作用。`title` 仍需传入，即使隐藏可见头部，它也提供辅助技术可读的弹窗标题。
 
+子组件通过 `@/hooks/useWindow` 的 `useWindow()` 获取最近所属窗口；嵌套窗口各自独立。返回 `id`、`state`（`closed | normal | maximized`）、`open`、`maximized`，以及 `close`、`minimize`、`maximize`、`restore`、`toggleMaximize`。`id` 可由 `WindowModal` 显式传入，否则自动生成；它用于识别当前窗口，不是全局查询入口。钩子必须在窗口后代组件内调用，不能在创建窗口的父组件或 children 渲染回调中直接调用。当前 `minimize` 与 `close` 一样关闭窗口，不提供任务栏收起状态。
+
 ## WindowModal 的头部
 
 `mode` 与 `header` 独立配置，默认模式由 `WindowModal` 兜底为 `controls`。
@@ -37,22 +40,24 @@ description: 在 NAS Vision 项目使用、接入或调整 LiquidGlassModal、Wi
 
 - `header={false}` 在所有模式下隐藏头部和窗口控制按钮。
 - `header={true}` 或省略时使用模式默认行为；`native` 不会补上标题或关闭按钮。
+- `controls={{ minimize, maximize }}` 从 `WindowModal` 透传至 `WindowControls`；两项类型均为 `WindowControlType`（`default | disabled | hide`），省略时为 `default`。`disabled` 保留按钮但禁用，`hide` 不渲染；不影响关闭按钮，也不限制钩子的程序化控制。
 - 传入对象时使用公共 `HeaderContent`：`{ left?, center?, right? }`，各值是 React 节点，不是图标动作配置数组。
 - 浮动关闭按钮由 `FloatingHeader` 自身渲染，不在父调用方再次添加。
 - `LiquidGlassModal.header` 是 React 节点插槽，不支持上述对象语义。底层不需要头部时省略该插槽，不依赖 `false` 消除其容器。
+- 内置 `controls` 头部通过 `useWindow()` 判断最大化状态，最大化时使用不透明深色背景，恢复后还原。函数式 children 自行放置 controls 时，其头部背景也由调用方根据窗口状态处理。
 
 ## 参数与布局
 
-| 参数             | 当前行为                                                                                  |
-| ---------------- | ----------------------------------------------------------------------------------------- |
-| `size`           | 数值宽高，基础默认 480 × 400；传入仅含 `width` 的对象且不指定 `style.height` 时高度自适应 |
-| `style`          | 覆盖弹窗宽高或设置视口上限；与 `className` 的作用位置不同                                 |
-| `modal`          | 默认 `true`；启用模态与遮罩，不能简化理解为底色开关                                       |
-| `closeOnOverlay` | 默认 `true`；控制点击外部关闭                                                             |
-| `transparent`    | 默认 `false`；开启后容器、头部外壳、footer 外壳和遮罩透明，模态点击拦截仍由 `modal` 控制  |
-| `top`            | 默认 `false`；提升整个 Portal 层级，不表示最大化或模态                                    |
-| `resizable`      | 默认 `false`；启用右下角圆弧控制点及方向键缩放                                            |
-| `fit`            | 默认 `true`；具体内边距规则见下文                                                         |
+| 参数             | 当前行为                                                                                                         |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `size`           | 数值宽高，基础默认 480 × 400；传入仅含 `width` 的对象且不指定 `style.height` 时高度自适应                        |
+| `style`          | 普通状态覆盖弹窗宽高或设置视口上限；最大化时由窗口覆盖宽高并解除上限；与 `className` 的作用位置不同              |
+| `modal`          | 默认 `true`；启用模态与遮罩，不能简化理解为底色开关                                                              |
+| `closeOnOverlay` | 默认 `true`；控制点击外部关闭                                                                                    |
+| `transparent`    | 默认 `false`；开启后容器、头部外壳、footer 外壳和遮罩透明；最大化时自动复用此分支，模态点击拦截仍由 `modal` 控制 |
+| `top`            | 默认 `false`；提升整个 Portal 层级，不表示最大化或模态                                                           |
+| `resizable`      | 默认 `false`；启用右下角圆弧控制点及方向键缩放，最大化时暂时隐藏控制点                                           |
+| `fit`            | 默认 `true`；具体内边距规则见下文                                                                                |
 
 `description` 能力已移除，不传递该参数。
 
@@ -60,10 +65,11 @@ description: 在 NAS Vision 项目使用、接入或调整 LiquidGlassModal、Wi
 
 - `LiquidGlassModal.className` 作用于 Popup；`WindowModal.className` 作用于内部内容容器。保持这两个现有作用位置，按需在调用处定制。
 - 基础容器提供 `--window-radius`，内容圆角可继承。若内层相对外层有内缩，圆角应与内缩量匹配。
-- 基础弹窗的 `fit={false}` 增加内容内边距。`WindowModal` 普通节点内容有模式自带间距；其 `fit` 主要控制函数式自定义内容的额外内边距，不能假定开关会改变普通内容布局。
+- 基础弹窗的 `fit={false}` 增加内容内边距。`WindowModal` 普通状态的节点内容有模式自带间距；其 `fit` 主要控制函数式自定义内容的额外内边距，不能假定开关会改变普通内容布局。最大化时统一清除窗口内容外侧间距。
+- 最大化使用 `100vw × 100dvh`，窗口圆角归零，恢复后还原传入的尺寸、样式与圆角。玻璃边缘来自高光和阴影，不能只靠圆角归零消除；复用 `transparent || state === 'maximized'` 的透明容器分支，避免再绘制外层玻璃。
 - 高度撑满使用连续的 `flex` / `flex-1` / `min-h-0`，宽度约束使用 `min-w-0`，滚动放在内部内容区域。
 - footer 半悬浮在弹窗底边之外。不要给 Popup 添加 `overflow-auto`、`overflow-hidden` 或原生 `resize` 以解决缩放问题，否则会出现外层滚动条或裁切 footer。复用现有独立缩放控制点。
-- `transparent` 不会清除 children 自己的底色或边框。全透明展示时检查内容与调用处样式。
+- `transparent` 不会清除 children 自己的底色或边框，也不覆盖最大化时内置 controls 头部的不透明背景。全透明展示时检查内容与调用处样式。
 - 可缩放列表按容器宽度响应，不按 `window.innerWidth` 固定卡片尺寸；需要时使用 `ResizeObserver`，避免无意的最大宽度或列数上限。
 
 ### footer 与自定义内容
@@ -136,4 +142,4 @@ function ExampleDialog({ onClose }: { onClose: () => void }) {
 
 ## 验证使用结果
 
-按任务覆盖相关行为即可：头部三种模式与 `header={false}`、透明模态下的底层点击拦截和外部关闭、缩放后的内容高度与 footer 完整性、窄窗口的列表重排。使用项目的格式、ESLint 与类型检查；是否能实际操作浏览器应如实说明，静态检查不能证明拖动或遮罩效果。
+按任务覆盖相关行为即可：头部三种模式与 `header={false}`、controls 的默认/禁用/隐藏状态、最大化与恢复时的留白/圆角/玻璃边缘及头部背景、嵌套窗口钩子的归属、透明模态下的底层点击拦截和外部关闭、缩放后的内容高度与 footer 完整性、窄窗口的列表重排。使用项目的格式、ESLint 与类型检查；是否能实际操作浏览器应如实说明，静态检查不能证明拖动或遮罩效果。不新增测试用例。
