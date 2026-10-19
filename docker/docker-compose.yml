@@ -1,20 +1,12 @@
 name: nas-vision
 
 services:
-  migrate:
-    image: ghcr.io/ofwh/nas-vision:migrate-latest
-    restart: 'no'
-    volumes:
-      - ${NAS_VISION_DATA:-./data}:/app/data
-
   app:
     image: ghcr.io/ofwh/nas-vision:latest
     restart: unless-stopped
-    depends_on:
-      migrate:
-        condition: service_completed_successfully
     environment:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
     # ports:
     #   - '3000:3000'
     volumes:

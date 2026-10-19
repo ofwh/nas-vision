@@ -37,21 +37,9 @@ pnpm dev
 docker build -t nas-vision:latest .
 ```
 
-构建数据库迁移镜像。
-
-```bash
-docker build -f Dockerfile.migrate -t nas-vision:migrate-latest .
-```
-
 ## Docker Run 启动
 
-执行数据库迁移，成功后再启动应用。
-
-```bash
-docker run --rm -v "$(pwd)/docker/data:/app/data" nas-vision:migrate-latest
-```
-
-启动应用，映射端口 3000 并挂载数据目录。
+启动应用，自动执行迁移，映射端口 3000 并挂载数据目录。
 
 ```bash
 docker run -d --name nas-vision --restart unless-stopped --env-file .env -p 3000:3000 -v "$(pwd)/docker/data:/app/data" -v "$(pwd)/docker/uploads:/app/public/static/uploads" nas-vision:latest
