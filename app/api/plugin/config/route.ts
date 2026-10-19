@@ -10,6 +10,6 @@ export async function POST(request: Request) {
     const result = await service.config(parsed.value);
     return result.ok ? okResponse(result.value) : errorResponse(result.error);
   } catch {
-    return errorResponse(appError('plugin.REQUEST_FAILED'));
+    return errorResponse(appError('plugin.CONFIG_READ_FAILED'));
   }
 }

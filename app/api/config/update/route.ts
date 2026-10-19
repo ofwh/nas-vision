@@ -9,6 +9,6 @@ export async function POST(request: Request) {
     const result = service.save(parsed.value);
     return result.ok ? okResponse<ConfigRes>({ config: result.value }) : errorResponse(result.error);
   } catch {
-    return errorResponse(appError('config.CONFIG_FAILED'));
+    return errorResponse(appError('config.SAVE_FAILED'));
   }
 }

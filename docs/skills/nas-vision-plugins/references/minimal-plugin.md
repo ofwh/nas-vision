@@ -1,104 +1,68 @@
-# 独立最小插件：text-tools
+# 最小展示插件
 
-这个示例通过配置控制文本是否转大写，覆盖注册、配置注入、DTO、service、API 和页面查询。它是纯计算插件，无需 client、repository、数据库迁移或第三方服务。
+最小插件只需展示页面、`manifest.json` 和根入口。示例 ID 为 `minimal-plugin`，不依赖其他插件或外部服务。
 
-## types.ts
-
-```ts
-export type TextToolsNormalizeParams = { text: string };
-export type TextToolsNormalizeRes = { text: string };
+```text
+components/plugins/minimal-plugin/
+├── index.ts
+├── manifest.json
+└── pages/
+    └── index.tsx
 ```
-
-## api/service.ts
-
-```ts
-import { appError, type Result } from '@/lib/api';
-import type { PluginConfig } from '@/types/plugins';
-import type { TextToolsNormalizeParams, TextToolsNormalizeRes } from '../types';
-
-export function normalize(params: TextToolsNormalizeParams, config: PluginConfig): Result<TextToolsNormalizeRes> {
-  if (typeof params.text !== 'string') {
-    return { ok: false, error: appError('common.INVALID_PARAMS') };
-  }
-  const text = params.text.trim();
-  return { ok: true, value: { text: config.uppercase === true ? text.toUpperCase() : text } };
-}
-
-export default { normalize };
-```
-
-## api/index.ts
-
-```ts
-import { okResponse, readParams } from '@/lib/api';
-import type { PluginApi } from '@/types/plugins';
-import type { TextToolsNormalizeParams } from '../types';
-import service from './service';
-
-const api = {
-  'api/normalize': {
-    POST: async (request, config) => {
-      const parsed = await readParams<TextToolsNormalizeParams>(request);
-      if (!parsed.ok) return parsed;
-      const result = service.normalize(parsed.value, config);
-      return result.ok ? { ok: true, value: okResponse(result.value) } : result;
-    },
-  },
-} satisfies PluginApi;
-
-export default api;
-```
-
-API 层解析为 Params、调用 service 并用 okResponse 构造成功信封，service 验证业务输入并返回 Result；通用壳转交请求与响应，分发 service 注入配置并统一适配失败信封。实际接外部服务时再在 API 层适配未预期异常。
-
-## pages/index.tsx
-
-```tsx
-'use client';
-
-import { usePlugin } from '@/hooks/usePlugin';
-import type { PluginViewProps } from '@/types/plugins';
-import type { TextToolsNormalizeRes } from '../types';
-
-export default function TextTools({ path }: PluginViewProps) {
-  const plugin = usePlugin('text-tools');
-  const { data, error, isLoading } = plugin.api.fetch<TextToolsNormalizeRes>('/api/normalize', { text: ' Hello ' });
-  return (
-    <section aria-label="文本工具" className="min-w-0 p-4 text-white">
-      <p>当前路径：{path}</p>
-      {isLoading ? <p role="status">正在处理…</p> : null}
-      {error ? <p role="alert">{error.message}</p> : null}
-      {data ? <p>{data.text}</p> : null}
-    </section>
-  );
-}
-```
-
-这里的 normalize 是无副作用的读取计算，适合查询 hook。真实的保存、删除不要照此放入自动查询。
 
 ## manifest.json
 
 ```json
 {
-  "id": "text-tools",
-  "name": "文本工具",
-  "description": "按配置规范化文本。",
-  "icon": "/static/icons/Toolkit.png",
+  "id": "minimal-plugin",
+  "name": "最小插件",
+  "description": "展示插件页面。",
+  "icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23334155'/%3E%3Ccircle cx='32' cy='32' r='12' fill='white'/%3E%3C/svg%3E",
   "status": "on",
-  "size": { "width": 720, "height": 480 },
-  "configs": [{ "label": "转为大写", "key": "uppercase", "type": "switch", "value": false, "defaults": false }]
+  "size": { "width": 480, "height": 320 }
 }
 ```
+
+图标以内联 SVG data URL 保存在插件 manifest 中，无需额外资源文件。窗口选项省略时使用宿主默认行为。
+
+## pages/index.tsx
+
+```tsx
+import type { PluginViewProps } from '@/types/plugins';
+
+export default function MinimalPlugin({ path }: PluginViewProps) {
+  return (
+    <section className="p-4 text-white" aria-label="最小插件">
+      <p>插件已加载</p>
+      <p>当前路径：{path}</p>
+    </section>
+  );
+}
+```
+
+页面由宿主窗口渲染，无需自行创建弹窗或 Next.js 路由。
 
 ## index.ts
 
 ```ts
-import type { PluginManifest } from '@/types/plugins';
+import type { PluginApi, PluginManifest } from '@/types/plugins';
 import definition from './manifest.json';
 
 export { default as component } from './pages';
-export { default as api } from './api';
+export const api: PluginApi = {};
 export const manifest = definition as PluginManifest;
 ```
 
-此示例使用必需的 `manifest.json`，由根入口导入并与页面、接口统一对外导出。没有私有静态资源、额外组件或组合 hook，样式也仅通过 `className` 表达，所以不创建 `assets/`、`components/`、`hooks/`、`styles/` 空目录。需要独立样式文件时再添加 `styles/`，组织方式见[目录、模块与配置](architecture.md)。随后在注册表加入 `'text-tools': textTools`，通过现有应用表单创建使用此插件的应用条目。未提供 mode 时沿用 WindowModal 的默认模式，未提供配置时 uppercase 默认为 false。
+保留框架要求的三个导出；没有业务接口时 `api` 为空，不创建 API、service 或错误定义文件。
+
+## 注册与打开
+
+在 `components/plugins/index.ts` 添加根入口导入：
+
+```ts
+import * as minimalPlugin from './minimal-plugin';
+```
+
+在现有 `plugins` 对象中添加 `'minimal-plugin': minimalPlugin`，保留其他注册项。随后通过应用配置表单新建插件类型的应用，选择“最小插件”并保存。打开该应用后应显示“插件已加载”，初始路径为 `/`。
+
+注册表 key、`manifest.id` 与应用的 `config.pluginName` 均为 `minimal-plugin`。需要配置或业务接口时，再参考[目录与配置](architecture.md)及[数据交互](data-interaction.md)。

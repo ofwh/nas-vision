@@ -14,7 +14,7 @@ import type {
 } from '@/types/plugins';
 
 function get(name: string): Result<PluginModule> {
-  if (typeof name !== 'string' || !name) return { ok: false, error: appError('common.INVALID_PARAMS') };
+  if (typeof name !== 'string' || !name) return { ok: false, error: appError('plugin.NAME_REQUIRED') };
   const plugin = Object.hasOwn(plugins, name) ? plugins[name] : undefined;
   if (!plugin) return { ok: false, error: appError('plugin.NOT_FOUND') };
   if (plugin.manifest.status !== 'on') return { ok: false, error: appError('plugin.DISABLED') };
@@ -59,7 +59,7 @@ export async function update(params: PluginUpdateParams): Promise<Result<PluginQ
   if (!plugin.ok) return plugin;
   const values = params.config;
   if (!values || typeof values !== 'object' || Array.isArray(values) || !Object.values(values).every(isFieldValue)) {
-    return { ok: false, error: appError('common.INVALID_PARAMS') };
+    return { ok: false, error: appError('plugin.INVALID_CONFIG') };
   }
   return {
     ok: true,

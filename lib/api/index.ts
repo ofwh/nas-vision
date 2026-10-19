@@ -1,10 +1,10 @@
 import { defaultLocale, type Locale } from '@/i18n/config';
-import type { ErrorCode } from './codes';
-import { businessCode } from './codes';
+import { businessCode, type ErrorCode } from './errors';
 import { formatMessage } from './messages';
 
-export type { ErrorCode } from './codes';
-export { CLIENT_ERROR_CODE, ERROR_CODE } from './codes';
+export type { ErrorCode } from './errors';
+export { CLIENT_ERROR_CODE } from './codes';
+export { ERROR_CODE } from './errors';
 export { MESSAGES } from './messages';
 export type { JsonObject, JsonValue } from './json';
 

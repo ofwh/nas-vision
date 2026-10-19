@@ -1,41 +1,35 @@
-# 目录、模块与配置
+# 目录与配置
 
-## 目录与文件职责
-
-每个插件根目录必需包含 `index.ts` 和 `manifest.json`。其余目录随功能增加，不为了凑齐目录树创建空模块。新插件使用 `pages/` 组织视图；已有 `page/` 或 `page.tsx` 的插件按当前入口解析即可，不因遵循本规范顺带重构无关插件。
+## 文件职责
 
 ```text
 components/plugins/<plugin-id>/
-├── index.ts              必需：对外统一导出 component、api、manifest
-├── manifest.json         必需：独立的 JSON 元数据、窗口选项与配置字段
-├── types.ts              按需：本插件的 Params、Res、领域与上游 DTO
-├── pages/                按需：视图入口、内部导航及页面组合
-│   └── index.tsx         默认视图组件，接收 PluginViewProps.path
-├── components/           按需：从页面拆分的展示与交互组件
-├── hooks/                按需：查询组合、分页、状态与视口逻辑
-├── styles/               按需：本插件的样式文件，如 CSS Modules
-├── assets/               按需：本插件使用的图片、图标等静态资源
-└── api/                  按需：有业务接口时添加
-    ├── index.ts          路径与 HTTP 方法映射、参数转换与响应适配
-    ├── service.ts        业务判断、上游数据映射与用例
-    └── client.ts         按需：外部 HTTP、连接配置、认证、超时
+├── index.ts          必需：导出 component、api、manifest
+├── manifest.json     必需：元数据、窗口选项与配置声明
+├── pages/            视图入口与内部导航
+├── types.ts          私有 Params、Res 与领域类型
+├── components/       展示与交互组件
+├── hooks/            可复用的状态与请求组合
+├── styles/           独立样式文件，优先 CSS Modules
+├── assets/           私有图片、图标与文件
+└── api/              有业务接口时添加
+    ├── index.ts      路径与方法映射、参数解析、响应适配
+    ├── service.ts    业务判断
+    ├── client.ts     外部协议适配
+    ├── errors.ts     私有错误码、类型与多语言文案
+    └── response.ts   私有错误响应适配
 ```
 
-- `pages/` 承载页面组合，通过 `path` 分发内部视图；它不是 Next.js 的 Pages Router，不在这里声明 HTTP route。
-- `components/` 放页面复用或值得单独维护的组件；只有一个简单视图时无需提前拆分。
-- `hooks/` 放有实际复用或组合价值的插件私有逻辑，简单查询可直接使用框架 hook。
-- `styles/` 集中保存插件的独立样式文件，按页面或组件命名，例如 `styles/Gallery.module.css`，由对应组件通过 `import styles from '../styles/Gallery.module.css'` 引用。局部样式优先使用 CSS Modules，避免影响宿主或其他插件；简单样式仍可使用 `className`，没有独立样式文件时不创建空目录。复用本地 UI 组件时通过调用处的 `className` 或插件封装定制，不修改 `components/ui`。
-- `assets/` 仅在存在插件私有静态资源时创建。可打包资源通过模块导入；必须直接以 URL 访问的文件使用项目 `public/` 资源约定，不假定插件目录自动提供静态 URL。资源和 manifest 不存真实密钥。
-- `api/` 有接口才创建，但 `api` 导出始终存在。纯展示插件可直接在根入口导出 `const api: PluginApi = {}`；需要业务接口时由 `api/index.ts` 调用 service，再按需增加 client。
-- 数据库 repository 与 schema 仍使用 `lib/db/repositories`、`lib/db/schema`，不把 SQL 写进插件 service。
+除根入口和 manifest 外，其余文件按需创建。新视图使用 `pages/`；它不是 Next.js Pages Router。已有插件无需为统一目录名重构。
 
-公共类型放根目录 `types/` 对应模块，插件局部类型留在自身 `types.ts`。目录名称表达职责，不从另一个业务插件导入 DTO、hook 或 service 来填充模块。
+- 无业务接口时，根入口导出空的 `PluginApi`，无需创建 `api/` 或 service。
+- 独立样式放在 `styles/`，由使用组件导入；简单样式使用 `className`。定制公共 UI 时遵守 AGENTS.md。
+- 私有静态资源通过模块导入解析 URL；JSON 中的相对资源路径不会自动解析。动态资源由插件 API 提供。
+- 私有 repository 与 schema 留在插件目录；接入数据库前确认服务端导出隔离，见技能入口的核心边界。
 
 ## 入口与注册
 
-每个插件必须以独立的 `manifest.json` 声明元数据与配置，不使用 TypeScript manifest，也不在入口内联配置对象。JSON 中只保存可序列化的声明，不放 React 节点或执行逻辑。
-
-根 `index.ts` 是统一的对外契约，负责导入 JSON 并导出具备 `PluginManifest` 类型的 manifest。宿主注册表只从插件根入口导入，不分别拼接内部文件。有业务 API 的插件入口示例：
+根入口导入独立的 `manifest.json`，不使用内联或 TypeScript manifest。有业务 API 时：
 
 ```ts
 import type { PluginManifest } from '@/types/plugins';
@@ -46,73 +40,42 @@ export { default as api } from './api';
 export const manifest = definition as PluginManifest;
 ```
 
-`pages/index.tsx` 和 `api/index.ts` 使用 default 导出；没有接口时由根入口声明空 `PluginApi`。JSON 导入的类型断言不提供运行时验证，仍需按 `PluginManifest` 核对必需字段及枚举值，避免断言掩盖配置错误。调整内部目录时只同步入口，不改变框架的三个导出名称。
+`pages/index.tsx`、`api/index.ts` 使用 default 导出。JSON 类型断言不会执行验证，需核对必需字段和枚举值。私有图标可在入口静态导入后将 `manifest.icon` 替换为资源 URL。
 
-在 `components/plugins/index.ts` 中使用命名空间导入，加入已有表：
+宿主 `components/plugins/index.ts` 使用命名空间导入插件根入口，并在现有 `plugins` 对象中添加同名条目；保留其他注册项。框架不会扫描目录自动注册。`status: 'off'` 会阻止模块加载及业务分发。
 
-```ts
-import * as textTools from './text-tools';
+## manifest
 
-// 在已有 plugins 对象中添加，而非替换其他条目：
-// 'text-tools': textTools
-```
+必需字段：`id`、`name`、`description`、`icon`、`status`、`size: { width, height }`。
 
-注册表是静态注册，不存在仅凭插件目录名自动发现的机制。`status: 'off'` 会被模块加载和业务分发拒绝。
+可选字段：`previews`、`configs`，以及窗口选项 `mode`、`header`、`transparent`、`resizable`、`top`。具体类型以 `types/plugins.ts` 为准；窗口行为见[弹窗技能](../../nas-vision-modals/SKILL.md)。JSON 只保存可序列化声明，用户可编辑选项放在 `configs`。
 
-## manifest 的职责
+## 配置
 
-必需元数据包括 `id`、`name`、`description`、`icon`、`status`、`size: { width, height }`。可选窗口参数为 `mode`、`header`、`transparent`、`resizable`、`top`；模式取值以 `types/window.ts` 为准。`previews` 与 `configs` 可省略。
+`configs` 中每项遵循 `PluginSettingOption`：
 
-窗口参数用于宿主插件弹窗；业务连接和用户可编辑选项属于 `configs`。不要把可编辑 API Key 或服务地址做成顶层窗口字段。
+| 字段           | 含义                                                         |
+| -------------- | ------------------------------------------------------------ |
+| `key`、`label` | 配置键与显示名称                                             |
+| `type`         | `input`、`switch` 或 `combobox`                              |
+| `value`        | 字段值类型的样本，不是已保存值                               |
+| `defaults`     | 无已保存配置时的默认值                                       |
+| `secret`       | input 使用密码展示与显隐切换                                 |
+| `options`      | combobox 选项：`label`、`value`、`description`               |
+| `multiple`     | 多选，值为同一原始类型的数组                                 |
+| `conditions`   | `{ key, value }` 或递归的 `{ and: [...] }` / `{ or: [...] }` |
 
-`AppPluginDialog` 透传窗口参数，`WindowModal` 默认 `controls` 并解释 `header=false`。内部二级弹窗不会自动继承主弹窗的选项。
+值仅支持 `string`、`number`、`boolean` 及各自的同类型数组。条件以严格相等比较；隐藏字段不会自动清空。
 
-## 配置表单 schema
+| POST 地址            | body             | 返回 data              |
+| -------------------- | ---------------- | ---------------------- |
+| `/api/plugin/config` | `{ id }`         | `{ configs }`          |
+| `/api/plugin/query`  | `{ id }`         | `{ manifest, config }` |
+| `/api/plugin/update` | `{ id, config }` | `{ manifest, config }` |
+| `/api/plugin/list`   | `{}`             | `{ plugins }`          |
 
-每个 `PluginSettingOption` 包含：
+配置按插件 ID 保存，同一插件的多个应用条目共享配置。无已保存配置时按 `defaults ?? ''` 初始化；已有配置直接返回，新增字段不会自动补入默认值。service 应处理字段缺失，并将 `PluginConfig` 的联合值收窄后使用。
 
-| 字段           | 作用                                                              |
-| -------------- | ----------------------------------------------------------------- |
-| `key`、`label` | 配置键与显示名称                                                  |
-| `type`         | 当前为 `input`、`switch`、`combobox`                              |
-| `value`        | 字段值类型的样本；不是数据库中已保存的当前值                      |
-| `defaults`     | 没有已保存配置时使用的默认值，建议显式声明                        |
-| `secret`       | input 使用密码展示和显隐切换                                      |
-| `options`      | combobox 的 `label`、`value`、`description` 选项                  |
-| `multiple`     | 多选，值应为同一原始类型的数组                                    |
-| `conditions`   | 单条件 `{ key, value }` 或递归 `{ and: [...] }` / `{ or: [...] }` |
+## API 边界
 
-值类型仅包括 `string`、`number`、`boolean` 和各自的同类型数组，不包括任意嵌套对象、混合数组或 null。
-
-```json
-{
-  "label": "启用大写输出",
-  "key": "uppercase",
-  "type": "switch",
-  "value": false,
-  "defaults": false
-}
-```
-
-条件显示由配置表单完成；隐藏字段的值不会因此自动清除，service 仍需按所选业务模式解释配置。当前单条件比较是严格相等，不是数组包含或深度匹配。
-
-### 配置保存与作用范围
-
-- `POST /api/plugin/config`，body `{ id }`：取得字段定义。
-- `POST /api/plugin/query`，body `{ id }`：取得 `{ manifest, config }`。
-- `POST /api/plugin/update`，body `{ id, config }`：保存配置并返回同一结构。
-- `POST /api/plugin/list`，body `{}`：获取插件列表。
-
-配置按插件 ID 保存，不按 AppItem ID 保存。多个应用条目选择同一插件时共享配置，不要误称为每个应用各自独立配置。
-
-没有已保存配置时，框架按 `defaults ?? ''` 初始化；已有配置当前直接返回，新增字段不会自动合并默认值。service 应为可缺失的字段提供业务默认值，或在确有需求时实现配置迁移。
-
-`PluginConfig` 是字段类型的联合记录。不要直接把 `config.serverUrl` 当作 string 或把 `config.limit` 当作 number；在 service / 外部 client 中收窄确定类型。
-
-## 模块边界
-
-`api/index.ts` 是业务调用适配层，不是独立的 Next.js route。插件的所有 endpoint 由现有 catch-all route 分发，一般无需新建 `app/api/plugin/<id>/...` 路由文件。
-
-`PluginApi` 按路径和 HTTP 方法声明，例如 `{ 'api/list': { POST: handler } }`。handler 接收 `(request, config)` 并返回 `Result<Response>`；原始 Request 的 body、query、headers 和取消信号由插件 API 按需使用。业务 JSON 请求使用 `readParams<Params>`，成功使用 `okResponse`。上传用 `readForm`；媒体流等能力可在插件 `api/` 内拆独立模块处理响应头、状态和流。通用 route 不解析特定协议，也不为某种能力设置专属分发分支。service 处理业务规则，client 只处理外部协议，repository 只处理数据库读写。无需数据库时不增加 repository。
-
-共享注册表当前也被浏览器使用。把函数放在 `api/` 目录不等于实现了编译层面的服务端隔离；不要把私钥字面量或 Node/server-only 依赖放进其共享导出链。
+接口使用现有 `app/api/plugin/[pluginName]/[...slug]/route.ts` 分发，无需为每个插件新增 Next.js route。插件 API 的 handler 契约、错误响应和请求工具见[数据交互](data-interaction.md#服务端)。

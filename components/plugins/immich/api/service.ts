@@ -18,7 +18,8 @@ import type {
   ImmichSearchRes,
 } from '../types';
 import { formatDuration } from '../utils/duration';
-import { ImmichError, connection, json, request } from './client';
+import { connection, json, request } from './client';
+import { ImmichError } from './errors';
 
 function media(asset: ImmichAsset): ImmichMedia {
   return {
@@ -36,7 +37,7 @@ function isMedia(asset: ImmichAsset): boolean {
 }
 function assetId(id: string): string {
   if (typeof id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
-    throw new ImmichError('common.INVALID_PARAMS');
+    throw new ImmichError('INVALID_ID');
   }
   return encodeURIComponent(id);
 }
@@ -48,7 +49,7 @@ function root(config: PluginConfig): string {
 }
 function directoryMode(config: PluginConfig): ImmichMode {
   const mode = config.directoryMode ?? 'folders';
-  if (mode !== 'folders' && mode !== 'albums') throw new ImmichError('common.INVALID_PARAMS');
+  if (mode !== 'folders' && mode !== 'albums') throw new ImmichError('DIRECTORY_MODE_INVALID');
   return mode;
 }
 function folderPath(directory: string, config: PluginConfig): string {
@@ -59,7 +60,7 @@ function folderPath(directory: string, config: PluginConfig): string {
     path.split('/').some((part) => part === '.' || part === '..') ||
     (base && path !== base && !path.startsWith(`${base}/`))
   ) {
-    throw new ImmichError('common.INVALID_PARAMS');
+    throw new ImmichError('DIRECTORY_FORBIDDEN');
   }
   return path;
 }
@@ -116,6 +117,7 @@ async function searchSlice(
 }
 
 export async function list(params: ImmichListParams, config: PluginConfig): Promise<ImmichListRes> {
+  params = params ?? {};
   connection(config);
   const page = params.page ?? 1;
   const pageSize = params.pageSize ?? 48;
@@ -126,10 +128,10 @@ export async function list(params: ImmichListParams, config: PluginConfig): Prom
     pageSize < 1 ||
     pageSize > 100 ||
     !Number.isSafeInteger(page * pageSize) ||
-    (params.directory !== undefined && typeof params.directory !== 'string') ||
+    (params.directory !== undefined && typeof params?.directory !== 'string') ||
     (params.mode !== undefined && params.mode !== 'folders' && params.mode !== 'albums')
   ) {
-    throw new ImmichError('common.INVALID_PARAMS');
+    throw new ImmichError('INVALID_LIST');
   }
   const sourceMode = directoryMode(config);
   const mode = params.mode ?? sourceMode;
@@ -189,8 +191,8 @@ export async function list(params: ImmichListParams, config: PluginConfig): Prom
 }
 
 export async function detail(params: ImmichDetailParams, config: PluginConfig): Promise<ImmichDetailRes> {
-  const asset = await json<ImmichAsset>(config, `/assets/${assetId(params.id)}`);
-  if (asset.type !== 'IMAGE' || asset.isTrashed) throw new ImmichError('plugin.REQUEST_FAILED');
+  const asset = await json<ImmichAsset>(config, `/assets/${assetId(params?.id)}`);
+  if (asset.type !== 'IMAGE' || asset.isTrashed) throw new ImmichError('IMAGE_UNAVAILABLE');
   return {
     ...media(asset),
     originalPath: asset.originalPath,
@@ -202,11 +204,11 @@ export async function detail(params: ImmichDetailParams, config: PluginConfig): 
 
 export async function preview(params: ImmichPreviewParams, config: PluginConfig): Promise<ImmichPreviewRes> {
   if (
-    typeof params.directory !== 'string' ||
+    typeof params?.directory !== 'string' ||
     !params.directory ||
     (params.mode !== 'folders' && params.mode !== 'albums')
   )
-    throw new ImmichError('common.INVALID_PARAMS');
+    throw new ImmichError('INVALID_PREVIEW');
   if (params.mode === 'albums') {
     assetId(params.directory);
     return { images: (await searchSlice(config, 0, 3, params.directory)).images };
@@ -224,12 +226,12 @@ export async function preview(params: ImmichPreviewParams, config: PluginConfig)
 }
 
 export async function thumbnail(params: ImmichThumbnailParams, config: PluginConfig): Promise<ImmichThumbnailRes> {
-  const size = params.size ?? 'thumbnail';
-  if (!['thumbnail', 'preview'].includes(size)) throw new ImmichError('common.INVALID_PARAMS');
-  const response = await request(config, `/assets/${assetId(params.id)}/thumbnail?size=${size}`);
+  const size = params?.size ?? 'thumbnail';
+  if (!['thumbnail', 'preview'].includes(size)) throw new ImmichError('INVALID_SIZE');
+  const response = await request(config, `/assets/${assetId(params?.id)}/thumbnail?size=${size}`);
   const mime = response.headers.get('Content-Type')?.split(';')[0];
   if (!mime || !['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'].includes(mime))
-    throw new ImmichError('plugin.REQUEST_FAILED');
+    throw new ImmichError('INVALID_IMAGE_RESPONSE');
   return { dataUrl: `data:${mime};base64,${Buffer.from(await response.arrayBuffer()).toString('base64')}` };
 }
 
@@ -238,8 +240,8 @@ export async function video(
   config: PluginConfig,
   context: ImmichVideoContext,
 ): Promise<Response> {
-  const id = assetId(params.id);
-  if (context.range && !/^bytes=(?:\d+-\d*|-\d+)$/.test(context.range)) throw new ImmichError('common.INVALID_PARAMS');
+  const id = assetId(params?.id);
+  if (context.range && !/^bytes=(?:\d+-\d*|-\d+)$/.test(context.range)) throw new ImmichError('INVALID_RANGE');
   const response = await request(config, `/assets/${id}/video/playback`, undefined, { ...context, stream: true });
   if (response.status === 416) return response;
   const mime = response.headers.get('Content-Type')?.split(';')[0];
@@ -249,7 +251,7 @@ export async function video(
     (!mime.startsWith('video/') && mime !== 'application/octet-stream')
   ) {
     await response.body?.cancel();
-    throw new ImmichError('plugin.REQUEST_FAILED');
+    throw new ImmichError('INVALID_VIDEO_RESPONSE');
   }
   return response;
 }

@@ -78,19 +78,45 @@ export function update(id: string, input: AppBaseItem): AppItem | null {
   return appRepository.updateById(id, input);
 }
 
-/** 带 id 走更新、不带走新增；库里没这条返回 null。 */
-export function save(input: AppSaveParams): AppItem | null {
+/** 带 id 走更新、不带走新增。 */
+export function save(input: AppSaveParams): Result<AppItem> {
+  if (
+    !input ||
+    typeof input.name !== 'string' ||
+    !input.name.trim() ||
+    !['url', 'plugin'].includes(input.type) ||
+    typeof input.image !== 'string' ||
+    !Number.isFinite(input.scale) ||
+    input.scale <= 0 ||
+    !['newtab', 'iframe', 'replace'].includes(input.external) ||
+    !['public', 'signed-in'].includes(input.permission) ||
+    typeof input.url !== 'string' ||
+    typeof input.innerUrl !== 'string' ||
+    !input.config ||
+    typeof input.config !== 'object' ||
+    Array.isArray(input.config)
+  )
+    return { ok: false, error: appError('apps.INVALID_APP') };
+  if (input.id !== undefined && (typeof input.id !== 'string' || !input.id))
+    return { ok: false, error: appError('apps.INVALID_ID') };
   const { id, ...fields } = input;
-  return id ? update(id, fields) : create(fields);
+  const app = id ? update(id, fields) : create(fields);
+  return app ? { ok: true, value: app } : { ok: false, error: appError('apps.APP_NOT_FOUND') };
 }
 
-export function updateStatus(id: string, status: Flag): AppItem | null {
-  return appRepository.updateStatusById(id, status);
+export function updateStatus(input: AppStatusParams): Result<AppItem> {
+  if (typeof input?.id !== 'string' || !input.id) return { ok: false, error: appError('apps.INVALID_ID') };
+  if (input.status !== 0 && input.status !== 1) return { ok: false, error: appError('apps.INVALID_STATUS') };
+  const app = appRepository.updateStatusById(input.id, input.status);
+  return app ? { ok: true, value: app } : { ok: false, error: appError('apps.APP_NOT_FOUND') };
 }
 
 /** 删除不改变其余应用的相对顺序。 */
-export function remove(id: string): boolean {
-  return appRepository.deleteById(id);
+export function remove(input: AppDeleteParams): Result<AppDeleteRes> {
+  if (typeof input?.id !== 'string' || !input.id) return { ok: false, error: appError('apps.INVALID_ID') };
+  return appRepository.deleteById(input.id)
+    ? { ok: true, value: { id: input.id } }
+    : { ok: false, error: appError('apps.APP_NOT_FOUND') };
 }
 
 /** 服务端基于当前全量列表定位，事务内生成唯一且长度有界的排序键。 */
@@ -101,9 +127,13 @@ export function move(input: AppMoveParams): Result<AppItem> {
     !input.id ||
     !(input.beforeId === null || (typeof input.beforeId === 'string' && input.beforeId))
   ) {
-    return { ok: false, error: appError('common.INVALID_PARAMS') };
+    return { ok: false, error: appError('apps.INVALID_MOVE') };
   }
-  return appRepository.moveBefore(input.id, input.beforeId);
+  const result = appRepository.moveBefore(input.id, input.beforeId);
+  if (result.state === 'missing-app') return { ok: false, error: appError('apps.APP_NOT_FOUND') };
+  if (result.state === 'missing-target')
+    return { ok: false, error: appError('apps.APP_ID_UNKNOWN', { id: input.beforeId! }) };
+  return { ok: true, value: result.app };
 }
 
 const appService = { list, create, update, save, updateStatus, remove, move };

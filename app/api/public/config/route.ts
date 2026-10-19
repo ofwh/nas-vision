@@ -13,6 +13,6 @@ export async function POST(request: NextRequest) {
       }),
     });
   } catch {
-    return errorResponse(appError('config.CONFIG_FAILED'));
+    return errorResponse(appError('config.LOAD_FAILED'));
   }
 }

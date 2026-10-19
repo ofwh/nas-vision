@@ -1,14 +1,12 @@
-import type { NextRequest } from 'next/server';
-import { errorResponse } from '@/lib/api/server';
-import { appError, okResponse, readParams } from '@/lib/api';
+import { handleApi, errorResponse } from '@/lib/api/server';
+import { okResponse, readParams } from '@/lib/api';
 import service, { type AppSaveParams, type AppSaveRes } from '@/lib/services/apps';
 
-export async function POST(request: NextRequest) {
-  const parsed = await readParams<AppSaveParams>(request);
-  if (!parsed.ok) return errorResponse(parsed.error);
-
-  const saved = service.save(parsed.value);
-  if (!saved) return errorResponse(appError('apps.APP_NOT_FOUND'));
-
-  return okResponse<AppSaveRes>({ app: saved });
+export async function POST(request: Request) {
+  return handleApi(async () => {
+    const parsed = await readParams<AppSaveParams>(request);
+    if (!parsed.ok) return errorResponse(parsed.error);
+    const result = service.save(parsed.value);
+    return result.ok ? okResponse<AppSaveRes>({ app: result.value }) : errorResponse(result.error);
+  }, 'apps.SAVE_FAILED');
 }

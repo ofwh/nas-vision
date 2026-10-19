@@ -2,7 +2,7 @@
   "id": "immich",
   "name": "Immich",
   "description": "浏览自部署 Immich 的目录、相册、照片和视频，查看照片信息与播放视频。",
-  "icon": "/static/icons/Immich.png",
+  "icon": "./assets/icon.png",
   "status": "on",
   "size": {
     "width": 1280,

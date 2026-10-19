@@ -9,6 +9,6 @@ export async function POST(request: Request) {
   try {
     return okResponse(service.list());
   } catch {
-    return errorResponse(appError('plugin.REQUEST_FAILED'));
+    return errorResponse(appError('plugin.LIST_FAILED'));
   }
 }

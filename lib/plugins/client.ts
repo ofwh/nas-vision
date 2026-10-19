@@ -4,7 +4,7 @@ import { appError, errorMessage, type BaseResponse, type JsonObject } from '@/li
 export function pluginPath(name: string, path: string): string {
   const segments = path.split('/').filter(Boolean);
   if (!/^[a-zA-Z0-9_-]+$/.test(name) || !segments.length || segments.some((part) => !/^[a-zA-Z0-9_-]+$/.test(part))) {
-    throw new Error(errorMessage(appError('common.INVALID_PARAMS')));
+    throw new Error(errorMessage(appError('plugin.INVALID_PATH')));
   }
   return `/api/plugin/${encodeURIComponent(name)}/${segments.map(encodeURIComponent).join('/')}`;
 }

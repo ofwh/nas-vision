@@ -12,7 +12,8 @@ export type IframeCheckRes = {
 
 const TIMEOUT = 3000;
 
-export async function check({ referer, url }: IframeCheckParams, signedIn: boolean): Promise<Result<IframeCheckRes>> {
+export async function check(input: IframeCheckParams, signedIn: boolean): Promise<Result<IframeCheckRes>> {
+  const { referer, url } = input ?? {};
   const target = toHttpUrl(url);
   if (!target) return { ok: false, error: appError('iframe.IFRAME_URL_INVALID') };
 
