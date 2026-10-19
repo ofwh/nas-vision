@@ -28,7 +28,9 @@ function AppEditDialog({ id, onClose }: { id?: string; onClose: () => void }) {
       title={id ? t('apps.editTitle') : t('apps.createTitle')}
       fit
       onOpenChange={(open) => {
-        if (!open && !pending) onClose();
+        if (!open && !pending) {
+          onClose();
+        }
       }}
     >
       <AppEdit id={id} onSuccess={onClose} onCancel={onClose} onPendingChange={setPending} />
@@ -59,15 +61,21 @@ export function AppConfig() {
   const busy = dragging || sorting || deletingId !== null;
 
   const remove = async (id: string) => {
-    if (busy) return;
+    if (busy) {
+      return;
+    }
+
     setDeletingId(id);
     setDeleteError(null);
     try {
       const response = await fetchApi<AppDeleteRes>('/api/apps/delete', { id });
+
       if (!response.success) {
         setDeleteError(response.message);
+
         return;
       }
+
       setPendingId(null);
       await useAppList.getState().list();
     } catch {
@@ -129,11 +137,17 @@ export function AppConfig() {
             }}
             onDragEnd={(event) => {
               setDragging(false);
-              if (event.canceled) return;
+              if (event.canceled) {
+                return;
+              }
+
               const ordered = moveItems(apps, event);
               const id = String(event.operation.source?.id ?? '');
               const index = ordered.findIndex((app) => app.id === id);
-              if (index >= 0) void move(id, ordered[index + 1]?.id ?? null);
+
+              if (index >= 0) {
+                void move(id, ordered[index + 1]?.id ?? null);
+              }
             }}
           >
             <div

@@ -33,6 +33,7 @@ function Gallery({ directory, mode }: { directory?: string; mode?: ImmichMode })
   const next = selectedIndex >= 0 ? images[selectedIndex + 1] : undefined;
   const root = data ? `/${data.mode}` : '/';
   const navigate = (id: string) => navigation.navigate(`${root}/directory/${encodeURIComponent(id)}`);
+
   return (
     <div className="relative h-full w-full min-w-0 overflow-hidden text-zinc-100">
       <ScrollArea
@@ -117,6 +118,7 @@ export default function Immich({ path }: PluginViewProps) {
   const [, segment, section, ...parts] = path.split('/');
   const mode = segment === 'folders' || segment === 'albums' ? segment : undefined;
   let directory: string | undefined;
+
   try {
     directory = mode && section === 'directory' ? decodeURIComponent(parts.join('/')) : undefined;
   } catch {
@@ -126,5 +128,6 @@ export default function Immich({ path }: PluginViewProps) {
       </p>
     );
   }
+
   return <Gallery key={path} directory={directory} mode={mode} />;
 }

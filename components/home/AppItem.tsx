@@ -22,11 +22,14 @@ function AppUrlDialog({
 }) {
   const width = typeof config.width === 'number' && config.width > 0 ? config.width : 1280;
   const height = typeof config.height === 'number' && config.height > 0 ? config.height : 800;
+
   return (
     <WindowModal
       open
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open) {
+          onClose();
+        }
       }}
       title={name}
       src={url}
@@ -53,6 +56,7 @@ function AppPluginDialog({
   const t = useTranslations();
   const PluginView = plugin.component;
   const size = plugin.manifest?.size;
+
   return (
     <WindowModal
       open
@@ -60,7 +64,9 @@ function AppPluginDialog({
       mode={plugin.manifest?.mode}
       header={plugin.manifest?.header}
       onOpenChange={(value) => {
-        if (!value) onClose();
+        if (!value) {
+          onClose();
+        }
       }}
       size={size}
       transparent={plugin.manifest?.transparent}
@@ -95,10 +101,16 @@ export function AppItem({ id, name, image, type, url, innerUrl, external, config
     page.close();
     setActivePluginId(null);
   };
+
   useEffect(
     () => () => {
-      if (launchTimer.current) clearTimeout(launchTimer.current);
-      if (useAppList.getState().activePluginId === id) useAppList.getState().setActivePluginId(null);
+      if (launchTimer.current) {
+        clearTimeout(launchTimer.current);
+      }
+
+      if (useAppList.getState().activePluginId === id) {
+        useAppList.getState().setActivePluginId(null);
+      }
     },
     [id],
   );
@@ -110,9 +122,13 @@ export function AppItem({ id, name, image, type, url, innerUrl, external, config
 
   const openPage = () => {
     if (type === 'plugin') {
-      if (typeof config.pluginName !== 'string' || activePluginId !== null) return;
+      if (typeof config.pluginName !== 'string' || activePluginId !== null) {
+        return;
+      }
+
       setActivePluginId(id);
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
       launchTimer.current = setTimeout(
         () => {
           launchTimer.current = null;
@@ -120,16 +136,25 @@ export function AppItem({ id, name, image, type, url, innerUrl, external, config
         },
         reducedMotion ? 0 : 350,
       );
+
       return;
     }
-    if (!address) return;
+
+    if (!address) {
+      return;
+    }
+
     let target: URL;
+
     try {
       target = new URL(address, window.location.href);
     } catch {
       return;
     }
-    if (target.protocol !== 'http:' && target.protocol !== 'https:') return;
+    if (target.protocol !== 'http:' && target.protocol !== 'https:') {
+      return;
+    }
+
     if (external === 'newtab') {
       window.open(target.href, '_blank', 'noopener,noreferrer');
     } else if (external === 'replace') {
@@ -142,14 +167,20 @@ export function AppItem({ id, name, image, type, url, innerUrl, external, config
   useEffect(() => {
     const bar = barRef.current;
     const text = textRef.current;
-    if (!bar || !text) return;
+
+    if (!bar || !text) {
+      return;
+    }
 
     const measure = () => setOverflow(Math.max(0, text.scrollWidth - bar.clientWidth));
+
     measure();
 
     const observer = new ResizeObserver(measure);
+
     observer.observe(bar);
     observer.observe(text);
+
     return () => observer.disconnect();
   }, [name]);
 

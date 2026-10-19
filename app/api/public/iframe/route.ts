@@ -7,11 +7,13 @@ import service, { type IframeCheckParams, type IframeCheckRes } from '@/lib/serv
 export async function POST(request: NextRequest) {
   return handleApi(async () => {
     const parsed = await readParams<IframeCheckParams>(request);
-    if (!parsed.ok) return errorResponse(parsed.error);
+
+    if (!parsed.ok) {return errorResponse(parsed.error);}
 
     const session = await auth.api.getSession({ headers: request.headers });
     const checked = await service.check(parsed.value, !!session);
-    if (!checked.ok) return errorResponse(checked.error);
+
+    if (!checked.ok) {return errorResponse(checked.error);}
 
     return okResponse<IframeCheckRes>(checked.value);
   }, 'iframe.CHECK_FAILED');

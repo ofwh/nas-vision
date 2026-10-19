@@ -29,10 +29,13 @@ export function VolumeControl() {
   const available = usePlayer((state) => state.volumeAvailability === 'available');
   const value = preview ?? volume;
   const level = value === 0 ? 'off' : value <= 50 ? 'low' : 'high';
+
   return (
     <Popover
       onOpenChange={(_, details) => {
-        if (details.reason === 'trigger-press') details.cancel();
+        if (details.reason === 'trigger-press') {
+          details.cancel();
+        }
       }}
     >
       <PopoverTrigger
@@ -129,6 +132,7 @@ export function ProgressControl() {
   const hover = useSliderPreview(Number.isFinite(duration) ? duration : 0);
   const value = preview ?? currentTime;
   const buffer = duration > 0 ? Math.min(100, ((buffered.at(-1)?.[1] ?? 0) / duration) * 100) : 0;
+
   return (
     <TooltipProvider>
       <Tooltip

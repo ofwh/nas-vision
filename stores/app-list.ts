@@ -30,6 +30,7 @@ export const useAppList = create<AppListStore>((set, get) => {
 
     if (!response.success) {
       set({ status: 'error', error: response.message });
+
       return;
     }
 
@@ -49,12 +50,20 @@ export const useAppList = create<AppListStore>((set, get) => {
     setSwiper: (swiper) => set({ swiper, activeIndex: swiper?.activeIndex ?? 0 }),
     setActiveIndex: (activeIndex) => set({ activeIndex }),
     move: async (id, beforeId) => {
-      if (get().sorting) return;
+      if (get().sorting) {
+        return;
+      }
+
       const previous = get().apps;
       const ordered = moveBefore(previous, id, beforeId);
-      if (ordered.every((app, index) => app.id === previous[index]?.id)) return;
+
+      if (ordered.every((app, index) => app.id === previous[index]?.id)) {
+        return;
+      }
+
       set({ apps: ordered, sorting: true, sortError: null });
       const response = await fetchApi<AppMoveRes>('/api/apps/sort', { id, beforeId });
+
       if (response.success && response.data) {
         await get().list();
         set({ sorting: false });

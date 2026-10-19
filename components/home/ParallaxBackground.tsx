@@ -17,13 +17,20 @@ export function ParallaxBackground() {
 
   usePointerOffset((offsetX, offsetY) => {
     const layer = layerRef.current;
-    if (!layer) return;
+
+    if (!layer) {
+      return;
+    }
 
     const dx = Math.sign(offsetX) * Math.abs(offsetX) ** RESPONSE_EXPONENT * MAX_OFFSET_X * DIRECTION;
     const dy = Math.sign(offsetY) * Math.abs(offsetY) ** RESPONSE_EXPONENT * MAX_OFFSET_Y * DIRECTION;
 
     const transform = `translate3d(${dx.toFixed(2)}px, ${dy.toFixed(2)}px, 0)`;
-    if (lastTransform.current === transform) return;
+
+    if (lastTransform.current === transform) {
+      return;
+    }
+
     layer.style.transform = transform;
     lastTransform.current = transform;
   });

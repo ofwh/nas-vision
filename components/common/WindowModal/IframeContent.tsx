@@ -16,11 +16,15 @@ export function IframeContent({ src, title }: { src: string; title: string }) {
 
   useEffect(() => {
     let alive = true;
+
     void fetchApi<IframeCheckRes>('/api/public/iframe', { referer: window.location.href, url: src }).then(
       (response) => {
-        if (alive) setStatus(response.data?.deny ? 'blocked' : 'allowed');
+        if (alive) {
+          setStatus(response.data?.deny ? 'blocked' : 'allowed');
+        }
       },
     );
+
     return () => {
       alive = false;
     };

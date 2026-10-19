@@ -6,7 +6,10 @@ import configService from '@/lib/services/config';
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const session = await auth.api.getSession({ headers: request.headers });
-  if (session) return NextResponse.next();
+
+  if (session) {
+    return NextResponse.next();
+  }
 
   if (pathname.startsWith('/api/')) {
     return errorResponse(

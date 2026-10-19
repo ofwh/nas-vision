@@ -37,20 +37,28 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
   const [saving, setSaving] = useState(false);
 
   const update = <K extends keyof AppForm>(key: K, value: AppForm[K]) => {
-    if (key === 'type') setPluginConfig(null);
+    if (key === 'type') {
+      setPluginConfig(null);
+    }
+
     setForm((previous) => ({ ...previous, [key]: value }));
   };
 
   const submit = async () => {
-    if (saving) return;
+    if (saving) {
+      return;
+    }
+
     setError(null);
     if (!form.name.trim()) {
       setError(t('apps.nameRequired'));
+
       return;
     }
 
     if (form.type === 'plugin' && (!pluginName || pluginConfig === null)) {
       setError(t('apps.pluginRequired'));
+
       return;
     }
 
@@ -60,6 +68,7 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
       ![form.width, form.height].every((value) => Number.isSafeInteger(Number(value)) && Number(value) > 0)
     ) {
       setError(t('apps.windowSizeInvalid'));
+
       return;
     }
 
@@ -84,17 +93,26 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
               height: Number(form.height) || 800,
             },
     };
-    if (id) params.id = id;
+
+    if (id) {
+      params.id = id;
+    }
 
     setSaving(true);
     onPendingChange?.(true);
     try {
-      if (form.type === 'plugin' && pluginConfig) await plugin.config.update(pluginConfig);
+      if (form.type === 'plugin' && pluginConfig) {
+        await plugin.config.update(pluginConfig);
+      }
+
       const response = await fetchApi<AppSaveRes>('/api/apps/update', params);
+
       if (!response.success) {
         setError(response.message);
+
         return;
       }
+
       await useAppList.getState().list();
       onSuccess();
     } catch (cause) {

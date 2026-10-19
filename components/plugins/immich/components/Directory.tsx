@@ -18,8 +18,12 @@ export default function Directory({
 }) {
   const ref = useRef<HTMLButtonElement>(null);
   const [visible, setVisible] = useState(false);
+
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -29,7 +33,9 @@ export default function Directory({
       },
       { rootMargin: '160px' },
     );
+
     observer.observe(ref.current);
+
     return () => observer.disconnect();
   }, []);
   const { data, isLoading } = usePluginFetch<ImmichPreviewRes>('immich', visible ? '/api/preview' : null, {
@@ -45,6 +51,7 @@ export default function Directory({
       </span>
     </div>
   );
+
   return (
     <button
       ref={ref}
@@ -59,6 +66,7 @@ export default function Directory({
             const tilt = index === images.length - 1 ? 0 : index === 0 ? 2 : 1;
             const angle = -3 * tilt;
             const hoverAngle = -5 * tilt;
+
             return (
               <div
                 key={photo.id}

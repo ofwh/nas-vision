@@ -52,22 +52,62 @@ const authErrors: Record<string, ErrorCode> = {
 export function authError(error: { code?: string }, path = '', status?: number): AppError {
   const code = error.code ?? '';
   const mapped = authErrors[code] ?? Object.values(authErrors).find((value) => value === code);
-  if (mapped) return appError(mapped);
-  if (status === 401) return appError('account.SESSION_EXPIRED');
-  if (status === 403) return appError('account.REQUEST_FORBIDDEN');
-  if (status === 404) return appError('account.ENDPOINT_NOT_FOUND');
-  if (status === 429) return appError('account.ACCOUNT_LOCKED');
-  if (path.startsWith('/sign-up/')) return appError('account.SIGN_UP_FAILED');
-  if (path.startsWith('/sign-in/')) return appError('account.SIGN_IN_FAILED');
-  if (path.startsWith('/two-factor/')) return appError('account.TWO_FACTOR_FAILED');
-  if (path === '/change-password') return appError('account.PASSWORD_CHANGE_FAILED');
-  if (path === '/update-user') return appError('account.PROFILE_UPDATE_FAILED');
-  if (path === '/sign-out') return appError('account.SIGN_OUT_FAILED');
-  if (path === '/get-session') return appError('account.SESSION_READ_FAILED');
+
+  if (mapped) {
+    return appError(mapped);
+  }
+
+  if (status === 401) {
+    return appError('account.SESSION_EXPIRED');
+  }
+
+  if (status === 403) {
+    return appError('account.REQUEST_FORBIDDEN');
+  }
+
+  if (status === 404) {
+    return appError('account.ENDPOINT_NOT_FOUND');
+  }
+
+  if (status === 429) {
+    return appError('account.ACCOUNT_LOCKED');
+  }
+
+  if (path.startsWith('/sign-up/')) {
+    return appError('account.SIGN_UP_FAILED');
+  }
+
+  if (path.startsWith('/sign-in/')) {
+    return appError('account.SIGN_IN_FAILED');
+  }
+
+  if (path.startsWith('/two-factor/')) {
+    return appError('account.TWO_FACTOR_FAILED');
+  }
+
+  if (path === '/change-password') {
+    return appError('account.PASSWORD_CHANGE_FAILED');
+  }
+
+  if (path === '/update-user') {
+    return appError('account.PROFILE_UPDATE_FAILED');
+  }
+
+  if (path === '/sign-out') {
+    return appError('account.SIGN_OUT_FAILED');
+  }
+
+  if (path === '/get-session') {
+    return appError('account.SESSION_READ_FAILED');
+  }
+
   return appError('account.SECURITY_FAILED');
 }
 
 export function authErrorMessage(error: { code?: string; message?: string }, locale: Locale): string {
-  if (error.code?.startsWith('account.')) return error.message ?? errorMessage(authError(error), locale);
+  if (error.code?.startsWith('account.')) {
+    return error.message ?? errorMessage(authError(error), locale);
+  }
+
   return errorMessage(authError(error), locale);
 }

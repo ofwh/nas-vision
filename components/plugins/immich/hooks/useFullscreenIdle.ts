@@ -12,17 +12,23 @@ export default function useFullscreenIdle() {
   const fullscreen = usePlayer((state) => state.isFullscreen);
 
   useEffect(() => {
-    if (!container || !fullscreen) return;
+    if (!container || !fullscreen) {
+      return;
+    }
+
     let lastActivity = performance.now();
     let lastMove = 0;
     let timer: ReturnType<typeof setTimeout>;
 
     const hide = () => {
       const remaining = IDLE_MS - (performance.now() - lastActivity);
+
       if (remaining > 0) {
         timer = setTimeout(hide, remaining);
+
         return;
       }
+
       container.setAttribute('data-controls-hidden', 'true');
     };
     const show = () => {
@@ -35,16 +41,22 @@ export default function useFullscreenIdle() {
     };
     const move = () => {
       const now = performance.now();
+
       lastActivity = now;
-      if (now - lastMove < MOVE_THROTTLE_MS) return;
+      if (now - lastMove < MOVE_THROTTLE_MS) {
+        return;
+      }
+
       lastMove = now;
       show();
     };
+
     container.setAttribute('data-controls-hidden', 'false');
     timer = setTimeout(hide, IDLE_MS);
     container.addEventListener('pointermove', move, { passive: true });
     container.addEventListener('pointerdown', show, { passive: true });
     window.addEventListener('keydown', show);
+
     return () => {
       clearTimeout(timer);
       container.removeEventListener('pointermove', move);

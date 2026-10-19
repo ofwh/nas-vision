@@ -34,49 +34,92 @@ import { FormGroup, FIELD_CONTROL_CLASS } from './form';
 import { AppSelectItem } from './AppSelectItem';
 
 function matchesCondition(condition: PluginSettingCondition | undefined, config: PluginConfig): boolean {
-  if (!condition) return true;
-  if ('and' in condition) return condition.and.every((item) => matchesCondition(item, config));
-  if ('or' in condition) return condition.or.some((item) => matchesCondition(item, config));
+  if (!condition) {
+    return true;
+  }
+
+  if ('and' in condition) {
+    return condition.and.every((item) => matchesCondition(item, config));
+  }
+
+  if ('or' in condition) {
+    return condition.or.some((item) => matchesCondition(item, config));
+  }
+
   return config[condition.key] === condition.value;
 }
 
 function parseValue(text: string, sample: PluginFieldType): PluginFieldType | undefined {
-  if (text === '') return '';
-  if (typeof sample === 'string') return text;
-  if (typeof sample === 'number') return Number.isFinite(Number(text)) ? Number(text) : undefined;
-  if (typeof sample === 'boolean') return text === 'true' ? true : text === 'false' ? false : undefined;
+  if (text === '') {
+    return '';
+  }
+
+  if (typeof sample === 'string') {
+    return text;
+  }
+
+  if (typeof sample === 'number') {
+    return Number.isFinite(Number(text)) ? Number(text) : undefined;
+  }
+
+  if (typeof sample === 'boolean') {
+    return text === 'true' ? true : text === 'false' ? false : undefined;
+  }
+
   try {
     const value: unknown = JSON.parse(text);
-    if (!Array.isArray(value)) return undefined;
+
+    if (!Array.isArray(value)) {
+      return undefined;
+    }
+
     if (
       value.every((item: unknown): item is string => typeof item === 'string') &&
       (!sample.length || typeof sample[0] === 'string')
-    )
+    ) {
       return value;
+    }
+
     if (
       value.every((item: unknown): item is number => typeof item === 'number' && Number.isFinite(item)) &&
       (!sample.length || typeof sample[0] === 'number')
-    )
+    ) {
       return value;
+    }
+
     if (
       value.every((item: unknown): item is boolean => typeof item === 'boolean') &&
       (!sample.length || typeof sample[0] === 'boolean')
-    )
+    ) {
       return value;
+    }
   } catch {
     return undefined;
   }
+
   return undefined;
 }
+
 function multipleValue(items: PluginFieldOption[]): PluginFieldType | undefined {
   const values = items.flatMap((item): (string | number | boolean)[] =>
     Array.isArray(item.value) ? item.value : [item.value],
   );
-  if (values.every((value): value is string => typeof value === 'string')) return values;
-  if (values.every((value): value is number => typeof value === 'number')) return values;
-  if (values.every((value): value is boolean => typeof value === 'boolean')) return values;
+
+  if (values.every((value): value is string => typeof value === 'string')) {
+    return values;
+  }
+
+  if (values.every((value): value is number => typeof value === 'number')) {
+    return values;
+  }
+
+  if (values.every((value): value is boolean => typeof value === 'boolean')) {
+    return values;
+  }
+
   return undefined;
 }
+
 function PluginInput({
   field,
   value,
@@ -90,6 +133,7 @@ function PluginInput({
   const [visible, setVisible] = useState(false);
   const [text, setText] = useState(Array.isArray(value) ? JSON.stringify(value) : String(value));
   const [invalid, setInvalid] = useState(false);
+
   return (
     <div className="relative">
       <Input
@@ -102,6 +146,7 @@ function PluginInput({
         onChange={(event) => {
           setText(event.target.value);
           const parsed = parseValue(event.target.value, field.defaults ?? field.value);
+
           setInvalid(parsed === undefined);
           onChange(parsed);
         }}
@@ -122,6 +167,7 @@ function PluginInput({
     </div>
   );
 }
+
 function PluginSelect({
   field,
   value,
@@ -148,6 +194,7 @@ function PluginSelect({
       </ComboboxList>
     </ComboboxContent>
   );
+
   return (
     <div className="flex min-h-12 items-center justify-between gap-3 px-4 py-2">
       <span className="text-sm text-white/70">{field.label}</span>
@@ -188,6 +235,7 @@ function PluginSelect({
           value={options.find((item) => JSON.stringify(item.value) === JSON.stringify(value)) ?? null}
           onValueChange={(item, details) => {
             const selected = item && JSON.stringify(item.value) === JSON.stringify(value);
+
             onChange(details.reason === 'item-press' && selected ? '' : (item?.value ?? ''));
           }}
         >
@@ -198,6 +246,7 @@ function PluginSelect({
     </div>
   );
 }
+
 export function AppPluginConfigForm({
   name,
   onNameChange,
@@ -222,9 +271,14 @@ export function AppPluginConfigForm({
     invalid: string[];
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    if (!name) return;
+    if (!name) {
+      return;
+    }
+
     let active = true;
+
     void Promise.resolve()
       .then(() =>
         Promise.all([
@@ -233,25 +287,40 @@ export function AppPluginConfigForm({
         ]),
       )
       .then(([structure, saved]) => {
-        if (!active) return;
+        if (!active) {
+          return;
+        }
+
         setLoaded({ fields: structure.data.configs, values: saved.data.config, invalid: [] });
         onConfigChange(saved.data.config);
       })
       .catch((cause: unknown) => {
-        if (active) setError(cause instanceof Error ? cause.message : t('common.connectionFailed'));
+        if (active) {
+          setError(cause instanceof Error ? cause.message : t('common.connectionFailed'));
+        }
       });
+
     return () => {
       active = false;
     };
   }, [name, onConfigChange, t]);
   const update = (key: string, value: PluginFieldType | undefined) => {
-    if (!loaded) return;
+    if (!loaded) {
+      return;
+    }
+
     const invalid = loaded.invalid.filter((item) => item !== key);
-    if (value === undefined) invalid.push(key);
+
+    if (value === undefined) {
+      invalid.push(key);
+    }
+
     const values = value === undefined ? loaded.values : { ...loaded.values, [key]: value };
+
     setLoaded({ ...loaded, values, invalid });
     onConfigChange(invalid.length ? null : values);
   };
+
   return (
     <FormGroup label={t('apps.pluginOptions')}>
       <div className="flex h-12 items-center justify-between gap-3 px-4">
@@ -263,7 +332,10 @@ export function AppPluginConfigForm({
           value={options.find((item) => item.id === name) ?? null}
           onValueChange={(item, details) => {
             const next = details.reason === 'item-press' && item?.id === name ? '' : (item?.id ?? '');
-            if (next !== name) onNameChange(next);
+
+            if (next !== name) {
+              onNameChange(next);
+            }
           }}
         >
           <ComboboxInput aria-label={t('apps.plugin')} className="combobox-input ml-auto" disabled={listLoading} />

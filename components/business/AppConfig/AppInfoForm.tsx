@@ -6,6 +6,7 @@ import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxList }
 import type { AppType } from '@/lib/db/schema';
 import { FormGroup, FIELD_CONTROL_CLASS, type AppFormProps } from './form';
 import { AppSelectItem } from './AppSelectItem';
+
 export function AppInfoForm({ form, update }: AppFormProps) {
   const t = useTranslations();
   const TYPE_ITEMS: { value: AppType; label: string; description?: string }[] = [
@@ -29,7 +30,9 @@ export function AppInfoForm({ form, update }: AppFormProps) {
           items={TYPE_ITEMS}
           value={TYPE_ITEMS.find((item) => item.value === form.type) ?? null}
           onValueChange={(value) => {
-            if (value) update('type', value.value);
+            if (value) {
+              update('type', value.value);
+            }
           }}
         >
           <ComboboxInput className="combobox-input ml-auto" aria-label={t('apps.type')} />

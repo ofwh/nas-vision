@@ -9,7 +9,11 @@ function post<Params, Res extends JsonValue>(
 ): PluginApiHandler {
   return async (request, config) => {
     const parsed = await readParams<Params>(request);
-    if (!parsed.ok) return parsed;
+
+    if (!parsed.ok) {
+      return parsed;
+    }
+
     return run(async () => okResponse(await action(parsed.value, config)));
   };
 }

@@ -16,6 +16,7 @@ export function AppSelectItem<Value>({ value, label, description, disabled }: Ap
       <span>{label}</span>
     </ComboboxItem>
   );
+
   return description ? (
     <Tooltip>
       <TooltipTrigger render={item} />

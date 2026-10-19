@@ -30,7 +30,10 @@ export default function useGallery(
     mutate,
   } = useSWRInfinite<ImmichListRes, Error>(
     (index: number, previous: ImmichListRes | null): ListKey | null => {
-      if (!settings || (previous && !previous.hasMore)) return null;
+      if (!settings || (previous && !previous.hasMore)) {
+        return null;
+      }
+
       return [
         pluginPath('immich', '/api/list'),
         {
@@ -45,7 +48,11 @@ export default function useGallery(
     },
     async ([url, params]: ListKey) => {
       const response = await pluginRequest<ImmichListRes>(url, params);
-      if (!response.data) throw new Error('照片资料库响应为空');
+
+      if (!response.data) {
+        throw new Error('照片资料库响应为空');
+      }
+
       return response.data;
     },
     {
@@ -60,19 +67,31 @@ export default function useGallery(
   const data = pages?.[0];
   const items = useMemo(() => {
     const unique = new Map<string, ImmichListRes['items'][number]>();
+
     for (const page of pages ?? []) {
-      for (const item of page.items) unique.set(`${item.type}-${item.id}`, item);
+      for (const item of page.items) {
+        unique.set(`${item.type}-${item.id}`, item);
+      }
     }
+
     return [...unique.values()];
   }, [pages]);
   const hasMore = pages?.at(-1)?.hasMore ?? false;
+
   useEffect(() => {
     const root = scrollRef.current;
     const target = sentinel.current;
-    if (!root || !target || !hasMore || error || isValidating || !pages || pages.length < size) return;
+
+    if (!root || !target || !hasMore || error || isValidating || !pages || pages.length < size) {
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting || loadingMore.current) return;
+        if (!entry.isIntersecting || loadingMore.current) {
+          return;
+        }
+
         loadingMore.current = true;
         void setSize((current) => current + 1)
           .catch(() => undefined)
@@ -82,13 +101,16 @@ export default function useGallery(
       },
       { root, rootMargin: '600px 0px' },
     );
+
     observer.observe(target);
+
     return () => observer.disconnect();
   }, [scrollRef, hasMore, error, isValidating, pages, size, setSize]);
   const refresh = () => {
     scrollRef.current?.scrollTo({ top: 0 });
     setRevision((value) => value + 1);
   };
+
   return {
     data,
     items,

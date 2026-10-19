@@ -18,15 +18,21 @@ export function TwoFactorChallenge({ onSuccess, onCancel }: { onSuccess: () => v
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending || code.length !== 6) return;
+    if (pending || code.length !== 6) {
+      return;
+    }
+
     setPending(true);
     setError(null);
     try {
       const result = await authClient.twoFactor.verifyTotp({ code: code.trim() });
+
       if (result.error) {
         setError(authErrorMessage(result.error, locale));
+
         return;
       }
+
       onSuccess();
     } catch {
       setError(t('common.connectionFailed'));

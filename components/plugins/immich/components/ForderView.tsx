@@ -22,11 +22,13 @@ export default function ForderView({
   const count = Math.ceil(directories.length / columns);
   const stride = rowHeight + 8;
   const { start, end } = visibleRows(count, stride, viewport.top, viewport.height);
+
   return (
     <section className="mb-8" aria-label="文件夹">
       <div ref={listRef} className="relative" style={{ height: Math.max(0, count * stride - 8) }}>
         {Array.from({ length: end - start }, (_, offset) => {
           const row = start + offset;
+
           return (
             <div
               key={row}

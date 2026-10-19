@@ -31,31 +31,47 @@ export function createSettingsStore(initial: AppearanceConfig, signedIn: boolean
     list: async () => {
       const signedIn = get().signedIn;
       const response = await fetchApi<ConfigRes>('/api/public/config', {});
-      if (get().signedIn !== signedIn) return false;
-      if (!response.success || !response.data) {
-        set({ error: response.message });
+
+      if (get().signedIn !== signedIn) {
         return false;
       }
+
+      if (!response.success || !response.data) {
+        set({ error: response.message });
+
+        return false;
+      }
+
       set({ ...response.data.config, error: null });
+
       return true;
     },
     save: async (values) => {
-      if (get().saving) return false;
+      if (get().saving) {
+        return false;
+      }
+
       const { language, theme, veil } = get();
       const config: AppearanceConfig = { language, theme, veil, ...values };
+
       if (!get().signedIn) {
         saveCookies(config);
         set({ ...config, error: null });
+
         return true;
       }
+
       set({ saving: true, error: null });
       const response = await fetchApi<ConfigRes>('/api/config/update', config);
+
       if (response.success && response.data) {
         saveCookies(response.data.config);
         set({ ...response.data.config, saving: false });
+
         return true;
       } else {
         set({ saving: false, error: response.message });
+
         return false;
       }
     },
@@ -66,6 +82,10 @@ export const SettingsContext = createContext<ReturnType<typeof createSettingsSto
 
 export function useSettings<T>(selector: (state: SettingsStore) => T): T {
   const store = useContext(SettingsContext);
-  if (!store) throw new Error('SettingsProvider is required.');
+
+  if (!store) {
+    throw new Error('SettingsProvider is required.');
+  }
+
   return useStore(store, selector);
 }

@@ -6,8 +6,12 @@ type Session = { expires: number; token: Promise<string> };
 const sessions = new Map<string, Session>();
 
 export function connection(config: PluginConfig): Connection {
-  if (typeof config.serverUrl !== 'string' || !config.serverUrl.trim()) throw new ImmichError('SERVER_URL_INVALID');
+  if (typeof config.serverUrl !== 'string' || !config.serverUrl.trim()) {
+    throw new ImmichError('SERVER_URL_INVALID');
+  }
+
   let url: URL;
+
   try {
     url = new URL(config.serverUrl.trim());
   } catch {
@@ -23,13 +27,16 @@ export function connection(config: PluginConfig): Connection {
   ) {
     throw new ImmichError('SERVER_URL_INVALID');
   }
+
   const authMode = config.authMode ?? 'apiKey';
   const apiKey = typeof config.apiKey === 'string' ? config.apiKey.trim() : '';
   const email = typeof config.email === 'string' ? config.email.trim() : '';
   const password = typeof config.password === 'string' ? config.password : '';
+
   if ((authMode !== 'apiKey' && authMode !== 'password') || (authMode === 'apiKey' ? !apiKey : !email || !password)) {
     throw new ImmichError('AUTH_CONFIG_INVALID');
   }
+
   return { base: `${url.origin}/api`, authMode, apiKey, email, password };
 }
 
@@ -40,19 +47,30 @@ async function send(url: string, init: RequestInit, stream = false): Promise<Res
   const timer = stream ? setTimeout(() => controller.abort(), 20_000) : undefined;
   const timeout = stream ? controller.signal : AbortSignal.timeout(20_000);
   const signal = init.signal ? AbortSignal.any([init.signal, timeout]) : timeout;
+
   try {
     return await fetch(url, { ...init, cache: 'no-store', redirect: 'error', signal });
   } catch {
     throw new ImmichError('UNREACHABLE');
   } finally {
-    if (timer) clearTimeout(timer);
+    if (timer) {
+      clearTimeout(timer);
+    }
   }
 }
 
 function check(response: Response): void {
-  if (response.status === 401 || response.status === 403) throw new ImmichError('AUTH_FAILED');
-  if (response.status === 404) throw new ImmichError('RESOURCE_NOT_FOUND');
-  if (!response.ok) throw new ImmichError('REQUEST_FAILED');
+  if (response.status === 401 || response.status === 403) {
+    throw new ImmichError('AUTH_FAILED');
+  }
+
+  if (response.status === 404) {
+    throw new ImmichError('RESOURCE_NOT_FOUND');
+  }
+
+  if (!response.ok) {
+    throw new ImmichError('REQUEST_FAILED');
+  }
 }
 
 async function login(settings: Connection): Promise<string> {
@@ -61,29 +79,49 @@ async function login(settings: Connection): Promise<string> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: settings.email, password: settings.password }),
   });
+
   check(response);
   let data: { accessToken?: string };
+
   try {
     data = (await response.json()) as { accessToken?: string };
   } catch {
     throw new ImmichError('INVALID_RESPONSE');
   }
-  if (!data || typeof data.accessToken !== 'string' || !data.accessToken) throw new ImmichError('AUTH_FAILED');
+  if (!data || typeof data.accessToken !== 'string' || !data.accessToken) {
+    throw new ImmichError('AUTH_FAILED');
+  }
+
   return data.accessToken;
 }
 
 async function token(settings: Connection, key: string): Promise<string> {
-  for (const [id, session] of sessions) if (session.expires <= Date.now()) sessions.delete(id);
+  for (const [id, session] of sessions) {
+    if (session.expires <= Date.now()) {
+      sessions.delete(id);
+    }
+  }
   const cached = sessions.get(key);
-  if (cached) return cached.token;
-  if (sessions.size >= 8) sessions.delete(sessions.keys().next().value ?? '');
+
+  if (cached) {
+    return cached.token;
+  }
+
+  if (sessions.size >= 8) {
+    sessions.delete(sessions.keys().next().value ?? '');
+  }
+
   const pending = login(settings);
   const session = { expires: Date.now() + 30 * 60_000, token: pending };
+
   sessions.set(key, session);
   try {
     return await pending;
   } catch (error) {
-    if (sessions.get(key) === session) sessions.delete(key);
+    if (sessions.get(key) === session) {
+      sessions.delete(key);
+    }
+
     throw error;
   }
 }
@@ -98,11 +136,25 @@ export async function request(
   const key = JSON.stringify([settings.base, settings.email, settings.password]);
   const execute = async () => {
     const headers = new Headers({ Accept: options.stream ? 'video/*,application/octet-stream' : 'application/json' });
-    if (options.stream) headers.set('Accept-Encoding', 'identity');
-    if (options.range) headers.set('Range', options.range);
-    if (settings.authMode === 'apiKey') headers.set('x-api-key', settings.apiKey);
-    else headers.set('Authorization', `Bearer ${await token(settings, key)}`);
-    if (body) headers.set('Content-Type', 'application/json');
+
+    if (options.stream) {
+      headers.set('Accept-Encoding', 'identity');
+    }
+
+    if (options.range) {
+      headers.set('Range', options.range);
+    }
+
+    if (settings.authMode === 'apiKey') {
+      headers.set('x-api-key', settings.apiKey);
+    } else {
+      headers.set('Authorization', `Bearer ${await token(settings, key)}`);
+    }
+
+    if (body) {
+      headers.set('Content-Type', 'application/json');
+    }
+
     return send(
       `${settings.base}${path}`,
       {
@@ -115,17 +167,23 @@ export async function request(
     );
   };
   let response = await execute();
+
   if (response.status === 401 && settings.authMode === 'password') {
     await response.body?.cancel();
     sessions.delete(key);
     response = await execute();
   }
-  if (!(options.stream && response.status === 416)) check(response);
+
+  if (!(options.stream && response.status === 416)) {
+    check(response);
+  }
+
   return response;
 }
 
 export async function json<T>(config: PluginConfig, path: string, body?: object): Promise<T> {
   const response = await request(config, path, body);
+
   try {
     return (await response.json()) as T;
   } catch {

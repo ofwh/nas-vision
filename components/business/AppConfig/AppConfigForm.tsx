@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import type { AppOpenMode, AppPermission } from '@/lib/db/schema';
 import { FormGroup, SwitchField, FIELD_CONTROL_CLASS, type AppFormProps } from './form';
 import { AppSelectItem } from './AppSelectItem';
+
 export function AppConfigForm({ form, update }: AppFormProps) {
   const t = useTranslations();
   const OPEN_MODE_ITEMS: { value: AppOpenMode; label: string; description?: string }[] = [
@@ -37,7 +38,9 @@ export function AppConfigForm({ form, update }: AppFormProps) {
           items={PERMISSION_ITEMS}
           value={PERMISSION_ITEMS.find((item) => item.value === form.permission) ?? null}
           onValueChange={(value) => {
-            if (value) update('permission', value.value);
+            if (value) {
+              update('permission', value.value);
+            }
           }}
         >
           <ComboboxInput className="combobox-input ml-auto" aria-label={t('apps.permission')} />
@@ -58,7 +61,9 @@ export function AppConfigForm({ form, update }: AppFormProps) {
             items={OPEN_MODE_ITEMS}
             value={OPEN_MODE_ITEMS.find((item) => item.value === form.external) ?? null}
             onValueChange={(value) => {
-              if (value) update('external', value.value);
+              if (value) {
+                update('external', value.value);
+              }
             }}
           >
             <ComboboxInput className="combobox-input ml-auto" aria-label={t('apps.openMode')} />
@@ -81,7 +86,9 @@ export function AppConfigForm({ form, update }: AppFormProps) {
               items={WINDOW_MODE_ITEMS}
               value={WINDOW_MODE_ITEMS.find((item) => item.value === form.mode) ?? null}
               onValueChange={(value) => {
-                if (value) update('mode', value.value);
+                if (value) {
+                  update('mode', value.value);
+                }
               }}
             >
               <ComboboxInput className="combobox-input ml-auto" aria-label={t('apps.windowMode')} />

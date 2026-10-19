@@ -5,9 +5,14 @@ import type { PluginUpdateParams } from '@/types/plugins';
 
 export async function POST(request: Request) {
   const parsed = await readParams<PluginUpdateParams>(request);
-  if (!parsed.ok) return errorResponse(parsed.error);
+
+  if (!parsed.ok) {
+    return errorResponse(parsed.error);
+  }
+
   try {
     const result = await service.update(parsed.value);
+
     return result.ok ? okResponse(result.value) : errorResponse(result.error);
   } catch {
     return errorResponse(appError('plugin.CONFIG_SAVE_FAILED'));

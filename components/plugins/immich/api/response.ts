@@ -15,6 +15,7 @@ export async function run(action: () => Promise<Response>): Promise<Result<Respo
       error: { code: `immich.${code}`, message },
       message,
     });
+
     return { ok: true, value: response };
   }
 }

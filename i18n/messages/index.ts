@@ -17,6 +17,7 @@ import zhLanguage from './zh-CN/language.json';
 import zhMetadata from './zh-CN/metadata.json';
 import zhSettings from './zh-CN/settings.json';
 import zhSidebar from './zh-CN/sidebar.json';
+
 const en = {
   account: enAccount,
   appearance: enAppearance,

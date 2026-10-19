@@ -44,35 +44,47 @@ export function TwoFactor({
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending || (step !== 'password' && step !== 'verify')) return;
+    if (pending || (step !== 'password' && step !== 'verify')) {
+      return;
+    }
+
     setPending(true);
     onPendingChange?.(true);
     setError(null);
     try {
       if (step === 'verify') {
         const result = await authClient.twoFactor.verifyTotp({ code });
+
         if (result.error) {
           setError(authErrorMessage(result.error, locale));
+
           return;
         }
+
         setCode('');
         setStep('enabled');
         await onUpdated();
       } else if (enabled) {
         const result = await authClient.twoFactor.disable({ password });
+
         if (result.error) {
           setError(authErrorMessage(result.error, locale));
+
           return;
         }
+
         setPassword('');
         await onUpdated();
         onSuccess();
       } else {
         const result = await authClient.twoFactor.enable({ password, method: 'totp' });
+
         if (result.error) {
           setError(authErrorMessage(result.error, locale));
+
           return;
         }
+
         if (result.data?.method === 'totp') {
           setEnrollment({ totpURI: result.data.totpURI });
           setPassword('');
@@ -90,7 +102,10 @@ export function TwoFactor({
   async function copySetupKey() {
     setError(null);
     try {
-      if (!navigator.clipboard || !window.isSecureContext) throw new Error('Clipboard unavailable');
+      if (!navigator.clipboard || !window.isSecureContext) {
+        throw new Error('Clipboard unavailable');
+      }
+
       await navigator.clipboard.writeText(setupKey);
       setCopied(true);
     } catch {

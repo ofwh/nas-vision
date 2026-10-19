@@ -21,6 +21,7 @@ export function WindowControls({
   controls: { minimize = 'default', maximize = 'default' } = {},
 }: WindowControlsProps) {
   const t = useTranslations();
+
   return (
     <div className={cn('group/controls flex items-center gap-2', className)}>
       <DialogClose

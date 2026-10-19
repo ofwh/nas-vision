@@ -35,7 +35,10 @@ function Playback({ video, onClose, onPrevious, onNext }: VideoViewProps) {
   const failed = failure !== null;
 
   const clearTimer = () => {
-    if (timer.current) clearTimeout(timer.current);
+    if (timer.current) {
+      clearTimeout(timer.current);
+    }
+
     timer.current = null;
   };
   const wait = () => {
@@ -55,17 +58,24 @@ function Playback({ video, onClose, onPrevious, onNext }: VideoViewProps) {
     try {
       await element.play();
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') return;
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return;
+      }
+
       if (automatic && error instanceof DOMException && error.name === 'NotAllowedError') {
         element.muted = true;
         try {
           await element.play();
           setAutoplayMuted(true);
+
           return;
         } catch (retryError) {
-          if (retryError instanceof DOMException && retryError.name === 'AbortError') return;
+          if (retryError instanceof DOMException && retryError.name === 'AbortError') {
+            return;
+          }
         }
       }
+
       ready();
       setFailure(
         error instanceof DOMException && error.name === 'NotAllowedError'
@@ -76,20 +86,34 @@ function Playback({ video, onClose, onPrevious, onNext }: VideoViewProps) {
   };
   const toggle = () => {
     const element = media.current;
-    if (!element) return;
-    if (element.paused) void play(element);
-    else element.pause();
+
+    if (!element) {
+      return;
+    }
+
+    if (element.paused) {
+      void play(element);
+    } else {
+      element.pause();
+    }
   };
   const retry = () => {
     const element = media.current;
-    if (!element) return;
+
+    if (!element) {
+      return;
+    }
+
     setFailure(null);
     element.load();
     void play(element);
   };
+
   useEffect(
     () => () => {
-      if (timer.current) clearTimeout(timer.current);
+      if (timer.current) {
+        clearTimeout(timer.current);
+      }
     },
     [],
   );
@@ -100,9 +124,14 @@ function Playback({ video, onClose, onPrevious, onNext }: VideoViewProps) {
         media.current.removeAttribute('src');
         media.current.load();
       }
+
       media.current = node;
-      if (node && !node.hasAttribute('src')) node.src = src;
+      if (node && !node.hasAttribute('src')) {
+        node.src = src;
+      }
+
       const container = node?.closest('[role="dialog"]');
+
       attachContainer?.(container instanceof HTMLElement ? container : null);
     },
     [attachContainer, src],
@@ -117,7 +146,9 @@ function Playback({ video, onClose, onPrevious, onNext }: VideoViewProps) {
       modal
       closeOnOverlay
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open) {
+          onClose();
+        }
       }}
       style={{ width: `min(90vw, ${90 * ratio}vh)`, height: `min(90vh, ${90 / ratio}vw)` }}
       footer={
@@ -180,7 +211,10 @@ function Playback({ video, onClose, onPrevious, onNext }: VideoViewProps) {
             }}
             onLoadedMetadata={(event) => {
               const { videoWidth, videoHeight } = event.currentTarget;
-              if (videoWidth > 0 && videoHeight > 0) setRatio(videoWidth / videoHeight);
+
+              if (videoWidth > 0 && videoHeight > 0) {
+                setRatio(videoWidth / videoHeight);
+              }
             }}
             onWaiting={wait}
             onSeeking={wait}
@@ -196,7 +230,9 @@ function Playback({ video, onClose, onPrevious, onNext }: VideoViewProps) {
             onPause={() => setPaused(true)}
             onEnded={() => setPaused(true)}
             onVolumeChange={(event) => {
-              if (!event.currentTarget.muted) setAutoplayMuted(false);
+              if (!event.currentTarget.muted) {
+                setAutoplayMuted(false);
+              }
             }}
             onPlaying={() => {
               ready();
@@ -205,6 +241,7 @@ function Playback({ video, onClose, onPrevious, onNext }: VideoViewProps) {
             onError={(event) => {
               ready();
               const code = event.currentTarget.error?.code;
+
               setFailure(
                 code === 3
                   ? '视频解码失败，请检查浏览器格式支持与 Immich 转码状态。'
