@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { ExternalLink, X } from 'lucide-react';
-import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, type ReactNode, useContext, useEffect, useId, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { LiquidGlassModal } from '@/components/common/LiquidGlassModal';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
@@ -12,8 +12,9 @@ import { DialogClose } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { Loading } from '@/components/common/Loading';
 import { fetchApi } from '@/lib/api/client';
+import { useWindow, WindowContext } from '@/hooks/useWindow';
 import type { IframeCheckRes } from '@/lib/services/iframe';
-import type { HeaderContent, WindowModalProps } from '@/types/window';
+import type { HeaderContent, WindowContextValue, WindowModalProps } from '@/types/window';
 
 const WindowFooterContext = createContext<{
   target: HTMLDivElement | null;
@@ -82,8 +83,14 @@ function IframeContent({ src, title }: { src: string; title: string }) {
 }
 
 function ControlsHeader({ title, controls, header }: { title: string; controls: ReactNode; header?: HeaderContent }) {
+  const { maximized } = useWindow();
   return (
-    <header className="grid min-h-12 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-3 px-5 text-white">
+    <header
+      className={cn(
+        'grid min-h-12 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-3 px-5 text-white',
+        maximized && 'bg-[#202024]',
+      )}
+    >
       <div className="flex min-w-0 items-center gap-2">{controls}</div>
       <span className="max-w-full truncate text-center text-sm font-semibold">{header?.center ?? title}</span>
       <div className="flex min-w-0 items-center justify-end gap-2">{header?.right}</div>
@@ -139,23 +146,48 @@ function HeaderLayout({ header }: { header?: HeaderContent }) {
 }
 
 export function WindowModal({
+  id,
+  open,
+  onOpenChange,
+  onClose,
   src,
   title,
   children,
   footer,
   mode,
   header,
+  controls: controlsConfig,
   style,
   radius = 30,
   fit = true,
   transparent = false,
+  resizable = false,
   className,
   ...props
 }: WindowModalProps) {
+  const generatedId = useId();
   const [maximized, setMaximized] = useState(false);
+  const windowContext = useMemo<WindowContextValue>(() => {
+    const close = () => {
+      onOpenChange(false);
+      onClose?.();
+    };
+    return {
+      id: id ?? generatedId,
+      state: !open ? 'closed' : maximized ? 'maximized' : 'normal',
+      open,
+      maximized,
+      close,
+      minimize: close,
+      maximize: () => setMaximized(true),
+      restore: () => setMaximized(false),
+      toggleMaximize: () => setMaximized((value) => !value),
+    };
+  }, [id, generatedId, open, maximized, onOpenChange, onClose]);
+  const resolvedTransparent = transparent || windowContext.state === 'maximized';
   const showHeader = header !== false;
   const controls = showHeader ? (
-    <WindowControls maximized={maximized} onMaximize={() => setMaximized((value) => !value)} />
+    <WindowControls maximized={maximized} onMaximize={windowContext.toggleMaximize} controls={controlsConfig} />
   ) : null;
   const resolvedHeaderMode = mode ?? 'controls';
   const hasContentRenderer = typeof children === 'function';
@@ -164,77 +196,88 @@ export function WindowModal({
   const footerContext = useMemo(() => ({ target: footerTarget, setHasContent: setHasFooterContent }), [footerTarget]);
 
   return (
-    <WindowFooterContext.Provider value={footerContext}>
-      <LiquidGlassModal
-        {...props}
-        radius={radius}
-        transparent={transparent}
-        title={title}
-        header={
-          showHeader && mode === 'native' ? (
-            <HeaderLayout header={typeof header === 'object' ? header : undefined} />
-          ) : undefined
-        }
-        style={{ ...style, ...(maximized ? { width: 'calc(100vw - 48px)', height: 'calc(100dvh - 48px)' } : {}) }}
-        footer={
-          hasFooterContent ? (
-            <div className="flex min-w-0 items-center gap-2">
-              {footer}
-              <div ref={setFooterTarget} className="min-w-0 flex-1" />
-            </div>
-          ) : (
-            footer
-          )
-        }
-      >
-        <div className="relative flex min-h-0 flex-1 flex-col">
-          {showHeader && !hasContentRenderer && resolvedHeaderMode === 'controls' ? (
-            <ControlsHeader
-              title={title}
-              controls={controls}
-              header={typeof header === 'object' ? header : undefined}
-            />
-          ) : null}
-          <div
-            className={cn(
-              'flex min-h-0 flex-1 flex-col',
-              hasContentRenderer
-                ? fit
-                  ? '[--content-gap:0px]'
-                  : 'p-5 [--content-gap:calc(var(--spacing)*5)]'
-                : resolvedHeaderMode === 'floating'
-                  ? 'p-2.5 [--content-gap:calc(var(--spacing)*2.5)]'
-                  : showHeader && resolvedHeaderMode === 'controls'
-                    ? 'px-5 pb-5 [--content-gap:calc(var(--spacing)*5)]'
-                    : 'p-5 [--content-gap:calc(var(--spacing)*5)]',
-            )}
-          >
+    <WindowContext.Provider value={windowContext}>
+      <WindowFooterContext.Provider value={footerContext}>
+        <LiquidGlassModal
+          {...props}
+          open={open}
+          onOpenChange={onOpenChange}
+          onClose={onClose}
+          radius={maximized ? 0 : radius}
+          resizable={resizable && !maximized}
+          transparent={resolvedTransparent}
+          title={title}
+          header={
+            showHeader && mode === 'native' ? (
+              <HeaderLayout header={typeof header === 'object' ? header : undefined} />
+            ) : undefined
+          }
+          style={{
+            ...style,
+            ...(maximized ? { width: '100vw', height: '100dvh', maxWidth: 'none', maxHeight: 'none' } : {}),
+          }}
+          footer={
+            hasFooterContent ? (
+              <div className="flex min-w-0 items-center gap-2">
+                {footer}
+                <div ref={setFooterTarget} className="min-w-0 flex-1" />
+              </div>
+            ) : (
+              footer
+            )
+          }
+        >
+          <div className="relative flex min-h-0 flex-1 flex-col">
+            {showHeader && !hasContentRenderer && resolvedHeaderMode === 'controls' ? (
+              <ControlsHeader
+                title={title}
+                controls={controls}
+                header={typeof header === 'object' ? header : undefined}
+              />
+            ) : null}
             <div
               className={cn(
-                'flex min-h-0 flex-1 flex-col overflow-auto overscroll-contain',
-                (resolvedHeaderMode === 'controls' || resolvedHeaderMode === 'floating') &&
-                  'rounded-[max(0px,calc(var(--window-radius)-var(--content-gap)))]',
-                className,
+                'flex min-h-0 flex-1 flex-col',
+                maximized
+                  ? '[--content-gap:0px]'
+                  : hasContentRenderer
+                    ? fit
+                      ? '[--content-gap:0px]'
+                      : 'p-5 [--content-gap:calc(var(--spacing)*5)]'
+                    : resolvedHeaderMode === 'floating'
+                      ? 'p-2.5 [--content-gap:calc(var(--spacing)*2.5)]'
+                      : showHeader && resolvedHeaderMode === 'controls'
+                        ? 'px-5 pb-5 [--content-gap:calc(var(--spacing)*5)]'
+                        : 'p-5 [--content-gap:calc(var(--spacing)*5)]',
               )}
             >
-              {typeof children === 'function' ? (
-                children(controls)
-              ) : children !== undefined ? (
-                children
-              ) : src ? (
-                <IframeContent key={src} src={src} title={title} />
-              ) : null}
+              <div
+                className={cn(
+                  'flex min-h-0 flex-1 flex-col overflow-auto overscroll-contain',
+                  (resolvedHeaderMode === 'controls' || resolvedHeaderMode === 'floating') &&
+                    'rounded-[max(0px,calc(var(--window-radius)-var(--content-gap)))]',
+                  className,
+                )}
+              >
+                {typeof children === 'function' ? (
+                  children(controls)
+                ) : children !== undefined ? (
+                  children
+                ) : src ? (
+                  <IframeContent key={src} src={src} title={title} />
+                ) : null}
+              </div>
             </div>
+            {showHeader && !hasContentRenderer && mode === 'floating' ? (
+              <FloatingHeader
+                title={title}
+                header={typeof header === 'object' ? header : undefined}
+                transparent={resolvedTransparent}
+              />
+            ) : null}
           </div>
-          {showHeader && !hasContentRenderer && mode === 'floating' ? (
-            <FloatingHeader
-              title={title}
-              header={typeof header === 'object' ? header : undefined}
-              transparent={transparent}
-            />
-          ) : null}
-        </div>
-      </LiquidGlassModal>
-    </WindowFooterContext.Provider>
+        </LiquidGlassModal>
+      </WindowFooterContext.Provider>
+    </WindowContext.Provider>
   );
 }

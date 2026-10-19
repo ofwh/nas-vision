@@ -2,6 +2,27 @@ import type { CSSProperties, LazyExoticComponent, ReactElement, ReactNode } from
 
 export type HeaderMode = 'controls' | 'floating' | 'native';
 
+export type WindowControlType = 'disabled' | 'hide' | 'default';
+
+export type WindowControlsConfig = {
+  minimize?: WindowControlType;
+  maximize?: WindowControlType;
+};
+
+export type WindowState = 'closed' | 'normal' | 'maximized';
+
+export type WindowContextValue = {
+  id: string;
+  state: WindowState;
+  open: boolean;
+  maximized: boolean;
+  close: () => void;
+  minimize: () => void;
+  maximize: () => void;
+  restore: () => void;
+  toggleMaximize: () => void;
+};
+
 export type ModalSize = {
   width: number;
   height?: number;
@@ -30,8 +51,10 @@ export type LiquidGlassModalProps = {
 export type HeaderContent = { left?: ReactNode; center?: ReactNode; right?: ReactNode };
 
 export type WindowModalProps = Omit<LiquidGlassModalProps, 'children' | 'header'> & {
+  id?: string;
   src?: string;
   mode?: HeaderMode;
+  controls?: WindowControlsConfig;
   header?: boolean | HeaderContent;
   children?: ReactNode | ((controls: ReactNode) => ReactNode);
 };
