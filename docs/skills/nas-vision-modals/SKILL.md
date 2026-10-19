@@ -1,109 +1,99 @@
 ---
 name: nas-vision-modals
-description: 在 NAS Vision 项目使用、接入或调整 LiquidGlassModal、WindowModal 及插件弹窗时，指导模式、头部、footer、透明、缩放和内容布局。用于现有组件体系，不用于其他项目的通用弹窗设计。
+description: 在 NAS Vision 使用或调整 LiquidGlassModal、WindowModal 及插件窗口时，指导头部模式、窗口控制、footer、透明、缩放与内容布局。适用于现有弹窗组件体系。
 ---
 
 # NAS Vision 弹窗组件
 
-## 先核对当前实现
+## 组件与源码
 
-以下路径均相对于仓库根目录。先读对应组件与公共类型，组件发生变化时以源码为准：
+路径相对于仓库根目录；行为以当前源码为准。
 
-- `components/common/LiquidGlassModal.tsx`：模态、玻璃容器、尺寸、footer 和缩放控制点。
-- `components/common/WindowModal.tsx`：窗口模式、头部、自定义内容、iframe 与 `WindowFooter`。
-- `components/common/WindowControls.tsx`、`hooks/useWindow.ts`：按钮配置、所属窗口上下文和状态控制。
-- `types/window.ts`：头部、控制按钮、窗口状态和弹窗 props。
-- 接入插件时再读 `types/plugins.ts`、`components/home/AppItem.tsx` 与目标插件的 manifest。
-- 需要侧栏时读 `components/common/SplitWindowModal.tsx`；交互排查可参考 `components/plugins/plugin-debug/pages/index.tsx`。
+| 能力                     | 组件 / 源码                                                  |
+| ------------------------ | ------------------------------------------------------------ |
+| 窗口、插件与 iframe      | `components/common/WindowModal/WindowModal.tsx`              |
+| 基础模态、玻璃容器与缩放 | `components/common/LiquidGlassModal.tsx`                     |
+| 控制按钮与窗口上下文     | `components/common/WindowControls.tsx`、`hooks/useWindow.ts` |
+| 侧栏窗口                 | `components/common/SplitWindowModal.tsx`、`WindowContent`    |
+| 公共参数                 | `types/window.ts`                                            |
+| 插件窗口接入             | `types/plugins.ts`、`components/home/AppItem.tsx`            |
 
-公共类型从根目录 `types/` 的对应模块导入。新增参数或改名时同步类型与调用，不把唯一用途的 prop 无故细化命名：保留 `className`、`mode`、`header`、`fit` 等现有接口。
+窗口组件从 `@/components/common/WindowModal` 导入。复用现有组件与参数，不另建 Portal、遮罩或缩放实现；新增参数时同步公共类型与调用方。
 
-## 选择组件
+## 状态与控制
 
-- 普通窗口、插件、iframe 优先使用 `WindowModal`。
-- 只需要玻璃内容容器、基础弹窗行为与插槽时使用 `LiquidGlassModal`，不要重复实现 Portal、遮罩或缩放。
-- 带侧栏的设置窗口可用 `SplitWindowModal` 与 `WindowContent`，无需自行搭建第二套窗口。
+使用受控的 `open` / `onOpenChange`；关闭时也执行 `onClose`，避免重复副作用。`title` 必传，隐藏头部时仍用作辅助技术可读标题。
 
-使用受控的 `open` / `onOpenChange`。`onClose` 在关闭时也会执行，不要在两个回调中重复提交同一个业务副作用。`title` 仍需传入，即使隐藏可见头部，它也提供辅助技术可读的弹窗标题。
+后代组件通过 `useWindow()` 获取最近窗口的上下文：
 
-子组件通过 `@/hooks/useWindow` 的 `useWindow()` 获取最近所属窗口；嵌套窗口各自独立。返回 `id`、`state`（`closed | normal | maximized`）、`open`、`maximized`，以及 `close`、`minimize`、`maximize`、`restore`、`toggleMaximize`。`id` 可由 `WindowModal` 显式传入，否则自动生成；它用于识别当前窗口，不是全局查询入口。钩子必须在窗口后代组件内调用，不能在创建窗口的父组件或 children 渲染回调中直接调用。当前 `minimize` 与 `close` 一样关闭窗口，不提供任务栏收起状态。
+- 状态：`id`、`state: closed | normal | maximized`、`open`、`maximized`。
+- 动作：`close`、`minimize`、`maximize`、`restore`、`toggleMaximize`。
 
-## WindowModal 的头部
+`id` 可显式传入，否则自动生成；它用于标识窗口，不提供全局查找。嵌套窗口各自独立；钩子在窗口后代组件调用，不能在创建窗口的父组件或 children 回调中直接调用。`minimize` 当前等同关闭。
 
-`mode` 与 `header` 独立配置，默认模式由 `WindowModal` 兜底为 `controls`。
+## 头部
 
-| mode       | 左侧                                                   | 中间                                | 右侧              |
-| ---------- | ------------------------------------------------------ | ----------------------------------- | ----------------- |
-| `controls` | 固定 `WindowControls`，不渲染 `header.left`            | `header.center`，未传则使用 `title` | `header.right`    |
-| `floating` | 固定关闭按钮，然后是 `header.left`，组件已保留安全间距 | `header.center`，未传则使用 `title` | `header.right`    |
-| `native`   | 仅 `header.left`                                       | 仅 `header.center`                  | 仅 `header.right` |
+`mode` 默认为 `controls`，与 `header` 独立：
 
-- `header={false}` 在所有模式下隐藏头部和窗口控制按钮。
-- `header={true}` 或省略时使用模式默认行为；`native` 不会补上标题或关闭按钮。
-- `controls={{ minimize, maximize }}` 从 `WindowModal` 透传至 `WindowControls`；两项类型均为 `WindowControlType`（`default | disabled | hide`），省略时为 `default`。`disabled` 保留按钮但禁用，`hide` 不渲染；不影响关闭按钮，也不限制钩子的程序化控制。
-- 传入对象时使用公共 `HeaderContent`：`{ left?, center?, right? }`，各值是 React 节点，不是图标动作配置数组。
-- 浮动关闭按钮由 `FloatingHeader` 自身渲染，不在父调用方再次添加。
-- `LiquidGlassModal.header` 是 React 节点插槽，不支持上述对象语义。底层不需要头部时省略该插槽，不依赖 `false` 消除其容器。
-- 内置 `controls` 头部通过 `useWindow()` 判断最大化状态，最大化时使用不透明深色背景，恢复后还原。函数式 children 自行放置 controls 时，其头部背景也由调用方根据窗口状态处理。
+| mode       | 左侧                                    | 中间                        | 右侧              |
+| ---------- | --------------------------------------- | --------------------------- | ----------------- |
+| `controls` | 固定 WindowControls，忽略 `header.left` | `header.center`，默认 title | `header.right`    |
+| `floating` | 固定关闭按钮，随后为 `header.left`      | `header.center`，默认 title | `header.right`    |
+| `native`   | 仅 `header.left`                        | 仅 `header.center`          | 仅 `header.right` |
 
-## 参数与布局
+- `header={false}` 隐藏头部与控制按钮；`true` 或省略时使用模式默认行为。`native` 不自动补标题或关闭按钮。
+- 对象形式为 `HeaderContent: { left?, center?, right? }`，值为 React 节点。
+- `controls={{ minimize, maximize }}` 的值为 `default | disabled | hide`，默认 `default`；仅控制相应按钮，不影响关闭按钮及钩子动作。
+- `LiquidGlassModal.header` 是 React 节点插槽，不使用对象语义；无头部时省略插槽。
 
-| 参数             | 当前行为                                                                                                         |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `size`           | 数值宽高，基础默认 480 × 400；传入仅含 `width` 的对象且不指定 `style.height` 时高度自适应                        |
-| `style`          | 普通状态覆盖弹窗宽高或设置视口上限；最大化时由窗口覆盖宽高并解除上限；与 `className` 的作用位置不同              |
-| `modal`          | 默认 `true`；启用模态与遮罩，不能简化理解为底色开关                                                              |
-| `closeOnOverlay` | 默认 `true`；控制点击外部关闭                                                                                    |
-| `transparent`    | 默认 `false`；开启后容器、头部外壳、footer 外壳和遮罩透明；最大化时自动复用此分支，模态点击拦截仍由 `modal` 控制 |
-| `top`            | 默认 `false`；提升整个 Portal 层级，不表示最大化或模态                                                           |
-| `resizable`      | 默认 `false`；启用右下角圆弧控制点及方向键缩放，最大化时暂时隐藏控制点                                           |
-| `fit`            | 默认 `true`；具体内边距规则见下文                                                                                |
+函数式 `children: (controls) => ReactNode` 由调用方放置 controls；组件不再自动渲染 `controls` / `floating` 头部，`native` 头部仍按配置展示。`header={false}` 时回调中的 controls 为 null。自定义布局需保留关闭途径。
 
-`description` 能力已移除，不传递该参数。
+## 尺寸与布局
 
-### 内容尺寸与样式
+| 参数             | 行为                                                                          |
+| ---------------- | ----------------------------------------------------------------------------- |
+| `size`           | 基础默认 480 × 400；仅传 width 且无 style.height 时高度自适应                 |
+| `style`          | 设置 Popup 尺寸与视口上限；最大化时覆盖宽高并解除上限                         |
+| `modal`          | 默认 true，控制模态与遮罩                                                     |
+| `closeOnOverlay` | 默认 true，控制点击外部关闭                                                   |
+| `transparent`    | 默认 false，透明化容器、头部 / footer 外壳及遮罩；模态点击拦截仍由 modal 控制 |
+| `top`            | 默认 false，提高 Portal 层级                                                  |
+| `resizable`      | 默认 false，启用右下角拖动与方向键缩放；最大化时隐藏控制点                    |
+| `fit`            | 默认 true；false 增加基础内容或窗口函数式内容的内边距                         |
 
-- `LiquidGlassModal.className` 作用于 Popup；`WindowModal.className` 作用于内部内容容器。保持这两个现有作用位置，按需在调用处定制。
-- 基础容器通过 Tailwind 设置 `--window-radius: calc(var(--spacing) * 5)`，默认等效 20px，不提供 `radius` 入参。普通内容的 `controls` 模式内缩 5 个 spacing 单位，内容圆角为 0；`floating` 内缩 2.5 个单位，内容圆角为外层圆角减去该间距。函数式内容无内缩时继承外层圆角。resize 角标统一使用 Tailwind 间距计算位置和同心圆弧，不随模式单独调整。
-- 基础弹窗的 `fit={false}` 增加内容内边距。`WindowModal` 普通状态的节点内容有模式自带间距；其 `fit` 主要控制函数式自定义内容的额外内边距，不能假定开关会改变普通内容布局。最大化时统一清除窗口内容外侧间距。
-- 最大化使用 `100vw × 100dvh`，通过 Tailwind 覆盖圆角变量为零，恢复后还原传入的尺寸、样式与默认圆角。玻璃边缘来自高光和阴影，不能只靠圆角归零消除；复用 `transparent || state === 'maximized'` 的透明容器分支，避免再绘制外层玻璃。
-- 高度撑满使用连续的 `flex` / `flex-1` / `min-h-0`，宽度约束使用 `min-w-0`，滚动放在内部内容区域。
-- footer 半悬浮在弹窗底边之外。不要给 Popup 添加 `overflow-auto`、`overflow-hidden` 或原生 `resize` 以解决缩放问题，否则会出现外层滚动条或裁切 footer。复用现有独立缩放控制点。
-- `transparent` 不会清除 children 自己的底色或边框，也不覆盖最大化时内置 controls 头部的不透明背景。全透明展示时检查内容与调用处样式。
-- 可缩放列表按容器宽度响应，不按 `window.innerWidth` 固定卡片尺寸；需要时使用 `ResizeObserver`，避免无意的最大宽度或列数上限。
+- `LiquidGlassModal.className` 作用于 Popup；`WindowModal.className` 作用于内部内容容器。
+- 圆角由 `--window-radius` 控制，默认 5 个 spacing 单位；不提供 radius 参数。普通内容的 `controls` 模式有左右与底部间距，`floating` 有四周间距；两者内容圆角均为外层圆角减去 2.5 个 spacing 单位。
+- 最大化使用 `100vw × 100dvh`，清除窗口内容外侧间距与圆角，并启用透明容器分支；恢复后还原尺寸与样式。内置 controls 头部最大化时有不透明背景；自定义头部由调用方处理。
+- 透明参数不清除 children 自身底色或边框。
+- 撑满高度使用连续的 `flex`、`flex-1`、`min-h-0`；宽度约束使用 `min-w-0`，滚动放在内部内容区域。响应式布局根据窗口容器宽度调整。
+- footer 位于弹窗底边外侧。不要为缩放给 Popup 添加 overflow 裁切、外层滚动或原生 resize，沿用独立缩放控制点。
 
-### footer 与自定义内容
+## footer
 
-`footer` 只传内容，组件已提供玻璃外壳、居中和半遮挡位置，不要再套重复外壳。插件子组件需要填充父窗口 footer 时使用 `WindowFooter`，它只在最近的 `WindowModal` 上下文中生效。
+`footer` 仅传内容，组件提供玻璃外壳、居中与半悬浮位置。子组件使用 `WindowFooter` 填充最近 `WindowModal` 的 footer，不重复套外壳。
 
-`children` 也可为 `(controls) => ReactNode`。使用该模式后，窗口不再自动渲染 `controls` / `floating` 头部，调用方在自己的布局中放置 controls。`native` 的独立头部仍按其配置展示。`header={false}` 时传给函数的 controls 为 `null`。自定义内容要保留可用的关闭途径，例如自有关闭按钮、允许外部关闭或 Escape。
-
-## 示例
-
-普通窗口：
+## 使用示例
 
 ```tsx
-import { WindowModal } from '@/components/common/WindowModal';
-import { Button } from '@/components/ui/button';
+'use client';
 
-function ExampleDialog({ onClose }: { onClose: () => void }) {
+import { WindowModal } from '@/components/common/WindowModal';
+
+type ExampleDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+export function ExampleDialog({ open, onOpenChange }: ExampleDialogProps) {
   return (
     <WindowModal
-      open
-      title="资料库"
+      open={open}
+      onOpenChange={onOpenChange}
+      title="示例窗口"
       mode="floating"
-      size={{ width: 960, height: 640 }}
+      size={{ width: 720, height: 480 }}
       style={{ maxWidth: '90vw', maxHeight: '85vh' }}
       resizable
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
-      header={{ right: <Button variant="ghost">刷新</Button> }}
-      footer={
-        <Button variant="ghost" onClick={onClose}>
-          完成
-        </Button>
-      }
     >
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">内容</div>
     </WindowModal>
@@ -111,35 +101,8 @@ function ExampleDialog({ onClose }: { onClose: () => void }) {
 }
 ```
 
-完全自定义的无头内容：
+## 插件接入与检查
 
-```tsx
-<WindowModal open title="预览" header={false} onOpenChange={setOpen}>
-  {() => <div className="min-h-0 min-w-0 flex-1">自定义预览内容</div>}
-</WindowModal>
-```
+manifest 可声明 `size`、`mode`、`header`、`transparent`、`resizable`、`top`；`header` 仅为布尔值。宿主统一透传，WindowModal 解释默认行为，不按插件 ID 添加窗口分支。子窗口需单独配置。
 
-示例仅说明组件组合。将状态、刷新等事件接到真实调用方，不把示例中的空动作直接当作完成的业务交互。
-
-## 插件接入
-
-插件 manifest 可声明 `size`、`mode`、`header`、`transparent`、`resizable`、`top`；以 `types/plugins.ts` 为准。`header` 在 manifest 中是布尔值，React 节点应由具体组件提供。
-
-例如窗口配置片段：
-
-```json
-{
-  "size": { "width": 1280, "height": 800 },
-  "mode": "floating",
-  "header": true,
-  "transparent": false,
-  "resizable": true,
-  "top": true
-}
-```
-
-`AppPluginDialog` 只透传 manifest 参数，`WindowModal` 负责模式兜底及头部渲染。不要在 AppItem 按插件 ID 生成头部或重复实现默认行为。主窗口配置不自动继承到内部二级弹窗；二级窗口在调用处单独配置。
-
-## 验证使用结果
-
-按任务覆盖相关行为即可：头部三种模式与 `header={false}`、controls 的默认/禁用/隐藏状态、最大化与恢复时的留白/圆角/玻璃边缘及头部背景、嵌套窗口钩子的归属、透明模态下的底层点击拦截和外部关闭、缩放后的内容高度与 footer 完整性、窄窗口的列表重排。使用项目的格式、ESLint 与类型检查；是否能实际操作浏览器应如实说明，静态检查不能证明拖动或遮罩效果。不新增测试用例。
+仅检查修改涉及的头部、控制按钮、关闭、最大化恢复、透明遮罩、缩放及 footer 布局。不新增测试用例；静态检查不能代替实际交互验证。

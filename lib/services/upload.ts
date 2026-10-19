@@ -30,23 +30,28 @@ const URL_PREFIX = '/static/uploads';
 const UPLOAD_ROOT = path.join(process.cwd(), 'public/static/uploads');
 
 export async function upload({ files }: UploadParams): Promise<Result<UploadRes>> {
-  if (!files.length) return { ok: false, error: appError('common.INVALID_PARAMS') };
-
-  await mkdir(UPLOAD_ROOT, { recursive: true });
-
-  const saved = await Promise.all(files.map((file) => save(file)));
-
-  return { ok: true, value: { files: saved } };
+  if (!files.length) return { ok: false, error: appError('upload.FILES_REQUIRED') };
+  try {
+    await mkdir(UPLOAD_ROOT, { recursive: true });
+    const saved = await Promise.all(files.map((file) => save(file)));
+    return { ok: true, value: { files: saved } };
+  } catch {
+    return { ok: false, error: appError('upload.WRITE_FAILED') };
+  }
 }
 
 /** 只删本服务落的文件；文件已经不在了也算成功，调用方要的是"删掉"这个结果。 */
-export async function remove({ url }: UploadRemoveParams): Promise<Result<UploadRemoveRes>> {
+export async function remove(input: UploadRemoveParams): Promise<Result<UploadRemoveRes>> {
+  const url = input?.url;
+  if (typeof url !== 'string') return { ok: false, error: appError('upload.INVALID_URL') };
   const target = resolve(url);
-  if (!target) return { ok: false, error: appError('common.INVALID_PARAMS') };
-
-  await rm(target, { force: true });
-
-  return { ok: true, value: { url } };
+  if (!target) return { ok: false, error: appError('upload.INVALID_URL') };
+  try {
+    await rm(target, { force: true });
+    return { ok: true, value: { url } };
+  } catch {
+    return { ok: false, error: appError('upload.DELETE_FAILED') };
+  }
 }
 
 /** url 由调用方给，必须落在 UPLOAD_ROOT 内，否则 ../ 就能删到外面去。 */

@@ -1,0 +1,42 @@
+export const codes = {
+  APP_NOT_FOUND: 1201000,
+  INVALID_APP: 1201001,
+  INVALID_ID: 1201002,
+  SAVE_FAILED: 1201003,
+  APP_ID_UNKNOWN: 1202000,
+  INVALID_MOVE: 1202001,
+  SORT_FAILED: 1202002,
+  LIST_FAILED: 1203000,
+  INVALID_STATUS: 1204000,
+  STATUS_FAILED: 1204001,
+  DELETE_FAILED: 1205000,
+} as const;
+
+export const messages = {
+  'zh-CN': {
+    APP_NOT_FOUND: '应用不存在。',
+    INVALID_APP: '应用配置无效，请检查名称、类型和配置字段。',
+    INVALID_ID: '应用 ID 无效。',
+    SAVE_FAILED: '保存应用失败。',
+    APP_ID_UNKNOWN: '找不到 ID 为“{id}”的应用。',
+    INVALID_MOVE: '应用排序参数无效。',
+    SORT_FAILED: '应用排序失败。',
+    LIST_FAILED: '无法加载应用列表。',
+    INVALID_STATUS: '应用状态必须为 0 或 1。',
+    STATUS_FAILED: '无法更新应用状态。',
+    DELETE_FAILED: '删除应用失败。',
+  },
+  en: {
+    APP_NOT_FOUND: 'App not found.',
+    INVALID_APP: 'The app configuration is invalid. Check its name, type, and configuration fields.',
+    INVALID_ID: 'The app ID is invalid.',
+    SAVE_FAILED: 'Unable to save the app.',
+    APP_ID_UNKNOWN: 'No app found with id "{id}".',
+    INVALID_MOVE: 'The app ordering parameters are invalid.',
+    SORT_FAILED: 'Unable to reorder apps.',
+    LIST_FAILED: 'Unable to load the app list.',
+    INVALID_STATUS: 'The app status must be 0 or 1.',
+    STATUS_FAILED: 'Unable to update the app status.',
+    DELETE_FAILED: 'Unable to delete the app.',
+  },
+};

@@ -1,23 +1,17 @@
-import type { ErrorCode } from '@/lib/api';
 import type { PluginConfig } from '@/types/plugins';
-
-export class ImmichError extends Error {
-  constructor(public readonly code: ErrorCode) {
-    super(code);
-  }
-}
+import { ImmichError } from './errors';
 
 type Connection = { base: string; authMode: 'apiKey' | 'password'; apiKey: string; email: string; password: string };
 type Session = { expires: number; token: Promise<string> };
 const sessions = new Map<string, Session>();
 
 export function connection(config: PluginConfig): Connection {
-  if (typeof config.serverUrl !== 'string' || !config.serverUrl.trim()) throw new ImmichError('common.INVALID_PARAMS');
+  if (typeof config.serverUrl !== 'string' || !config.serverUrl.trim()) throw new ImmichError('SERVER_URL_INVALID');
   let url: URL;
   try {
     url = new URL(config.serverUrl.trim());
   } catch {
-    throw new ImmichError('common.INVALID_PARAMS');
+    throw new ImmichError('SERVER_URL_INVALID');
   }
   if (
     !['http:', 'https:'].includes(url.protocol) ||
@@ -27,14 +21,14 @@ export function connection(config: PluginConfig): Connection {
     url.hash ||
     !['', '/', '/api', '/api/'].includes(url.pathname)
   ) {
-    throw new ImmichError('common.INVALID_PARAMS');
+    throw new ImmichError('SERVER_URL_INVALID');
   }
   const authMode = config.authMode ?? 'apiKey';
   const apiKey = typeof config.apiKey === 'string' ? config.apiKey.trim() : '';
   const email = typeof config.email === 'string' ? config.email.trim() : '';
   const password = typeof config.password === 'string' ? config.password : '';
   if ((authMode !== 'apiKey' && authMode !== 'password') || (authMode === 'apiKey' ? !apiKey : !email || !password)) {
-    throw new ImmichError('common.INVALID_PARAMS');
+    throw new ImmichError('AUTH_CONFIG_INVALID');
   }
   return { base: `${url.origin}/api`, authMode, apiKey, email, password };
 }
@@ -49,14 +43,16 @@ async function send(url: string, init: RequestInit, stream = false): Promise<Res
   try {
     return await fetch(url, { ...init, cache: 'no-store', redirect: 'error', signal });
   } catch {
-    throw new ImmichError('plugin.REQUEST_FAILED');
+    throw new ImmichError('UNREACHABLE');
   } finally {
     if (timer) clearTimeout(timer);
   }
 }
 
 function check(response: Response): void {
-  if (!response.ok) throw new ImmichError('plugin.REQUEST_FAILED');
+  if (response.status === 401 || response.status === 403) throw new ImmichError('AUTH_FAILED');
+  if (response.status === 404) throw new ImmichError('RESOURCE_NOT_FOUND');
+  if (!response.ok) throw new ImmichError('REQUEST_FAILED');
 }
 
 async function login(settings: Connection): Promise<string> {
@@ -66,8 +62,13 @@ async function login(settings: Connection): Promise<string> {
     body: JSON.stringify({ email: settings.email, password: settings.password }),
   });
   check(response);
-  const data: { accessToken: string } = await response.json();
-  if (!data.accessToken) throw new ImmichError('plugin.REQUEST_FAILED');
+  let data: { accessToken?: string };
+  try {
+    data = (await response.json()) as { accessToken?: string };
+  } catch {
+    throw new ImmichError('INVALID_RESPONSE');
+  }
+  if (!data || typeof data.accessToken !== 'string' || !data.accessToken) throw new ImmichError('AUTH_FAILED');
   return data.accessToken;
 }
 
@@ -124,5 +125,10 @@ export async function request(
 }
 
 export async function json<T>(config: PluginConfig, path: string, body?: object): Promise<T> {
-  return (await request(config, path, body)).json() as Promise<T>;
+  const response = await request(config, path, body);
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw new ImmichError('INVALID_RESPONSE');
+  }
 }

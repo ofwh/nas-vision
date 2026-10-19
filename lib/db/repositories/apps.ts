@@ -1,6 +1,5 @@
 import { asc, desc, eq } from 'drizzle-orm';
 import { generateNKeysBetween } from 'fractional-indexing';
-import { appError, type Result } from '@/lib/api';
 import { moveBefore as orderBefore } from '@/lib/app-order';
 import { rankAfter } from '@/lib/sort-key';
 import { db } from '@/lib/db';
@@ -71,13 +70,15 @@ export function deleteById(id: string): boolean {
 }
 
 /** 读取、定位、重排在同一事务内，添加/删除/其他移动不会插入中间。 */
-export function moveBefore(id: string, beforeId: string | null): Result<AppItem> {
+type MoveResult = { state: 'missing-app' } | { state: 'missing-target' } | { state: 'moved'; app: AppItem };
+
+export function moveBefore(id: string, beforeId: string | null): MoveResult {
   return db.transaction(
     () => {
       const current = selectAll();
-      if (!current.some((app) => app.id === id)) return { ok: false, error: appError('apps.APP_NOT_FOUND') };
+      if (!current.some((app) => app.id === id)) return { state: 'missing-app' };
       if (beforeId !== null && !current.some((app) => app.id === beforeId)) {
-        return { ok: false, error: appError('apps.APP_ID_UNKNOWN', { id: beforeId }) };
+        return { state: 'missing-target' };
       }
       const ordered = orderBefore(current, id, beforeId);
       const ranks = generateNKeysBetween(null, null, ordered.length);
@@ -86,7 +87,7 @@ export function moveBefore(id: string, beforeId: string | null): Result<AppItem>
         const updated = app.rank === ranks[index] ? app : updateRankById(app.id, ranks[index]);
         if (app.id === id) moved = updated;
       });
-      return { ok: true, value: moved! };
+      return { state: 'moved', app: moved! };
     },
     { behavior: 'immediate' },
   );

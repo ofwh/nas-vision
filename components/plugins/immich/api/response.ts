@@ -1,10 +1,20 @@
-import { appError, type Result } from '@/lib/api';
-import { ImmichError } from './client';
+import { getLocale } from 'next-intl/server';
+import type { Result } from '@/lib/api';
+import { codes, messages, ImmichError } from './errors';
 
 export async function run(action: () => Promise<Response>): Promise<Result<Response>> {
   try {
     return { ok: true, value: await action() };
   } catch (error) {
-    return { ok: false, error: appError(error instanceof ImmichError ? error.code : 'plugin.REQUEST_FAILED') };
+    const code = error instanceof ImmichError ? error.code : 'REQUEST_FAILED';
+    const locale = await getLocale();
+    const message = messages[locale === 'en' ? 'en' : 'zh-CN'][code];
+    const response = Response.json({
+      code: codes[code],
+      data: null,
+      error: { code: `immich.${code}`, message },
+      message,
+    });
+    return { ok: true, value: response };
   }
 }

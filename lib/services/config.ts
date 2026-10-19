@@ -11,14 +11,10 @@ export function list(cookies: AppearanceCookies = {}): AppearanceConfig {
 }
 
 export function save(input: ConfigSaveParams): Result<AppearanceConfig> {
-  if (
-    !input ||
-    !['zh-CN', 'en'].includes(input.language) ||
-    !['auto', 'light', 'dark'].includes(input.theme) ||
-    typeof input.veil !== 'boolean'
-  ) {
-    return { ok: false, error: appError('common.INVALID_PARAMS') };
-  }
+  if (!input || !['zh-CN', 'en'].includes(input.language))
+    return { ok: false, error: appError('config.INVALID_LANGUAGE') };
+  if (!['auto', 'light', 'dark'].includes(input.theme)) return { ok: false, error: appError('config.INVALID_THEME') };
+  if (typeof input.veil !== 'boolean') return { ok: false, error: appError('config.INVALID_VEIL') };
   return {
     ok: true,
     value: repository.upsert({
