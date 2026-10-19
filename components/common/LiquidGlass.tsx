@@ -42,7 +42,15 @@ export function GlassMask({ variant }: { variant?: GlassMaskVariant }) {
   );
 }
 
-export function LiquidGlass({ className, contentClassName, style, ref, variant, children }: LiquidGlassProps) {
+export function LiquidGlass({
+  className,
+  contentClassName,
+  style,
+  ref,
+  variant,
+  transparent = false,
+  children,
+}: LiquidGlassProps) {
   const specularRef = useRef<HTMLDivElement>(null);
   const lastOffset = useRef({ x: '', y: '' });
 
@@ -68,11 +76,15 @@ export function LiquidGlass({ className, contentClassName, style, ref, variant, 
   });
 
   return (
-    <div ref={ref} style={style} className={cn(CONTAINER, className)}>
-      <GlassMask variant={variant} />
-      <div ref={specularRef} className={SPECULAR} />
+    <div
+      ref={ref}
+      style={style}
+      className={cn(transparent ? 'relative overflow-hidden bg-transparent text-white' : CONTAINER, className)}
+    >
+      {!transparent ? <GlassMask variant={variant} /> : null}
+      <div ref={specularRef} className={cn(SPECULAR, transparent ? 'hidden' : undefined)} />
 
-      <div className={cn(CONTENT, contentClassName)}>{children}</div>
+      <div className={cn(transparent ? 'relative' : CONTENT, contentClassName)}>{children}</div>
     </div>
   );
 }

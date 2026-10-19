@@ -6,7 +6,6 @@ import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Dialog, DialogOverlay, DialogPortal, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import type { LiquidGlassModalProps, ModalSize } from '@/types/window';
-import type { LiquidGlassProps } from '@/types/glass';
 import styles from '@/styles/LiquidGlassModal.module.css';
 
 const DEFAULT_SIZE: ModalSize = { width: 480, height: 400 };
@@ -99,18 +98,6 @@ function ResizeHandle() {
   );
 }
 
-function ModalSurface({ transparent, ...props }: Omit<LiquidGlassProps, 'ref' | 'variant'> & { transparent: boolean }) {
-  if (!transparent) {
-    return <LiquidGlass {...props} />;
-  }
-
-  return (
-    <div style={props.style} className={cn('relative overflow-hidden bg-transparent text-white', props.className)}>
-      <div className={cn('relative', props.contentClassName)}>{props.children}</div>
-    </div>
-  );
-}
-
 export function LiquidGlassModal({
   open,
   onOpenChange,
@@ -169,15 +156,15 @@ export function LiquidGlassModal({
           >
             <DialogTitle className="sr-only">{title}</DialogTitle>
             {header != null ? (
-              <ModalSurface
+              <LiquidGlass
                 transparent={transparent}
                 className="max-w-full shrink-0 self-center rounded-full"
                 contentClassName="flex min-w-0 items-center justify-center p-1"
               >
                 {header}
-              </ModalSurface>
+              </LiquidGlass>
             ) : null}
-            <ModalSurface
+            <LiquidGlass
               transparent={transparent}
               className={cn(
                 'flex min-h-0 min-w-0 flex-col rounded-(--window-radius)',
@@ -191,16 +178,16 @@ export function LiquidGlassModal({
               <div className={cn('flex min-h-0 flex-1 flex-col overflow-auto overscroll-contain', !fit && 'p-5')}>
                 {children}
               </div>
-            </ModalSurface>
+            </LiquidGlass>
             {footer != null ? (
               <div className="absolute bottom-0 left-1/2 z-10 max-w-full shrink-0 -translate-x-1/2 translate-y-1/2 self-center">
-                <ModalSurface
+                <LiquidGlass
                   transparent={transparent}
                   className="rounded-full"
                   contentClassName="flex items-center justify-center gap-2 p-2"
                 >
                   {footer}
-                </ModalSurface>
+                </LiquidGlass>
               </div>
             ) : null}
             {resizable ? <ResizeHandle /> : null}
