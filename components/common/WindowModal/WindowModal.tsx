@@ -12,7 +12,11 @@ import { NativeHeader } from './NativeHeader';
 import { IframeContent } from './IframeContent';
 import { WindowFooterContext } from './WindowFooter';
 
-export function WindowModal({
+export function WindowModal(props: WindowModalProps) {
+  return props.open ? <WindowModalContent {...props} /> : null;
+}
+
+function WindowModalContent({
   id,
   open,
   onOpenChange,
