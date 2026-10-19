@@ -158,7 +158,6 @@ export function WindowModal({
   header,
   controls: controlsConfig,
   style,
-  radius = 30,
   fit = true,
   transparent = false,
   resizable = false,
@@ -203,7 +202,7 @@ export function WindowModal({
           open={open}
           onOpenChange={onOpenChange}
           onClose={onClose}
-          radius={maximized ? 0 : radius}
+          className={maximized ? '[--window-radius:0px]' : undefined}
           resizable={resizable && !maximized}
           transparent={resolvedTransparent}
           title={title}
@@ -239,23 +238,32 @@ export function WindowModal({
               className={cn(
                 'flex min-h-0 flex-1 flex-col',
                 maximized
-                  ? '[--content-gap:0px]'
+                  ? undefined
                   : hasContentRenderer
                     ? fit
-                      ? '[--content-gap:0px]'
-                      : 'p-5 [--content-gap:calc(var(--spacing)*5)]'
+                      ? undefined
+                      : 'p-5'
                     : resolvedHeaderMode === 'floating'
-                      ? 'p-2.5 [--content-gap:calc(var(--spacing)*2.5)]'
+                      ? 'p-2.5'
                       : showHeader && resolvedHeaderMode === 'controls'
-                        ? 'px-5 pb-5 [--content-gap:calc(var(--spacing)*5)]'
-                        : 'p-5 [--content-gap:calc(var(--spacing)*5)]',
+                        ? 'px-5 pb-5'
+                        : 'p-5',
               )}
             >
               <div
                 className={cn(
                   'flex min-h-0 flex-1 flex-col overflow-auto overscroll-contain',
-                  (resolvedHeaderMode === 'controls' || resolvedHeaderMode === 'floating') &&
-                    'rounded-[max(0px,calc(var(--window-radius)-var(--content-gap)))]',
+                  maximized
+                    ? 'rounded-none'
+                    : hasContentRenderer
+                      ? fit
+                        ? 'rounded-(--window-radius)'
+                        : 'rounded-none'
+                      : resolvedHeaderMode === 'floating'
+                        ? 'rounded-[calc(var(--window-radius)-var(--spacing)*2.5)]'
+                        : resolvedHeaderMode === 'controls'
+                          ? 'rounded-none'
+                          : undefined,
                   className,
                 )}
               >

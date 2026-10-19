@@ -64,9 +64,9 @@ description: 在 NAS Vision 项目使用、接入或调整 LiquidGlassModal、Wi
 ### 内容尺寸与样式
 
 - `LiquidGlassModal.className` 作用于 Popup；`WindowModal.className` 作用于内部内容容器。保持这两个现有作用位置，按需在调用处定制。
-- 基础容器提供 `--window-radius`，内容圆角可继承。若内层相对外层有内缩，圆角应与内缩量匹配。
+- 基础容器通过 Tailwind 设置 `--window-radius: calc(var(--spacing) * 5)`，默认等效 20px，不提供 `radius` 入参。普通内容的 `controls` 模式内缩 5 个 spacing 单位，内容圆角为 0；`floating` 内缩 2.5 个单位，内容圆角为外层圆角减去该间距。函数式内容无内缩时继承外层圆角。resize 角标统一使用 Tailwind 间距计算位置和同心圆弧，不随模式单独调整。
 - 基础弹窗的 `fit={false}` 增加内容内边距。`WindowModal` 普通状态的节点内容有模式自带间距；其 `fit` 主要控制函数式自定义内容的额外内边距，不能假定开关会改变普通内容布局。最大化时统一清除窗口内容外侧间距。
-- 最大化使用 `100vw × 100dvh`，窗口圆角归零，恢复后还原传入的尺寸、样式与圆角。玻璃边缘来自高光和阴影，不能只靠圆角归零消除；复用 `transparent || state === 'maximized'` 的透明容器分支，避免再绘制外层玻璃。
+- 最大化使用 `100vw × 100dvh`，通过 Tailwind 覆盖圆角变量为零，恢复后还原传入的尺寸、样式与默认圆角。玻璃边缘来自高光和阴影，不能只靠圆角归零消除；复用 `transparent || state === 'maximized'` 的透明容器分支，避免再绘制外层玻璃。
 - 高度撑满使用连续的 `flex` / `flex-1` / `min-h-0`，宽度约束使用 `min-w-0`，滚动放在内部内容区域。
 - footer 半悬浮在弹窗底边之外。不要给 Popup 添加 `overflow-auto`、`overflow-hidden` 或原生 `resize` 以解决缩放问题，否则会出现外层滚动条或裁切 footer。复用现有独立缩放控制点。
 - `transparent` 不会清除 children 自己的底色或边框，也不覆盖最大化时内置 controls 头部的不透明背景。全透明展示时检查内容与调用处样式。

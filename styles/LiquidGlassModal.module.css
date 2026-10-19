@@ -1,0 +1,35 @@
+.resizeArc {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--handle-radius) + var(--handle-half-stroke));
+  height: calc(var(--handle-radius) + var(--handle-half-stroke));
+  background: currentColor;
+  mask-image: radial-gradient(
+    circle at 0 0,
+    transparent calc(var(--handle-radius) - var(--handle-half-stroke)),
+    black calc(var(--handle-radius) - var(--handle-half-stroke) + 0.5px),
+    black calc(var(--handle-radius) + var(--handle-half-stroke) - 0.5px),
+    transparent calc(var(--handle-radius) + var(--handle-half-stroke))
+  );
+}
+
+.resizeCurve::before,
+.resizeCurve::after {
+  position: absolute;
+  width: calc(var(--handle-half-stroke) * 2);
+  height: calc(var(--handle-half-stroke) * 2);
+  border-radius: 9999px;
+  background: currentColor;
+  content: '';
+}
+
+.resizeCurve::before {
+  left: calc(var(--handle-radius) - var(--handle-half-stroke));
+  top: calc(0px - var(--handle-half-stroke));
+}
+
+.resizeCurve::after {
+  left: calc(0px - var(--handle-half-stroke));
+  top: calc(var(--handle-radius) - var(--handle-half-stroke));
+}
