@@ -14,5 +14,5 @@
   "noOptions": "No matching options",
   "connectionFailed": "Unable to connect to the server. Please try again later.",
   "saveFailed": "Unable to save. Please try again.",
-  "iframeBlocked": "Browser security restrictions prevent this page from being embedded."
+  "iframeBlocked": "<restrictions>Browser security restrictions</restrictions> prevent this page from being embedded."
 }
