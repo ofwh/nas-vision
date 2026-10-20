@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
+import { unstable_serialize as serializeInfinite } from 'swr/infinite';
 import useSWRMutation from 'swr/mutation';
 import { appError, errorMessage, type BaseResponse, type JsonObject } from '@/lib/api';
 import plugins from '@/components/plugins';
@@ -51,7 +52,7 @@ export function usePluginUpload<T>(name: string, path: string, formData?: FormDa
 }
 
 export function usePlugin(name: string) {
-  const { mutate } = useSWRConfig();
+  const { cache, mutate } = useSWRConfig();
   const parentPage = useContext(PluginPageContext);
   const [isOpen, setOpen] = useState(false);
   const [path, setPath] = useState('/');
@@ -101,12 +102,27 @@ export function usePlugin(name: string) {
 
     await mutate(['/api/plugin/query', { id: name }], response, { revalidate: false });
     const prefix = `/api/plugin/${encodeURIComponent(name)}/`;
+    const infiniteKeys = new Set<string>();
 
     await mutate(
-      (key: unknown) => Array.isArray(key) && typeof key[0] === 'string' && key[0].startsWith(prefix),
+      (key: unknown) => {
+        if (!Array.isArray(key) || typeof key[0] !== 'string' || !key[0].startsWith(prefix)) {
+          return false;
+        }
+
+        // SWR 的筛选式 mutate 会跳过分页聚合缓存，需通过页 key 单独定位。
+        const infiniteKey = serializeInfinite(() => key);
+
+        if (cache.get(infiniteKey)) {
+          infiniteKeys.add(infiniteKey);
+        }
+
+        return true;
+      },
       undefined,
       { revalidate: false },
     );
+    await Promise.all([...infiniteKeys].map((key) => mutate(key, undefined, { revalidate: false })));
 
     return { success: response.code === 0, data: response.data };
   }

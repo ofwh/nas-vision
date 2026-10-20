@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useMemo, useState } from 'react';
+import { type CSSProperties, useId, useMemo, useState } from 'react';
 import { LiquidGlassModal } from '@/components/common/LiquidGlassModal';
 import { WindowControls } from '@/components/common/WindowControls';
 import { WindowContext } from '@/hooks/useWindow';
@@ -29,7 +29,7 @@ function WindowModalContent({
   header,
   controls: controlsConfig,
   style,
-  fit = true,
+  fit,
   transparent = false,
   resizable = false,
   className,
@@ -55,13 +55,38 @@ function WindowModalContent({
       toggleMaximize: () => setMaximized((value) => !value),
     };
   }, [id, generatedId, open, maximized, onOpenChange, onClose]);
-  const resolvedTransparent = transparent || windowContext.state === 'maximized';
+  const isTransparent = transparent || windowContext.state === 'maximized';
   const showHeader = header !== false;
   const controls = showHeader ? (
     <WindowControls maximized={maximized} onMaximize={windowContext.toggleMaximize} controls={controlsConfig} />
   ) : null;
-  const resolvedHeaderMode = mode ?? 'controls';
+  const headerMode = mode ?? 'controls';
   const hasContentRenderer = typeof children === 'function';
+  const spacingType = fit === true ? 'none' : headerMode === 'floating' ? 'small' : 'default';
+  const spacingStyles = {
+    none: {
+      spacing: undefined,
+      radius: 'rounded-(--window-radius)',
+    },
+    small: {
+      spacing: 'p-2.5',
+      radius: 'rounded-[calc(var(--window-radius)-var(--spacing)*2.5)]',
+    },
+    default: {
+      spacing: showHeader && headerMode === 'controls' ? 'px-5 pb-5' : 'p-5',
+      radius: headerMode === 'controls' ? 'rounded-[calc(var(--window-radius)-var(--spacing)*2.5)]' : undefined,
+    },
+  }[spacingType];
+  const maximizedStyles = maximized
+    ? {
+        className: 'max-h-none! max-w-none! [--window-radius:0px]',
+        style: { width: '100vw', height: '100dvh' } satisfies CSSProperties,
+        spacing: undefined,
+        radius: 'rounded-none',
+      }
+    : undefined;
+  const contentStyles = maximizedStyles ?? spacingStyles;
+  const resolvedStyle = { ...style, ...maximizedStyles?.style };
   const [footerTarget, setFooterTarget] = useState<HTMLDivElement | null>(null);
   const [hasFooterContent, setHasFooterContent] = useState(false);
   const footerContext = useMemo(() => ({ target: footerTarget, setHasContent: setHasFooterContent }), [footerTarget]);
@@ -74,19 +99,16 @@ function WindowModalContent({
           open={open}
           onOpenChange={onOpenChange}
           onClose={onClose}
-          className={maximized ? '[--window-radius:0px]' : undefined}
+          className={maximizedStyles?.className}
           resizable={resizable && !maximized}
-          transparent={resolvedTransparent}
+          transparent={isTransparent}
           title={title}
           header={
             showHeader && mode === 'native' ? (
               <NativeHeader header={typeof header === 'object' ? header : undefined} />
             ) : undefined
           }
-          style={{
-            ...style,
-            ...(maximized ? { width: '100vw', height: '100dvh', maxWidth: 'none', maxHeight: 'none' } : {}),
-          }}
+          style={resolvedStyle}
           footer={
             hasFooterContent ? (
               <div className="flex min-w-0 items-center gap-2">
@@ -99,41 +121,18 @@ function WindowModalContent({
           }
         >
           <div className="relative flex min-h-0 flex-1 flex-col">
-            {showHeader && !hasContentRenderer && resolvedHeaderMode === 'controls' ? (
+            {showHeader && !hasContentRenderer && headerMode === 'controls' ? (
               <ControlsHeader
                 title={title}
                 controls={controls}
                 header={typeof header === 'object' ? header : undefined}
               />
             ) : null}
-            <div
-              className={cn(
-                'flex min-h-0 flex-1 flex-col',
-                maximized
-                  ? undefined
-                  : hasContentRenderer
-                    ? fit
-                      ? undefined
-                      : 'p-5'
-                    : resolvedHeaderMode === 'floating'
-                      ? 'p-2.5'
-                      : showHeader && resolvedHeaderMode === 'controls'
-                        ? 'px-5 pb-5'
-                        : 'p-5',
-              )}
-            >
+            <div className={cn('flex min-h-0 flex-1 flex-col', contentStyles.spacing)}>
               <div
                 className={cn(
                   'flex min-h-0 flex-1 flex-col overflow-auto overscroll-contain',
-                  maximized
-                    ? 'rounded-none'
-                    : hasContentRenderer
-                      ? fit
-                        ? 'rounded-(--window-radius)'
-                        : 'rounded-none'
-                      : resolvedHeaderMode === 'floating' || resolvedHeaderMode === 'controls'
-                        ? 'rounded-[calc(var(--window-radius)-var(--spacing)*2.5)]'
-                        : undefined,
+                  contentStyles.radius,
                   className,
                 )}
               >
@@ -150,7 +149,7 @@ function WindowModalContent({
               <FloatingHeader
                 title={title}
                 header={typeof header === 'object' ? header : undefined}
-                transparent={resolvedTransparent}
+                transparent={isTransparent}
               />
             ) : null}
           </div>
