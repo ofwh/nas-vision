@@ -61,7 +61,7 @@ service 判断业务错误，API 负责响应适配。公共模块不导入、�
 - 公共错误：数值与标识写入 `lib/api/codes.ts`，文案写入 `lib/api/messages/{locale}.json`，不加入具体业务原因。
 - 宿主新业务：在 `lib/errors/<业务>.ts` 导出 `codes`、`messages`，接入 `lib/errors/index.ts` 的聚合，供 `lib/api` 推导类型、映射编号与格式化文案。已有业务新增模块或错误仍写入所属业务文件。
 - 插件框架：仅在 `lib/plugins/errors.ts` 维护框架自身错误。
-- 具体插件：数值、错误类型与多语言文案保存在 `components/plugins/<插件>/api/errors.ts`，由插件 API 适配为错误信封。按需拆出私有 `api/response.ts`，不接入宿主 `lib/errors`、公共 `ErrorCode` 或公共文案导出。没有业务错误时无需创建这些文件。
+- 具体插件：数值与错误类型保存在 `components/plugins/<插件>/api/errors.ts`，多语言文案集中在插件自身 `i18n/` 目录，由插件 API 按当前语言读取并适配为错误信封。按需拆出私有 `api/response.ts`，不接入宿主 `lib/errors`、公共 `ErrorCode` 或公共文案导出。没有业务错误时无需创建这些文件。
 
 ## 协议适配边界
 

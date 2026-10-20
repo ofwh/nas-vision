@@ -70,6 +70,7 @@ function AppPluginDialog({
       }}
       size={size}
       transparent={plugin.manifest?.transparent}
+      fit={plugin.manifest?.fit}
       resizable={plugin.manifest?.resizable}
       top={plugin.manifest?.top}
       style={size ? { width: `min(${size.width}px, 90vw)`, height: `min(${size.height}px, 85vh)` } : undefined}

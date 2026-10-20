@@ -31,6 +31,7 @@ export interface PluginManifest {
   status: 'on' | 'off';
   size: { width: number; height: number };
   transparent?: boolean;
+  fit?: boolean;
   resizable?: boolean;
   top?: boolean;
   header?: boolean;
