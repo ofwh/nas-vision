@@ -40,6 +40,8 @@ export function SettingsDialog({ initialPage, onClose }: { initialPage: Settings
       open
       title={t('settings.title')}
       size={{ width: 960, height: 640 }}
+      style={{ maxWidth: 'calc(100vw - 48px)', maxHeight: 'calc(100dvh - 48px)' }}
+      fit
       active={initialPage}
       sidebar={{ header: t('settings.title'), items }}
       onOpenChange={(open) => {

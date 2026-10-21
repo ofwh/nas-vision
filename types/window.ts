@@ -48,13 +48,14 @@ export type LiquidGlassModalProps = {
 };
 
 export type HeaderContent = { left?: ReactNode; center?: ReactNode; right?: ReactNode };
+export type WindowModalHeader = boolean | HeaderContent;
 
 export type WindowModalProps = Omit<LiquidGlassModalProps, 'children' | 'header'> & {
   id?: string;
   src?: string;
   mode?: HeaderMode;
   controls?: WindowControlsConfig;
-  header?: boolean | HeaderContent;
+  header?: WindowModalHeader;
   children?: ReactNode | ((controls: ReactNode) => ReactNode);
 };
 
