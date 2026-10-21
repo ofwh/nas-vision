@@ -73,7 +73,7 @@
     "previewUnavailable": "{name}：预览不可用",
     "viewPhoto": "查看照片：{name}",
     "viewVideo": "查看视频：{name}",
-    "rotateClockwise": "顺时针旋转",
+    "rotateClockwise": "旋转",
     "sortAscending": "图片按时间升序，点击切换为降序",
     "sortDescending": "图片按时间降序，点击切换为升序"
   }

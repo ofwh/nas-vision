@@ -25,6 +25,7 @@ export default function useGallery(
   const { config } = usePlugin('immich');
   const { data: settings, error: configError } = config.query();
   const [revision, setRevision] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
   const sentinel = useRef<HTMLDivElement>(null);
   const loadingMore = useRef(false);
   const {
@@ -123,14 +124,17 @@ export default function useGallery(
   return {
     data,
     items,
-    error: error ?? configError,
-    isLoading: !settings && !configError ? true : isLoading,
+    error: isRetrying ? undefined : (error ?? configError),
+    isLoading: isRetrying || (!settings && !configError) || isLoading,
     isValidating,
     hasMore,
     sentinel,
     refresh,
     retry: () => {
-      void (configError ? mutateCache(['/api/plugin/query', { id: 'immich' }]) : mutate()).catch(() => undefined);
+      setIsRetrying(true);
+      void (configError ? mutateCache(['/api/plugin/query', { id: 'immich' }]) : mutate())
+        .catch(() => undefined)
+        .finally(() => setIsRetrying(false));
     },
   };
 }

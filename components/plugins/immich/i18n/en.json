@@ -73,7 +73,7 @@
     "previewUnavailable": "{name}: preview unavailable",
     "viewPhoto": "View photo: {name}",
     "viewVideo": "View video: {name}",
-    "rotateClockwise": "Rotate clockwise",
+    "rotateClockwise": "Rotate",
     "sortAscending": "Photos: oldest first; switch to newest first",
     "sortDescending": "Photos: newest first; switch to oldest first"
   }
