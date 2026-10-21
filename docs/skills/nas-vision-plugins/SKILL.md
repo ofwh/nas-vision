@@ -15,6 +15,7 @@ description: 在 NAS Vision 创建、接入或维护插件时，指导模块注�
 | 导航、请求、上传、缓存 | [数据交互](references/data-interaction.md)                                   | `hooks/usePlugin.ts`、`lib/plugins/client.ts`、`lib/services/plugins.ts` |
 | 创建最小展示插件       | [最小插件](references/minimal-plugin.md)                                     | 仅使用模块注册与展示能力                                                 |
 | 调整配置表单           | [目录与配置](references/architecture.md#配置)                                | `components/business/AppConfig/AppPluginConfigForm.tsx`                  |
+| 样式命名与隔离         | [样式规范](references/architecture.md#样式规范)                              | `components/plugins/<插件>/styles/`                                      |
 | 页面与接口文案         | [语言](references/architecture.md#语言)                                      | `components/plugins/<插件>/i18n/`                                        |
 | 设计、接入插件窗口     | [窗口与公共组件](#窗口与公共组件)、[弹窗技能](../nas-vision-modals/SKILL.md) | `components/home/AppItem.tsx`、`types/window.ts`                         |
 
