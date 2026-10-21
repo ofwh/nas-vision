@@ -1,0 +1,39 @@
+{
+  "id": "navidrome",
+  "name": "Navidrome",
+  "description": "浏览音乐资料库、专辑与歌单，搜索、收藏并播放 Navidrome 音乐。",
+  "icon": "",
+  "status": "on",
+  "size": {
+    "width": 1240,
+    "height": 760
+  },
+  "mode": "floating",
+  "header": false,
+  "fit": true,
+  "resizable": true,
+  "configs": [
+    {
+      "label": "服务地址（支持子路径，如 https://music.example.com）",
+      "key": "serverUrl",
+      "type": "input",
+      "value": "",
+      "defaults": ""
+    },
+    {
+      "label": "Navidrome 用户名",
+      "key": "username",
+      "type": "input",
+      "value": "",
+      "defaults": ""
+    },
+    {
+      "label": "Navidrome 密码",
+      "key": "password",
+      "type": "input",
+      "secret": true,
+      "value": "",
+      "defaults": ""
+    }
+  ]
+}
