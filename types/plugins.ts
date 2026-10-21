@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import type { HeaderMode } from '@/types/window';
+import type { HeaderMode, WindowModalHeader } from '@/types/window';
 import type { JsonObject, Result } from '@/lib/api';
 
 export type PluginFieldType = string | number | boolean | string[] | number[] | boolean[];
@@ -34,7 +34,7 @@ export interface PluginManifest {
   fit?: boolean;
   resizable?: boolean;
   top?: boolean;
-  header?: boolean;
+  header?: WindowModalHeader;
   mode?: HeaderMode;
   previews?: string[];
   configs?: PluginSettingOption[];
