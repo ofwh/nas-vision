@@ -22,12 +22,16 @@ function sliderValue(value: number | readonly number[]): number {
 export function VolumeControl() {
   const [preview, setPreview] = useState<number | null>(null);
   const [hintOpen, setHintOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [hovering, setHovering] = useState(false);
   const hintId = useId();
+  const hover = useSliderPreview(100, 'vertical');
   const container = useContainer();
   const player = usePlayer();
   const volume = usePlayer((state) => (state.muted ? 0 : Math.round(state.volume * 100)));
   const available = usePlayer((state) => state.volumeAvailability === 'available');
   const value = preview ?? volume;
+  const hintValue = preview ?? (hovering ? hover.value : value) ?? value;
   const level = value === 0 ? 'off' : value <= 50 ? 'low' : 'high';
 
   return (
@@ -63,13 +67,31 @@ export function VolumeControl() {
             <LiquidGlass className="rounded-full" contentClassName="px-3 py-4">
               <TooltipProvider>
                 <Tooltip
-                  open={preview !== null || hintOpen}
+                  open={available && (preview !== null || hintOpen || focused)}
                   onOpenChange={setHintOpen}
                   triggerId={hintId}
                   trackCursorAxis="y"
                   disableHoverablePopup
                 >
-                  <TooltipTrigger id={hintId} delay={0} closeOnClick={false} render={<div className="relative" />}>
+                  <TooltipTrigger
+                    id={hintId}
+                    delay={0}
+                    closeOnClick={false}
+                    onPointerMoveCapture={(event) => {
+                      setHovering(true);
+                      hover.move(event);
+                    }}
+                    onPointerDownCapture={(event) => {
+                      setHovering(true);
+                      hover.move(event);
+                    }}
+                    onPointerEnter={(event) => {
+                      setHovering(true);
+                      hover.move(event);
+                    }}
+                    onPointerLeave={() => setHovering(false)}
+                    render={<div className="relative" />}
+                  >
                     <span id={`${hintId}-label`} className="sr-only">
                       音量
                     </span>
@@ -89,8 +111,14 @@ export function VolumeControl() {
                       }}
                       onPointerCancel={() => setPreview(null)}
                       onLostPointerCapture={() => setPreview(null)}
-                      onFocus={() => setHintOpen(true)}
-                      onBlur={() => setHintOpen(false)}
+                      onFocus={(event) =>
+                        setFocused(event.target instanceof HTMLElement && event.target.matches(':focus-visible'))
+                      }
+                      onKeyDownCapture={() => {
+                        setFocused(true);
+                        setHovering(false);
+                      }}
+                      onBlur={() => setFocused(false)}
                     />
                   </TooltipTrigger>
                   <TooltipPrimitive.Portal container={container} className={styles.portal}>
@@ -105,7 +133,7 @@ export function VolumeControl() {
                           className="rounded-full"
                           contentClassName="px-3 py-2 text-xs text-white tabular-nums"
                         >
-                          <output aria-live="off">{Math.round(value)}%</output>
+                          <output aria-live="off">{Math.round(hintValue)}%</output>
                         </LiquidGlass>
                       </TooltipPrimitive.Popup>
                     </TooltipPrimitive.Positioner>
