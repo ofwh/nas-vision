@@ -5,6 +5,7 @@ import type {
   ImmichMedia,
   ImmichDirectory,
   ImmichMode,
+  ImmichOrder,
   ImmichListParams,
   ImmichListRes,
   ImmichDetailParams,
@@ -115,13 +116,19 @@ async function folders(config: PluginConfig, path: string): Promise<ImmichDirect
   return [...children.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-async function search(config: PluginConfig, page: number, size: number, album?: string): Promise<ImmichSearchRes> {
+async function search(
+  config: PluginConfig,
+  page: number,
+  size: number,
+  album?: string,
+  order: ImmichOrder = 'desc',
+): Promise<ImmichSearchRes> {
   return json<ImmichSearchRes>(config, '/search/metadata', {
     page,
     size,
     withExif: true,
     withDeleted: false,
-    order: 'desc',
+    order,
     ...(album ? { albumIds: [album] } : {}),
   });
 }
@@ -131,6 +138,7 @@ async function searchSlice(
   offset: number,
   count: number,
   album?: string,
+  order: ImmichOrder = 'desc',
 ): Promise<{ images: ImmichMedia[]; hasMore: boolean }> {
   const size = 100;
   let page = Math.floor(offset / size) + 1;
@@ -139,7 +147,7 @@ async function searchSlice(
   let more = false;
 
   do {
-    const result = await search(config, page, size, album);
+    const result = await search(config, page, size, album, order);
 
     assets.push(...result.assets.items.slice(skip).filter(isMedia));
     more = Boolean(result.assets.nextPage ?? result.assets.nextCursor);
@@ -155,6 +163,7 @@ export async function list(params: ImmichListParams, config: PluginConfig): Prom
   connection(config);
   const page = params.page ?? 1;
   const pageSize = params.pageSize ?? 48;
+  const order = params.order ?? 'asc';
 
   if (
     !Number.isSafeInteger(page) ||
@@ -164,7 +173,8 @@ export async function list(params: ImmichListParams, config: PluginConfig): Prom
     pageSize > 100 ||
     !Number.isSafeInteger(page * pageSize) ||
     (params.directory !== undefined && typeof params?.directory !== 'string') ||
-    (params.mode !== undefined && params.mode !== 'folders' && params.mode !== 'albums')
+    (params.mode !== undefined && params.mode !== 'folders' && params.mode !== 'albums') ||
+    (order !== 'asc' && order !== 'desc')
   ) {
     throw new ImmichError('INVALID_LIST');
   }
@@ -179,7 +189,7 @@ export async function list(params: ImmichListParams, config: PluginConfig): Prom
       assetId(directory);
       const [album, result] = await Promise.all([
         json<ImmichAlbum>(config, `/albums/${assetId(directory)}`),
-        searchSlice(config, offset, pageSize, directory),
+        searchSlice(config, offset, pageSize, directory, order),
       ]);
 
       return {
@@ -201,7 +211,7 @@ export async function list(params: ImmichListParams, config: PluginConfig): Prom
       .map((album) => ({ type: 'directory', id: album.id, name: album.albumName, count: album.assetCount }));
     const count = pageSize - directories.length;
     const result = count
-      ? await searchSlice(config, Math.max(0, offset - albums.length), count)
+      ? await searchSlice(config, Math.max(0, offset - albums.length), count, undefined, order)
       : { images: [], hasMore: true };
 
     return {
@@ -209,7 +219,7 @@ export async function list(params: ImmichListParams, config: PluginConfig): Prom
       hasMore: offset + pageSize < albums.length || result.hasMore,
       page,
       directory: '',
-      name: '相册',
+      name: '',
       parent: null,
       mode,
     };
@@ -226,7 +236,7 @@ export async function list(params: ImmichListParams, config: PluginConfig): Prom
     hasMore: offset + pageSize < items.length,
     page,
     directory: path,
-    name: path.split('/').pop() || '目录',
+    name: path.split('/').pop() || '',
     parent: path === root(config) ? null : parentPath,
     mode,
   };

@@ -1,0 +1,15 @@
+.preview {
+  transform: translateX(var(--nv-plugin-immich-preview-offset)) rotate(var(--nv-plugin-immich-preview-angle));
+  transition: transform 300ms ease;
+}
+
+.directory:hover .preview {
+  transform: translateX(var(--nv-plugin-immich-preview-offset)) rotate(var(--nv-plugin-immich-preview-hover-angle))
+    scale(1.03);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preview {
+    transition: none;
+  }
+}

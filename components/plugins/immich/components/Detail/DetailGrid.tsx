@@ -2,16 +2,17 @@
 
 import { Play } from 'lucide-react';
 import { type RefObject, useMemo } from 'react';
-import useVirtualViewport, { visibleRows } from '../hooks/useVirtualViewport';
-import type { ImmichMedia } from '../types';
-import { formatDuration } from '../utils/duration';
-import Photo from './Photo';
+import { useImmichTranslations } from '../../i18n/useTranslations';
+import useVirtualViewport, { visibleRows } from '../../hooks/useVirtualViewport';
+import type { ImmichMedia } from '../../types';
+import { formatDuration } from '../../utils/duration';
+import DetailThumbnail from './DetailThumbnail';
 
 function aspectRatio(image: ImmichMedia): number {
   return image.width && image.height && image.width > 0 && image.height > 0 ? image.width / image.height : 1;
 }
 
-export default function PhotoView({
+export default function DetailGrid({
   images,
   onSelect,
   scrollRef,
@@ -20,6 +21,7 @@ export default function PhotoView({
   images: ImmichMedia[];
   onSelect: (image: ImmichMedia) => void;
 }) {
+  const t = useImmichTranslations();
   const [listRef, viewport] = useVirtualViewport(scrollRef);
   const width = viewport.width;
   const target = viewport.width >= 1024 ? 256 : viewport.width >= 768 ? 224 : viewport.width >= 640 ? 192 : 160;
@@ -50,7 +52,7 @@ export default function PhotoView({
   const { start, end } = visibleRows(rows.length, stride, viewport.top, viewport.height);
 
   return (
-    <section aria-label="照片和视频">
+    <section aria-label={t('ui.media')}>
       <div ref={listRef} className="relative" style={{ height: Math.max(0, rows.length * stride - 4) }}>
         {rows.slice(start, end).map((items, index) => (
           <div
@@ -63,12 +65,12 @@ export default function PhotoView({
                 key={image.id}
                 type="button"
                 onClick={() => onSelect(image)}
-                aria-label={`查看${image.type === 'video' ? '视频' : '照片'}：${image.name}`}
+                aria-label={t(image.type === 'video' ? 'ui.viewVideo' : 'ui.viewPhoto', { name: image.name })}
                 title={image.name}
                 style={{ flex: `${aspectRatio(image)} 1 0%` }}
                 className="group relative min-w-0 cursor-pointer overflow-hidden bg-zinc-900 focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-white"
               >
-                <Photo
+                <DetailThumbnail
                   id={image.id}
                   name={image.name}
                   className="h-full w-full [&_img]:transition-transform [&_img]:duration-300 [&_img]:ease-out group-hover:[&_img]:scale-105 motion-reduce:[&_img]:transform-none motion-reduce:[&_img]:transition-none"

@@ -103,5 +103,6 @@
         "value": "folders"
       }
     }
-  ]
+  ],
+  "header": false
 }

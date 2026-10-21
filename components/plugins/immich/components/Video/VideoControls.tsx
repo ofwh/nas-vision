@@ -11,15 +11,17 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger } from '@/components/ui/popover';
 import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import useSliderPreview from '../hooks/useSliderPreview';
-import styles from '../styles/VideoView.module.css';
-import { formatDuration } from '../utils/duration';
+import { useImmichTranslations } from '../../i18n/useTranslations';
+import useSliderPreview from '../../hooks/useSliderPreview';
+import styles from '../../styles/VideoModal.module.css';
+import { formatDuration } from '../../utils/duration';
 
 function sliderValue(value: number | readonly number[]): number {
   return typeof value === 'number' ? value : (value[0] ?? 0);
 }
 
-export function VolumeControl() {
+export function VideoVolumeControl() {
+  const t = useImmichTranslations();
   const [preview, setPreview] = useState<number | null>(null);
   const [hintOpen, setHintOpen] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -51,7 +53,7 @@ export function VolumeControl() {
             variant="ghost"
             size="icon"
             className={`${styles.button} ${styles.volumeButton}`}
-            aria-label="音量控制"
+            aria-label={t('ui.volumeControl')}
           />
         }
       >
@@ -63,7 +65,11 @@ export function VolumeControl() {
       </PopoverTrigger>
       <PopoverPrimitive.Portal container={container} className={styles.portal}>
         <PopoverPrimitive.Positioner data-video-overlay side="top" sideOffset={12} className="pointer-events-auto z-50">
-          <PopoverPrimitive.Popup aria-label="音量" className="rounded-full outline-none" initialFocus={false}>
+          <PopoverPrimitive.Popup
+            aria-label={t('ui.volume')}
+            className="rounded-full outline-none"
+            initialFocus={false}
+          >
             <LiquidGlass className="rounded-full" contentClassName="px-3 py-4">
               <TooltipProvider>
                 <Tooltip
@@ -93,7 +99,7 @@ export function VolumeControl() {
                     render={<div className="relative" />}
                   >
                     <span id={`${hintId}-label`} className="sr-only">
-                      音量
+                      {t('ui.volume')}
                     </span>
                     <Slider
                       orientation="vertical"
@@ -148,7 +154,8 @@ export function VolumeControl() {
   );
 }
 
-export function ProgressControl() {
+export function VideoProgressControl() {
+  const t = useImmichTranslations();
   const [preview, setPreview] = useState<number | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const previewId = useId();
@@ -178,11 +185,11 @@ export function ProgressControl() {
           render={<div className="relative w-40 shrink-0" />}
         >
           <span id={`${previewId}-label`} className="sr-only">
-            播放进度
+            {t('ui.progress')}
           </span>
           <Slider
             className={styles.seek}
-            style={{ '--video-buffer': `${buffer}%` } as CSSProperties}
+            style={{ '--nv-plugin-immich-video-buffer': `${buffer}%` } as CSSProperties}
             aria-labelledby={`${previewId}-label`}
             value={[value]}
             min={0}
