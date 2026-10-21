@@ -60,49 +60,51 @@ function Gallery({
         onModeChange={(mode) => navigation.navigate(`/${mode}`)}
         onRefresh={error ? retry : refresh}
       />
-      <ScrollArea
-        ref={setScrollArea}
-        className="min-h-0 w-full min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-thumb]]:bg-white/35 [&_[data-slot=scroll-area-thumb]]:hover:bg-white/55 [&_[data-slot=scroll-area-viewport]]:overscroll-contain"
-      >
-        <main className="flex min-h-full w-full min-w-0 flex-col">
-          {isLoading ? (
-            <div role="status" className="flex min-h-60 items-center justify-center gap-3 text-sm text-white/50">
-              <LoaderCircle className="size-5 animate-spin motion-reduce:animate-none" />
-              {t('ui.loading')}
-            </div>
-          ) : null}
-          {data && !items.length ? (
-            <div className="flex min-h-60 flex-col items-center justify-center gap-3 text-white/40">
-              <Images className="size-10" strokeWidth={1} />
-              <p className="text-sm">{t('ui.empty')}</p>
-            </div>
-          ) : null}
-          {data && directories.length ? (
-            <DirectoryGrid mode={data.mode} directories={directories} onOpen={navigate} scrollRef={container} />
-          ) : null}
-          {images.length ? <DetailGrid images={images} onSelect={setSelected} scrollRef={container} /> : null}
-          {error ? (
-            <div role="alert" className="rounded-xl bg-white/5 p-6">
-              <p className="text-sm text-red-300">{error.message}</p>
-              <p className="mt-2 text-sm text-white/50">{t('ui.settingsHint')}</p>
-              <Button variant="ghost" className="mt-4" onClick={retry}>
-                {t('ui.retry')}
-              </Button>
-            </div>
-          ) : null}
-          {hasMore ? <div ref={sentinel} className="h-px shrink-0" aria-hidden="true" /> : null}
-          {isValidating && items.length ? (
-            <div
-              className="flex min-h-12 items-center justify-center py-4 text-sm text-white/50"
-              role="status"
-              aria-live="polite"
-            >
-              <LoaderCircle className="mr-2 size-4 animate-spin motion-reduce:animate-none" />
-              {t('ui.loadingMore')}
-            </div>
-          ) : null}
-        </main>
-      </ScrollArea>
+      {isLoading ? (
+        <div role="status" className="flex min-h-0 flex-1 items-center justify-center gap-3 p-6 text-sm text-white/50">
+          <LoaderCircle className="size-5 animate-spin motion-reduce:animate-none" />
+          {t('ui.loading')}
+        </div>
+      ) : error ? (
+        <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto p-6">
+          <div role="alert" className="max-w-full rounded-xl bg-white/5 p-6 text-center wrap-break-word">
+            <p className="text-sm text-red-300">{error.message}</p>
+            <p className="mt-2 text-sm text-white/50">{t('ui.settingsHint')}</p>
+            <Button variant="ghost" className="mt-4" onClick={retry}>
+              {t('ui.retry')}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <ScrollArea
+          ref={setScrollArea}
+          className="min-h-0 w-full min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-thumb]]:bg-white/35 [&_[data-slot=scroll-area-thumb]]:hover:bg-white/55 [&_[data-slot=scroll-area-viewport]]:overscroll-contain"
+        >
+          <main className="flex min-h-full w-full min-w-0 flex-col">
+            {data && !items.length ? (
+              <div className="flex min-h-60 flex-col items-center justify-center gap-3 text-white/40">
+                <Images className="size-10" strokeWidth={1} />
+                <p className="text-sm">{t('ui.empty')}</p>
+              </div>
+            ) : null}
+            {data && directories.length ? (
+              <DirectoryGrid mode={data.mode} directories={directories} onOpen={navigate} scrollRef={container} />
+            ) : null}
+            {images.length ? <DetailGrid images={images} onSelect={setSelected} scrollRef={container} /> : null}
+            {hasMore ? <div ref={sentinel} className="h-px shrink-0" aria-hidden="true" /> : null}
+            {isValidating && items.length ? (
+              <div
+                className="flex min-h-12 items-center justify-center py-4 text-sm text-white/50"
+                role="status"
+                aria-live="polite"
+              >
+                <LoaderCircle className="mr-2 size-4 animate-spin motion-reduce:animate-none" />
+                {t('ui.loadingMore')}
+              </div>
+            ) : null}
+          </main>
+        </ScrollArea>
+      )}
       {selected?.type === 'video' ? (
         <VideoModal
           key={selected.id}
@@ -135,7 +137,7 @@ export default function Immich({ path }: PluginViewProps) {
     directory = mode && section === 'directory' ? decodeURIComponent(parts.join('/')) : undefined;
   } catch {
     return (
-      <p role="alert" className="p-6 text-red-300">
+      <p role="alert" className="flex min-h-0 flex-1 items-center justify-center p-6 text-center text-red-300">
         {t('ui.invalidPath')}
       </p>
     );

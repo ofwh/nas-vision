@@ -2,7 +2,7 @@
 
 import type { ReactElement } from 'react';
 import { Tooltip as TooltipPrimitive } from '@base-ui/react/tooltip';
-import { ArrowDownAZ, ArrowDownZA, ArrowLeft, Folder, House, Images, RefreshCw, X } from 'lucide-react';
+import { ArrowDownAZ, ArrowDownZA, ChevronLeft, Folder, House, Images, RefreshCw, X } from 'lucide-react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -29,7 +29,7 @@ function HeaderTooltip({ label, children }: { label: string; children: ReactElem
     <Tooltip>
       <TooltipTrigger render={children} />
       <TooltipPrimitive.Portal>
-        <TooltipPrimitive.Positioner side="bottom" sideOffset={8} className="pointer-events-none z-[1200]">
+        <TooltipPrimitive.Positioner side="top" sideOffset={8} className="pointer-events-none z-[1200]">
           <TooltipPrimitive.Popup>
             <LiquidGlass className="rounded-full" contentClassName="px-3 py-2 text-xs text-white">
               {label}
@@ -83,7 +83,7 @@ export default function GalleryHeader({
                     aria-label={t('ui.back')}
                     onClick={onBack}
                   >
-                    <ArrowLeft className="size-4" />
+                    <ChevronLeft className="size-4" />
                   </Button>
                 </HeaderTooltip>
               </Surface>
