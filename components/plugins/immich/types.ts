@@ -1,4 +1,5 @@
 export type ImmichMode = 'folders' | 'albums';
+export type ImmichOrder = 'asc' | 'desc';
 
 export type ImmichDirectory = {
   type: 'directory';
@@ -46,7 +47,13 @@ export type ImmichDetailRes = ImmichMedia & {
   isFavorite: boolean;
   exif: ImmichExif;
 };
-export type ImmichListParams = { directory?: string; page?: number; pageSize?: number; mode?: ImmichMode };
+export type ImmichListParams = {
+  directory?: string;
+  page?: number;
+  pageSize?: number;
+  mode?: ImmichMode;
+  order?: ImmichOrder;
+};
 export type ImmichDetailParams = { id: string };
 export type ImmichVideoParams = { id: string };
 export type ImmichVideoContext = { range: string | null; signal: AbortSignal };

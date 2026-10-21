@@ -95,7 +95,7 @@
 }
 :global([role='dialog']):fullscreen:has(.frame) > :global(.absolute):has(.controls),
 :global([role='dialog']):fullscreen .overlay,
-:global([role='dialog']):fullscreen :global([data-video-overlay]) {
+:global([role='dialog']):fullscreen:has(.frame) :global([data-video-overlay]) {
   transition:
     opacity 250ms ease,
     visibility 0s;
@@ -103,9 +103,9 @@
 :global([role='dialog']):fullscreen[data-controls-hidden='true']:has(.frame) {
   cursor: none;
 }
-:global([role='dialog']):fullscreen[data-controls-hidden='true'] > :global(.absolute):has(.controls),
+:global([role='dialog']):fullscreen[data-controls-hidden='true']:has(.frame) > :global(.absolute):has(.controls),
 :global([role='dialog']):fullscreen[data-controls-hidden='true'] .overlay,
-:global([role='dialog']):fullscreen[data-controls-hidden='true'] :global([data-video-overlay]) {
+:global([role='dialog']):fullscreen[data-controls-hidden='true']:has(.frame) :global([data-video-overlay]) {
   opacity: 0 !important;
   visibility: hidden;
   pointer-events: none;
@@ -116,7 +116,7 @@
 @media (prefers-reduced-motion: reduce) {
   :global([role='dialog']):fullscreen:has(.frame) > :global(.absolute):has(.controls),
   :global([role='dialog']):fullscreen .overlay,
-  :global([role='dialog']):fullscreen :global([data-video-overlay]) {
+  :global([role='dialog']):fullscreen:has(.frame) :global([data-video-overlay]) {
     transition: none;
   }
 }
@@ -139,7 +139,7 @@
   position: absolute;
   inset-block: 0;
   left: 0;
-  width: var(--video-buffer, 0%);
+  width: var(--nv-plugin-immich-video-buffer, 0%);
   background: rgb(255 255 255 / 35%);
 }
 .seek [data-slot='slider-range'],

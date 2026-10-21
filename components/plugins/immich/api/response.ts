@@ -1,6 +1,7 @@
 import { getLocale } from 'next-intl/server';
 import type { Result } from '@/lib/api';
-import { codes, messages, ImmichError } from './errors';
+import { getMessages } from '../i18n';
+import { codes, ImmichError } from './errors';
 
 export async function run(action: () => Promise<Response>): Promise<Result<Response>> {
   try {
@@ -8,7 +9,7 @@ export async function run(action: () => Promise<Response>): Promise<Result<Respo
   } catch (error) {
     const code = error instanceof ImmichError ? error.code : 'REQUEST_FAILED';
     const locale = await getLocale();
-    const message = messages[locale === 'en' ? 'en' : 'zh-CN'][code];
+    const message = getMessages(locale).errors[code];
     const response = Response.json({
       code: codes[code],
       data: null,

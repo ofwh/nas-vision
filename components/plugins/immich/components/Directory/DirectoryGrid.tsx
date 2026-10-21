@@ -1,11 +1,12 @@
 'use client';
 
 import { type RefObject } from 'react';
-import type { ImmichDirectory, ImmichMode } from '../types';
-import useVirtualViewport, { visibleRows } from '../hooks/useVirtualViewport';
-import Directory from './Directory';
+import { useImmichTranslations } from '../../i18n/useTranslations';
+import type { ImmichDirectory, ImmichMode } from '../../types';
+import useVirtualViewport, { visibleRows } from '../../hooks/useVirtualViewport';
+import DirectoryCard from './DirectoryCard';
 
-export default function ForderView({
+export default function DirectoryGrid({
   directories,
   mode,
   onOpen,
@@ -16,6 +17,7 @@ export default function ForderView({
   onOpen: (id: string) => void;
   scrollRef: RefObject<HTMLDivElement | null>;
 }) {
+  const t = useImmichTranslations();
   const [listRef, viewport] = useVirtualViewport(scrollRef);
   const columns = Math.max(1, Math.floor((viewport.width + 8) / 248));
   const rowHeight = viewport.width >= 1024 ? 256 : viewport.width >= 768 ? 224 : viewport.width >= 640 ? 192 : 160;
@@ -24,7 +26,7 @@ export default function ForderView({
   const { start, end } = visibleRows(count, stride, viewport.top, viewport.height);
 
   return (
-    <section className="mb-8" aria-label="文件夹">
+    <section className="mb-8" aria-label={t('ui.folders')}>
       <div ref={listRef} className="relative" style={{ height: Math.max(0, count * stride - 8) }}>
         {Array.from({ length: end - start }, (_, offset) => {
           const row = start + offset;
@@ -40,7 +42,7 @@ export default function ForderView({
               }}
             >
               {directories.slice(row * columns, (row + 1) * columns).map((directory) => (
-                <Directory
+                <DirectoryCard
                   key={`${mode}-${directory.id}`}
                   mode={mode}
                   directory={directory}

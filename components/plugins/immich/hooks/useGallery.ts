@@ -1,20 +1,27 @@
 'use client';
 
+import { useLocale } from 'next-intl';
 import { type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import useSWRInfinite from 'swr/infinite';
+import { useSWRConfig } from 'swr';
 import { usePlugin } from '@/hooks/usePlugin';
 import { pluginPath, pluginRequest } from '@/lib/plugins/client';
 import type { JsonObject } from '@/lib/api';
 import type { PluginConfig } from '@/types/plugins';
-import type { ImmichListRes, ImmichMode } from '../types';
+import { useImmichTranslations } from '../i18n/useTranslations';
+import type { ImmichListRes, ImmichMode, ImmichOrder } from '../types';
 
 type ListKey = readonly [string, JsonObject, PluginConfig];
 
 export default function useGallery(
   directory: string | undefined,
   mode: ImmichMode | undefined,
+  order: ImmichOrder,
   scrollRef: RefObject<HTMLDivElement | null>,
 ) {
+  const t = useImmichTranslations();
+  const locale = useLocale();
+  const { mutate: mutateCache } = useSWRConfig();
   const { config } = usePlugin('immich');
   const { data: settings, error: configError } = config.query();
   const [revision, setRevision] = useState(0);
@@ -39,9 +46,11 @@ export default function useGallery(
         {
           ...(directory === undefined ? {} : { directory }),
           ...(mode === undefined ? {} : { mode }),
+          order,
           page: index + 1,
           pageSize: 48,
           revision,
+          locale,
         },
         settings.config,
       ];
@@ -50,7 +59,7 @@ export default function useGallery(
       const response = await pluginRequest<ImmichListRes>(url, params);
 
       if (!response.data) {
-        throw new Error('照片资料库响应为空');
+        throw new Error(t('ui.emptyResponse'));
       }
 
       return response.data;
@@ -121,7 +130,7 @@ export default function useGallery(
     sentinel,
     refresh,
     retry: () => {
-      void mutate().catch(() => undefined);
+      void (configError ? mutateCache(['/api/plugin/query', { id: 'immich' }]) : mutate()).catch(() => undefined);
     },
   };
 }

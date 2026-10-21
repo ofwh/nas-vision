@@ -1,13 +1,14 @@
 'use client';
 
+import { useLocale } from 'next-intl';
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { Folder, LoaderCircle } from 'lucide-react';
 import { usePluginFetch } from '@/hooks/usePlugin';
-import type { ImmichDirectory, ImmichMode, ImmichPreviewRes } from '../types';
-import styles from '../styles/Directory.module.css';
-import Photo from './Photo';
+import type { ImmichDirectory, ImmichMode, ImmichPreviewRes } from '../../types';
+import styles from '../../styles/DirectoryCard.module.css';
+import DetailThumbnail from '../Detail/DetailThumbnail';
 
-export default function Directory({
+export default function DirectoryCard({
   directory,
   mode,
   onOpen,
@@ -38,9 +39,11 @@ export default function Directory({
 
     return () => observer.disconnect();
   }, []);
+  const locale = useLocale();
   const { data, isLoading } = usePluginFetch<ImmichPreviewRes>('immich', visible ? '/api/preview' : null, {
     directory: directory.id,
     mode,
+    locale,
   });
   const images = data?.images.slice(0, 3) ?? [];
   const label = (
@@ -73,14 +76,14 @@ export default function Directory({
                 className={`${styles.preview} absolute right-3 bottom-3 aspect-[3/4] h-[84%] origin-bottom-left overflow-hidden rounded-xl shadow-lg ring-1 ring-white/15`}
                 style={
                   {
-                    '--preview-offset': `${images.length === 1 ? 0 : (position - 1) * 8}%`,
-                    '--preview-angle': `${angle}deg`,
-                    '--preview-hover-angle': `${hoverAngle}deg`,
+                    '--nv-plugin-immich-preview-offset': `${images.length === 1 ? 0 : (position - 1) * 8}%`,
+                    '--nv-plugin-immich-preview-angle': `${angle}deg`,
+                    '--nv-plugin-immich-preview-hover-angle': `${hoverAngle}deg`,
                     zIndex: index + 1,
                   } as CSSProperties
                 }
               >
-                <Photo id={photo.id} name={photo.name} className="h-full w-full bg-transparent!" />
+                <DetailThumbnail id={photo.id} name={photo.name} className="h-full w-full bg-transparent!" />
                 {index === images.length - 1 ? (
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                 ) : null}

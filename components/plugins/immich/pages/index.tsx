@@ -6,15 +6,27 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { usePlugin } from '@/hooks/usePlugin';
 import type { PluginViewProps } from '@/types/plugins';
-import type { ImmichMedia, ImmichMode } from '../types';
-import ForderView from '../components/ForderView';
-import Detail from '../components/Detail';
-import VideoView from '../components/VideoView';
-import PhotoView from '../components/PhotoView';
-import Footer from '../components/Footer';
+import { useImmichTranslations } from '../i18n/useTranslations';
+import type { ImmichMedia, ImmichMode, ImmichOrder } from '../types';
+import DirectoryGrid from '../components/Directory/DirectoryGrid';
+import PhotoModal from '../components/Photo/PhotoModal';
+import VideoModal from '../components/Video/VideoModal';
+import DetailGrid from '../components/Detail/DetailGrid';
+import GalleryHeader from '../components/GalleryHeader';
 import useGallery from '../hooks/useGallery';
 
-function Gallery({ directory, mode }: { directory?: string; mode?: ImmichMode }) {
+function Gallery({
+  directory,
+  mode,
+  order,
+  onOrderChange,
+}: {
+  directory?: string;
+  mode?: ImmichMode;
+  order: ImmichOrder;
+  onOrderChange: (order: ImmichOrder) => void;
+}) {
+  const t = useImmichTranslations();
   const { page: navigation } = usePlugin('immich');
   const container = useRef<HTMLDivElement>(null);
   const setScrollArea = useCallback((node: HTMLDivElement | null) => {
@@ -24,6 +36,7 @@ function Gallery({ directory, mode }: { directory?: string; mode?: ImmichMode })
   const { data, items, error, isLoading, isValidating, hasMore, sentinel, refresh, retry } = useGallery(
     directory,
     mode,
+    order,
     container,
   );
   const directories = items.filter((item) => item.type === 'directory');
@@ -35,36 +48,45 @@ function Gallery({ directory, mode }: { directory?: string; mode?: ImmichMode })
   const navigate = (id: string) => navigation.navigate(`${root}/directory/${encodeURIComponent(id)}`);
 
   return (
-    <div className="relative h-full w-full min-w-0 overflow-hidden text-zinc-100">
+    <div className="relative flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden text-zinc-100">
+      <GalleryHeader
+        mode={data?.mode}
+        order={order}
+        onOrderChange={onOrderChange}
+        loading={isLoading || isValidating}
+        canGoBack={Boolean(data && data.parent !== null)}
+        onBack={() => (data?.parent ? navigate(data.parent) : navigation.navigate(root))}
+        onRoot={() => navigation.navigate(root)}
+        onModeChange={(mode) => navigation.navigate(`/${mode}`)}
+        onRefresh={error ? retry : refresh}
+      />
       <ScrollArea
         ref={setScrollArea}
-        className="h-full w-full min-w-0 overflow-hidden [&_[data-slot=scroll-area-thumb]]:bg-white/35 [&_[data-slot=scroll-area-thumb]]:hover:bg-white/55 [&_[data-slot=scroll-area-viewport]]:overscroll-contain"
+        className="min-h-0 w-full min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-thumb]]:bg-white/35 [&_[data-slot=scroll-area-thumb]]:hover:bg-white/55 [&_[data-slot=scroll-area-viewport]]:overscroll-contain"
       >
         <main className="flex min-h-full w-full min-w-0 flex-col">
           {isLoading ? (
             <div role="status" className="flex min-h-60 items-center justify-center gap-3 text-sm text-white/50">
               <LoaderCircle className="size-5 animate-spin motion-reduce:animate-none" />
-              正在加载媒体资料库…
+              {t('ui.loading')}
             </div>
           ) : null}
           {data && !items.length ? (
             <div className="flex min-h-60 flex-col items-center justify-center gap-3 text-white/40">
               <Images className="size-10" strokeWidth={1} />
-              <p className="text-sm">这里还没有目录、照片或视频</p>
+              <p className="text-sm">{t('ui.empty')}</p>
             </div>
           ) : null}
           {data && directories.length ? (
-            <ForderView mode={data.mode} directories={directories} onOpen={navigate} scrollRef={container} />
+            <DirectoryGrid mode={data.mode} directories={directories} onOpen={navigate} scrollRef={container} />
           ) : null}
-          {images.length ? <PhotoView images={images} onSelect={setSelected} scrollRef={container} /> : null}
+          {images.length ? <DetailGrid images={images} onSelect={setSelected} scrollRef={container} /> : null}
           {error ? (
             <div role="alert" className="rounded-xl bg-white/5 p-6">
               <p className="text-sm text-red-300">{error.message}</p>
-              <p className="mt-2 text-sm text-white/50">
-                请检查插件设置中的服务地址与认证信息，以及 API Key 对应的读取权限。
-              </p>
+              <p className="mt-2 text-sm text-white/50">{t('ui.settingsHint')}</p>
               <Button variant="ghost" className="mt-4" onClick={retry}>
-                重试
+                {t('ui.retry')}
               </Button>
             </div>
           ) : null}
@@ -76,25 +98,13 @@ function Gallery({ directory, mode }: { directory?: string; mode?: ImmichMode })
               aria-live="polite"
             >
               <LoaderCircle className="mr-2 size-4 animate-spin motion-reduce:animate-none" />
-              正在加载更多…
+              {t('ui.loadingMore')}
             </div>
           ) : null}
         </main>
       </ScrollArea>
-      {data ? (
-        <Footer
-          name={data.name}
-          mode={data.mode}
-          loading={isValidating}
-          canGoBack={data.parent !== null}
-          onBack={() => (data.parent ? navigate(data.parent) : navigation.navigate(root))}
-          onRoot={() => navigation.navigate(root)}
-          onModeChange={(mode) => navigation.navigate(`/${mode}`)}
-          onRefresh={refresh}
-        />
-      ) : null}
       {selected?.type === 'video' ? (
-        <VideoView
+        <VideoModal
           key={selected.id}
           video={selected}
           onClose={() => setSelected(null)}
@@ -102,7 +112,7 @@ function Gallery({ directory, mode }: { directory?: string; mode?: ImmichMode })
           onNext={next ? () => setSelected(next) : undefined}
         />
       ) : selected ? (
-        <Detail
+        <PhotoModal
           key={selected.id}
           image={selected}
           onClose={() => setSelected(null)}
@@ -115,6 +125,8 @@ function Gallery({ directory, mode }: { directory?: string; mode?: ImmichMode })
 }
 
 export default function Immich({ path }: PluginViewProps) {
+  const [order, setOrder] = useState<ImmichOrder>('asc');
+  const t = useImmichTranslations();
   const [, segment, section, ...parts] = path.split('/');
   const mode = segment === 'folders' || segment === 'albums' ? segment : undefined;
   let directory: string | undefined;
@@ -124,10 +136,10 @@ export default function Immich({ path }: PluginViewProps) {
   } catch {
     return (
       <p role="alert" className="p-6 text-red-300">
-        目录路径无效
+        {t('ui.invalidPath')}
       </p>
     );
   }
 
-  return <Gallery key={path} directory={directory} mode={mode} />;
+  return <Gallery key={`${path}:${order}`} directory={directory} mode={mode} order={order} onOrderChange={setOrder} />;
 }

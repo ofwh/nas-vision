@@ -1,27 +1,38 @@
 'use client';
 
+import type { CSSProperties } from 'react';
+import { useLocale } from 'next-intl';
 import Image from 'next/image';
 import { ImageOff, LoaderCircle } from 'lucide-react';
 import { usePluginFetch } from '@/hooks/usePlugin';
-import type { ImmichThumbnailRes } from '../types';
+import { useImmichTranslations } from '../../i18n/useTranslations';
+import type { ImmichThumbnailRes } from '../../types';
 
-export default function Photo({
+export default function DetailThumbnail({
   id,
   name,
   size = 'thumbnail',
   className = '',
   onDimensions,
+  style,
 }: {
   id: string;
   name: string;
   size?: 'thumbnail' | 'preview';
   className?: string;
+  style?: CSSProperties;
   onDimensions?: (width: number, height: number) => void;
 }) {
-  const { data, error, isLoading } = usePluginFetch<ImmichThumbnailRes>('immich', '/api/thumbnail', { id, size });
+  const t = useImmichTranslations();
+  const locale = useLocale();
+  const { data, error, isLoading } = usePluginFetch<ImmichThumbnailRes>('immich', '/api/thumbnail', {
+    id,
+    size,
+    locale,
+  });
 
   return (
-    <div className={`relative overflow-hidden bg-white/5 ${className}`}>
+    <div className={`relative overflow-hidden bg-white/5 ${className}`} style={style}>
       {data ? (
         <Image
           src={data.dataUrl}
@@ -40,7 +51,7 @@ export default function Photo({
         <div
           className="flex h-full min-h-12 items-center justify-center text-white/35"
           role={error ? 'img' : 'status'}
-          aria-label={error ? `${name}：预览不可用` : '加载图片'}
+          aria-label={error ? t('ui.previewUnavailable', { name }) : t('ui.loadingImage')}
         >
           {isLoading ? (
             <LoaderCircle className="size-5 animate-spin motion-reduce:animate-none" />

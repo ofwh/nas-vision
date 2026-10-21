@@ -1,11 +1,11 @@
-export type MediaInfoItem = readonly [label: string, value: string | null];
+export type PhotoInfoItem = readonly [label: string, value: string | null];
 
-type MediaInfoProps = {
-  firstRow: readonly MediaInfoItem[];
-  secondRow: readonly MediaInfoItem[];
+type PhotoInfoProps = {
+  firstRow: readonly PhotoInfoItem[];
+  secondRow: readonly PhotoInfoItem[];
 };
 
-export default function MediaInfo({ firstRow, secondRow }: MediaInfoProps) {
+export default function PhotoInfo({ firstRow, secondRow }: PhotoInfoProps) {
   const secondRowItems = secondRow.filter(([, value]) => value !== null && value !== '');
 
   return (
