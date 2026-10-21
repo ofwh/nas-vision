@@ -105,4 +105,6 @@ export function ExampleDialog({ open, onOpenChange }: ExampleDialogProps) {
 
 manifest 可声明 `size`、`mode`、`header`、`transparent`、`fit`、`resizable`、`top`；`header` 仅为布尔值。宿主统一透传，WindowModal 解释默认行为，不按插件 ID 添加窗口分支。子窗口需单独配置。
 
+插件窗口按需使用已有能力；涉及公共组件调整时，遵守[插件技能的窗口与公共组件边界](../nas-vision-plugins/SKILL.md#窗口与公共组件)，先提出不影响其他模块的方案并取得用户确认，再实施调整。
+
 仅检查修改涉及的头部、控制按钮、关闭、最大化恢复、透明遮罩、缩放及 footer 布局。不新增测试用例；静态检查不能代替实际交互验证。
