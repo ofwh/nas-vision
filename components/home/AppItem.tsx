@@ -196,15 +196,19 @@ export function AppItem({ id, name, image, type, url, innerUrl, external, config
             onClick={openPage}
             disabled={type === 'plugin' ? !config.pluginName : !address}
             aria-label={t('home.openNamed', { name })}
-            className="flex h-40 w-full cursor-pointer flex-col items-center justify-center gap-2.5 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:cursor-default"
+            className="group/app flex h-40 w-full cursor-pointer flex-col items-center justify-center gap-2.5 rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:cursor-default"
           >
             {/* 别在玻璃上写 opacity：会自建 backdrop 根，毛玻璃就看不到背景了 */}
             {/* 放大走 transform，不占布局；长出来的部分靠 z-10 的文案盖住 */}
             <LiquidGlass
-              className="h-32 w-32 rounded-full transition-transform duration-500 ease-out hover:scale-110"
+              className="group/icon h-32 w-32 rounded-full transition-transform duration-500 ease-out hover:scale-110"
               contentClassName="h-full"
             >
               {image ? <img src={image} alt="" className="h-full w-full rounded-full object-cover" /> : null}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(ellipse_at_center,transparent_50%,rgb(255_234_215/16%)_100%)] opacity-0 shadow-[inset_0_0_18px_2px_rgb(255_234_215/18%),inset_0_0_0_1px_rgb(255_248_241/24%)] transition-opacity duration-650 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/icon:opacity-100 group-focus-visible/app:opacity-100 motion-reduce:transition-none"
+              />
             </LiquidGlass>
 
             <div
