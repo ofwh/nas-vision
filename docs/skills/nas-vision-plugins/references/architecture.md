@@ -10,7 +10,7 @@ components/plugins/<plugin-id>/
 ├── types.ts          私有 Params、Res 与领域类型
 ├── components/       展示与交互组件
 ├── hooks/            可复用的状态与请求组合
-├── styles/           独立样式文件，优先 CSS Modules
+├── styles/           按需存放独立样式文件，优先使用 Tailwind 样式
 ├── assets/           私有图片、图标与文件
 ├── i18n/             语言资源与插件内翻译入口
 └── api/              有业务接口时添加
@@ -24,9 +24,17 @@ components/plugins/<plugin-id>/
 除根入口和 manifest 外，其余文件按需创建。新视图使用 `pages/`；它不是 Next.js Pages Router。已有插件无需为统一目录名重构。
 
 - 无业务接口时，根入口导出空的 `PluginApi`，无需创建 `api/` 或 service。
-- 独立样式放在 `styles/`，由使用组件导入；简单样式使用 `className`。定制公共 UI 时遵守 AGENTS.md。
+- 优先通过 `className` 使用 Tailwind 样式；需要独立样式文件时放在 `styles/`，由使用组件导入。命名与作用域遵守[样式规范](#样式规范)，定制公共 UI 时遵守 AGENTS.md。
 - 私有静态资源通过模块导入解析 URL；JSON 中的相对资源路径不会自动解析。动态资源由插件 API 提供。
 - 私有 repository 与 schema 留在插件目录；接入数据库前确认服务端导出隔离，见技能入口的核心边界。
+
+## 样式规范
+
+- 优先通过 `className` 使用现有 Tailwind 工具类，不重新定义工具类或修改宿主全局样式。
+- 自定义全局类名以 `nv-plugin-<plugin-id>` 为命名空间：根节点使用该名称，内部元素使用 `nv-plugin-<plugin-id>__<element>`；`<plugin-id>` 与 `manifest.id` 一致，`<element>` 使用小写短横线命名。CSS Modules 的局部类名无需插件前缀，`:global()` 中的自定义类名仍须遵守全局命名规则。
+- 独立样式的每个选择器分支必须包含本插件的命名空间类或 CSS Modules 局部类。标签、属性、状态及第三方组件选择器须限定在该作用域内；不以 `html`、`body`、`:root` 为样式目标，不覆盖宿主或其他插件的样式规则。
+- 自定义 CSS 变量使用 `--nv-plugin-<plugin-id>-<name>`，仅在插件所属元素上声明；全局动画名称使用 `nv-plugin-<plugin-id>-<name>`，`<name>` 使用小写短横线命名。CSS Modules 中由构建工具隔离的局部动画名称无需插件前缀。
+- 通过 Portal 挂载的内容遵守相同的命名与作用域规则；私有 CSS 变量在对应内容作用域内提供，不通过修改宿主挂载节点的类名、变量或样式实现隔离。
 
 ## 入口与注册
 

@@ -62,7 +62,6 @@ docker compose --env-file .env -f docker/docker-compose.yml up -d --pull always
 ## 开发文档
 
 - [仓库约定](AGENTS.md)
-- [API 错误规范](docs/api.md)
+- [API 规范](docs/api.md)
 - [UI 开发约定](docs/design.md)
 - [插件开发技能](docs/skills/nas-vision-plugins/SKILL.md)
-- [账户接口适配](docs/account.md)
