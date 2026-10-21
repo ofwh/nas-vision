@@ -29,7 +29,7 @@ export function WindowContent({ title, left, right, children, className }: Windo
     <section className={cn('flex h-full min-h-0 min-w-0 flex-col text-white', className)}>
       <header className="grid h-18 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-3 px-6 py-4">
         <div className="flex min-w-0 items-center justify-start gap-3">{left}</div>
-        <h2 className="truncate text-center text-sm font-semibold">{title}</h2>
+        <h2 className="truncate text-center text-base font-bold">{title}</h2>
         <div className="flex min-w-0 items-center justify-end gap-3">{right}</div>
       </header>
       <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">

@@ -24,7 +24,7 @@ export function ControlsHeader({
       )}
     >
       <div className="flex min-w-0 items-center gap-2">{controls}</div>
-      <span className="max-w-full truncate text-center text-sm font-semibold">{header?.center ?? title}</span>
+      <span className="max-w-full truncate text-center text-base font-bold">{header?.center ?? title}</span>
       <div className="flex min-w-0 items-center justify-end gap-2">{header?.right}</div>
     </header>
   );
