@@ -35,7 +35,10 @@ export function AppInfoForm({ form, update }: AppFormProps) {
             }
           }}
         >
-          <ComboboxInput className="combobox-input ml-auto" aria-label={t('apps.type')} />
+          <ComboboxInput
+            className="ml-auto h-8 w-auto border-0 px-0 focus-visible:ring-0 [&_input]:text-right"
+            aria-label={t('apps.type')}
+          />
 
           <ComboboxContent>
             <ComboboxEmpty>{t('common.noOptions')}</ComboboxEmpty>

@@ -46,5 +46,8 @@
   "windowResize": "Resize window",
   "defaultWidth": "Default width",
   "defaultHeight": "Default height",
-  "windowSizeInvalid": "Window width and height must be positive integers"
+  "windowSizeInvalid": "Window width and height must be positive integers",
+  "imageRequired": "Select an app icon.",
+  "urlRequired": "Enter a page URL.",
+  "pluginFieldRequired": "Enter or select a value for \"{label}\"."
 }

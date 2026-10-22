@@ -8,6 +8,7 @@ import { AppPreview } from '@/components/business/AppConfig/AppPreview';
 import { Button } from '@/components/ui/button';
 import type { JsonObject } from '@/lib/api';
 import { fetchApi } from '@/lib/api/client';
+import { isPluginFieldEmpty, matchesPluginCondition } from '@/lib/plugins/config';
 import type { AppSaveRes } from '@/lib/services/apps';
 import type { PluginConfig } from '@/types/plugins';
 import { usePlugin } from '@/hooks/usePlugin';
@@ -25,6 +26,50 @@ export type AppEditProps = {
   onCancel: () => void;
   onPendingChange?: (pending: boolean) => void;
 };
+
+function AppEditActions({
+  saving,
+  onCancel,
+  onSubmit,
+}: {
+  saving: boolean;
+  onCancel: () => void;
+  onSubmit: () => Promise<void>;
+}) {
+  const t = useTranslations();
+
+  return (
+    <div className="flex shrink-0 items-center justify-between">
+      <LiquidGlass className="size-10 rounded-full" contentClassName="h-full">
+        <Button
+          variant="ghost"
+          size="icon-lg"
+          aria-label={t('common.close')}
+          title={t('common.close')}
+          className="rounded-full text-white"
+          disabled={saving}
+          onClick={onCancel}
+        >
+          <X aria-hidden className="size-5" />
+        </Button>
+      </LiquidGlass>
+
+      <LiquidGlass className="size-10 rounded-full" contentClassName="h-full">
+        <Button
+          variant="ghost"
+          size="icon-lg"
+          aria-label={saving ? t('common.saving') : t('common.save')}
+          title={t('common.save')}
+          disabled={saving}
+          onClick={onSubmit}
+          className="rounded-full text-white"
+        >
+          <Check aria-hidden className="size-5" />
+        </Button>
+      </LiquidGlass>
+    </div>
+  );
+}
 
 export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditProps) {
   const t = useTranslations();
@@ -50,16 +95,43 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
     }
 
     setError(null);
+    if (!form.image.trim()) {
+      setError(t('apps.imageRequired'));
+
+      return;
+    }
+
     if (!form.name.trim()) {
       setError(t('apps.nameRequired'));
 
       return;
     }
 
-    if (form.type === 'plugin' && (!pluginName || pluginConfig === null)) {
+    if (form.type === 'url' && !form.url.trim()) {
+      setError(t('apps.urlRequired'));
+
+      return;
+    }
+
+    if (form.type === 'plugin' && (!pluginName || pluginConfig === null || !plugin.app.manifest)) {
       setError(t('apps.pluginRequired'));
 
       return;
+    }
+
+    if (form.type === 'plugin' && pluginConfig) {
+      const missingField = plugin.app.manifest?.configs?.find(
+        (field) =>
+          field.required &&
+          matchesPluginCondition(field.conditions, pluginConfig) &&
+          isPluginFieldEmpty(pluginConfig[field.key]),
+      );
+
+      if (missingField) {
+        setError(t('apps.pluginFieldRequired', { label: missingField.label }));
+
+        return;
+      }
     }
 
     if (
@@ -125,38 +197,15 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 bg-[#545458]/25 p-4">
-      <div className="flex shrink-0 items-center justify-between">
-        <LiquidGlass className="size-10 rounded-full" contentClassName="h-full">
-          <Button
-            variant="ghost"
-            size="icon-lg"
-            aria-label={t('common.close')}
-            title={t('common.close')}
-            className="rounded-full text-white hover:bg-white/15 hover:text-white"
-            disabled={saving}
-            onClick={onCancel}
-          >
-            <X aria-hidden className="size-5" />
-          </Button>
-        </LiquidGlass>
-
-        <LiquidGlass className="size-10 rounded-full" contentClassName="h-full">
-          <Button
-            variant="ghost"
-            size="icon-lg"
-            aria-label={saving ? t('common.saving') : t('common.save')}
-            title={t('common.save')}
-            disabled={saving}
-            onClick={submit}
-            className="rounded-full text-white hover:bg-white/15 hover:text-white"
-          >
-            <Check aria-hidden className="size-5" />
-          </Button>
-        </LiquidGlass>
-      </div>
+      <AppEditActions saving={saving} onCancel={onCancel} onSubmit={submit} />
 
       <div className="flex h-52 shrink-0 items-center justify-center">
-        <AppPreview name={form.name} image={form.image} onImageChange={(url) => update('image', url)} />
+        <AppPreview
+          name={form.name}
+          image={form.image}
+          suggestedImage={form.type === 'plugin' ? plugin.app.manifest?.icon || undefined : undefined}
+          onImageChange={(url) => update('image', url)}
+        />
       </div>
 
       {/* overflow-x-hidden 挡掉"overflow-y 非 visible"连带出来的横向滚动条 */}

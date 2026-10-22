@@ -16,6 +16,7 @@ export type PluginSettingOption = {
   key: string;
   type: PluginFormType;
   value: PluginFieldType;
+  required?: boolean;
   secret?: boolean;
   defaults?: PluginFieldType;
   multiple?: boolean;

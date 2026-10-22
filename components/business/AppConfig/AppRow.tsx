@@ -1,10 +1,56 @@
 'use client';
 
+import Image from 'next/image';
+import type { Ref } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSortable } from '@dnd-kit/react/sortable';
 import { Menu, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { AppItem } from '@/lib/services/apps';
+
+function AppRowActions({
+  name,
+  pending,
+  removing,
+  deleting,
+  disabled,
+  onDelete,
+  handleRef,
+}: {
+  name: string;
+  pending: boolean;
+  removing: boolean;
+  deleting: boolean;
+  disabled: boolean;
+  onDelete: () => void;
+  handleRef: Ref<HTMLButtonElement>;
+}) {
+  const t = useTranslations();
+
+  return pending && removing ? (
+    <Button
+      variant="ghost"
+      disabled={deleting}
+      onClick={onDelete}
+      aria-label={t('apps.confirmDeleteNamed', { name })}
+      className="self-stretch rounded-lg bg-[#ff3b30] px-4 text-white hover:bg-[#ff3b30]/85 hover:text-white"
+    >
+      {deleting ? t('common.deleting') : t('common.delete')}
+    </Button>
+  ) : (
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      ref={handleRef}
+      disabled={disabled}
+      title={t('apps.dragHint')}
+      aria-label={t('apps.reorderNamed', { name })}
+      className="cursor-grab touch-none text-white/55 hover:bg-white/12 hover:text-white active:cursor-grabbing"
+    >
+      <Menu aria-hidden />
+    </Button>
+  );
+}
 
 export function AppRow({
   app,
@@ -58,7 +104,15 @@ export function AppRow({
         className="flex min-w-0 flex-1 cursor-pointer items-center gap-3.5 text-left"
       >
         {app.image ? (
-          <img src={app.image} alt="" className="size-10 shrink-0 rounded-md object-cover" />
+          <Image
+            src={app.image}
+            alt=""
+            width={40}
+            height={40}
+            unoptimized
+            loading="eager"
+            className="size-10 shrink-0 rounded-md object-cover"
+          />
         ) : (
           <span aria-hidden className="size-10 shrink-0 rounded-md bg-white/10" />
         )}
@@ -66,29 +120,15 @@ export function AppRow({
         <span className="min-w-0 flex-1 truncate text-sm">{app.name}</span>
       </button>
 
-      {pending && removing ? (
-        <Button
-          variant="ghost"
-          disabled={deleting}
-          onClick={onDelete}
-          aria-label={t('apps.confirmDeleteNamed', { name: app.name })}
-          className="self-stretch rounded-lg bg-[#ff3b30] px-4 text-white hover:bg-[#ff3b30]/85 hover:text-white"
-        >
-          {deleting ? t('common.deleting') : t('common.delete')}
-        </Button>
-      ) : (
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          ref={handleRef}
-          disabled={disabled}
-          title={t('apps.dragHint')}
-          aria-label={t('apps.reorderNamed', { name: app.name })}
-          className="cursor-grab touch-none text-white/55 hover:bg-white/12 hover:text-white active:cursor-grabbing"
-        >
-          <Menu aria-hidden />
-        </Button>
-      )}
+      <AppRowActions
+        name={app.name}
+        pending={pending}
+        removing={removing}
+        deleting={deleting}
+        disabled={disabled}
+        onDelete={onDelete}
+        handleRef={handleRef}
+      />
     </div>
   );
 }

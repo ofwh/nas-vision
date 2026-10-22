@@ -20,6 +20,7 @@ import {
   ComboboxValue,
 } from '@/components/ui/combobox';
 import { pluginRequest } from '@/lib/plugins/client';
+import { matchesPluginCondition } from '@/lib/plugins/config';
 import type {
   PluginConfig,
   PluginListRes,
@@ -28,26 +29,9 @@ import type {
   PluginFieldType,
   PluginQueryRes,
   PluginSettingOption,
-  PluginSettingCondition,
 } from '@/types/plugins';
 import { FormGroup, FIELD_CONTROL_CLASS } from './form';
 import { AppSelectItem } from './AppSelectItem';
-
-function matchesCondition(condition: PluginSettingCondition | undefined, config: PluginConfig): boolean {
-  if (!condition) {
-    return true;
-  }
-
-  if ('and' in condition) {
-    return condition.and.every((item) => matchesCondition(item, config));
-  }
-
-  if ('or' in condition) {
-    return condition.or.some((item) => matchesCondition(item, config));
-  }
-
-  return config[condition.key] === condition.value;
-}
 
 function parseValue(text: string, sample: PluginFieldType): PluginFieldType | undefined {
   if (text === '') {
@@ -120,7 +104,7 @@ function multipleValue(items: PluginFieldOption[]): PluginFieldType | undefined 
   return undefined;
 }
 
-function PluginInput({
+function PluginInputField({
   field,
   value,
   onChange,
@@ -140,6 +124,7 @@ function PluginInput({
         aria-label={field.label}
         placeholder={field.label}
         aria-invalid={invalid}
+        required={field.required}
         type={field.secret && !visible ? 'password' : 'text'}
         className={`${FIELD_CONTROL_CLASS} ${field.secret ? 'pr-12' : ''}`}
         value={text}
@@ -168,18 +153,10 @@ function PluginInput({
   );
 }
 
-function PluginSelect({
-  field,
-  value,
-  onChange,
-}: {
-  field: PluginSettingOption;
-  value: PluginFieldType;
-  onChange: (value: PluginFieldType | undefined) => void;
-}) {
+function PluginSelectContent() {
   const t = useTranslations();
-  const options = field.options ?? [];
-  const content = (
+
+  return (
     <ComboboxContent>
       <ComboboxEmpty>{t('common.noOptions')}</ComboboxEmpty>
       <ComboboxList>
@@ -194,12 +171,25 @@ function PluginSelect({
       </ComboboxList>
     </ComboboxContent>
   );
+}
+
+function PluginSelectField({
+  field,
+  value,
+  onChange,
+}: {
+  field: PluginSettingOption;
+  value: PluginFieldType;
+  onChange: (value: PluginFieldType | undefined) => void;
+}) {
+  const options = field.options ?? [];
 
   return (
     <div className="flex min-h-12 items-center justify-between gap-3 px-4 py-2">
       <span className="text-sm text-white/70">{field.label}</span>
       {field.multiple ? (
         <Combobox
+          required={field.required}
           multiple
           items={options}
           itemToStringLabel={(item) => item.label}
@@ -225,10 +215,11 @@ function PluginSelect({
               )}
             </ComboboxValue>
           </ComboboxChips>
-          {content}
+          <PluginSelectContent />
         </Combobox>
       ) : (
         <Combobox
+          required={field.required}
           items={options}
           itemToStringLabel={(item) => item.label}
           itemToStringValue={(item) => item.label}
@@ -239,11 +230,88 @@ function PluginSelect({
             onChange(details.reason === 'item-press' && selected ? '' : (item?.value ?? ''));
           }}
         >
-          <ComboboxInput aria-label={field.label} className="combobox-input ml-auto" />
-          {content}
+          <ComboboxInput
+            aria-label={field.label}
+            className="ml-auto h-8 w-auto border-0 px-0 focus-visible:ring-0 [&_input]:text-right"
+          />
+          <PluginSelectContent />
         </Combobox>
       )}
     </div>
+  );
+}
+
+function PluginNameField({
+  name,
+  options,
+  loading,
+  onNameChange,
+}: {
+  name: string;
+  options: PluginListRes['plugins'];
+  loading: boolean;
+  onNameChange: (name: string) => void;
+}) {
+  const t = useTranslations();
+
+  return (
+    <div className="flex h-12 items-center justify-between gap-3 px-4">
+      <span className="text-sm text-white/70">{t('apps.plugin')}</span>
+      <Combobox
+        items={options}
+        itemToStringLabel={(item) => item.name}
+        itemToStringValue={(item) => item.name}
+        value={options.find((item) => item.id === name) ?? null}
+        onValueChange={(item, details) => {
+          const next = details.reason === 'item-press' && item?.id === name ? '' : (item?.id ?? '');
+
+          if (next !== name) {
+            onNameChange(next);
+          }
+        }}
+      >
+        <ComboboxInput
+          aria-label={t('apps.plugin')}
+          className="ml-auto h-8 w-auto border-0 px-0 focus-visible:ring-0 [&_input]:text-right"
+          disabled={loading}
+        />
+        <ComboboxContent>
+          <ComboboxEmpty>{t('common.noOptions')}</ComboboxEmpty>
+          <ComboboxList>
+            {(item) => (
+              <AppSelectItem
+                key={item.id}
+                value={item}
+                label={item.name}
+                description={item.description}
+                disabled={item.status === 'off'}
+              />
+            )}
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
+    </div>
+  );
+}
+
+function PluginConfigField({
+  field,
+  value,
+  onChange,
+}: {
+  field: PluginSettingOption;
+  value: PluginFieldType;
+  onChange: (value: PluginFieldType | undefined) => void;
+}) {
+  return field.type === 'input' ? (
+    <PluginInputField field={field} value={value} onChange={onChange} />
+  ) : field.type === 'switch' ? (
+    <label className="flex h-12 items-center justify-between px-4">
+      <span className="text-sm text-white/70">{field.label}</span>
+      <Switch className="ml-auto shrink-0" checked={value === true} onCheckedChange={onChange} />
+    </label>
+  ) : (
+    <PluginSelectField field={field} value={value} onChange={onChange} />
   );
 }
 
@@ -323,71 +391,22 @@ export function AppPluginConfigForm({
 
   return (
     <FormGroup label={t('apps.pluginOptions')}>
-      <div className="flex h-12 items-center justify-between gap-3 px-4">
-        <span className="text-sm text-white/70">{t('apps.plugin')}</span>
-        <Combobox
-          items={options}
-          itemToStringLabel={(item) => item.name}
-          itemToStringValue={(item) => item.name}
-          value={options.find((item) => item.id === name) ?? null}
-          onValueChange={(item, details) => {
-            const next = details.reason === 'item-press' && item?.id === name ? '' : (item?.id ?? '');
-
-            if (next !== name) {
-              onNameChange(next);
-            }
-          }}
-        >
-          <ComboboxInput aria-label={t('apps.plugin')} className="combobox-input ml-auto" disabled={listLoading} />
-          <ComboboxContent>
-            <ComboboxEmpty>{t('common.noOptions')}</ComboboxEmpty>
-            <ComboboxList>
-              {(item) => (
-                <AppSelectItem
-                  key={item.id}
-                  value={item}
-                  label={item.name}
-                  description={item.description}
-                  disabled={item.status === 'off'}
-                />
-              )}
-            </ComboboxList>
-          </ComboboxContent>
-        </Combobox>
-      </div>
+      <PluginNameField name={name} options={options} loading={listLoading} onNameChange={onNameChange} />
       {name !== '' && !loaded && !error ? (
         <p role="status" className="p-4 text-sm text-white/70">
           {t('apps.loadingPlugin')}
         </p>
       ) : null}
       {loaded?.fields
-        .filter((field) => matchesCondition(field.conditions, loaded.values))
-        .map((field) =>
-          field.type === 'input' ? (
-            <PluginInput
-              key={field.key}
-              field={field}
-              value={loaded.values[field.key] ?? ''}
-              onChange={(value) => update(field.key, value)}
-            />
-          ) : field.type === 'switch' ? (
-            <label key={field.key} className="flex h-12 items-center justify-between px-4">
-              <span className="text-sm text-white/70">{field.label}</span>
-              <Switch
-                className="ml-auto shrink-0"
-                checked={loaded.values[field.key] === true}
-                onCheckedChange={(value) => update(field.key, value)}
-              />
-            </label>
-          ) : (
-            <PluginSelect
-              key={field.key}
-              field={field}
-              value={loaded.values[field.key] ?? ''}
-              onChange={(value) => update(field.key, value)}
-            />
-          ),
-        )}
+        .filter((field) => matchesPluginCondition(field.conditions, loaded.values))
+        .map((field) => (
+          <PluginConfigField
+            key={field.key}
+            field={field}
+            value={loaded.values[field.key] ?? ''}
+            onChange={(value) => update(field.key, value)}
+          />
+        ))}
       {error || listError ? (
         <p role="alert" className="p-4 text-sm text-red-300">
           {error ?? listError?.message}

@@ -3,16 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { AppLogoPicker } from '@/components/business/AppConfig/AppLogoPicker';
 
-/** 预览的图标 + 名字：展示效果与 AppItem 保持一致。图标即换图入口。 */
-export function AppPreview({
-  name,
-  image,
-  onImageChange,
-}: {
-  name: string;
-  image: string;
-  onImageChange: (url: string) => void;
-}) {
+function AppPreviewName({ name }: { name: string }) {
   const barRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const [overflow, setOverflow] = useState(0);
@@ -38,25 +29,42 @@ export function AppPreview({
   }, [name]);
 
   return (
+    <div
+      ref={barRef}
+      className="relative z-10 flex h-5.5 max-w-50 items-center overflow-hidden rounded-md text-sm text-white"
+    >
+      <span
+        ref={textRef}
+        className={overflow > 0 ? 'group-hover:animate-marquee whitespace-nowrap' : 'whitespace-nowrap'}
+        style={{ '--marquee-shift': `-${overflow}px` } as CSSProperties}
+      >
+        {name}
+      </span>
+    </div>
+  );
+}
+
+/** 预览的图标 + 名字：展示效果与 AppItem 保持一致。图标即换图入口。 */
+export function AppPreview({
+  name,
+  image,
+  suggestedImage,
+  onImageChange,
+}: {
+  name: string;
+  image: string;
+  suggestedImage?: string;
+  onImageChange: (url: string) => void;
+}) {
+  return (
     <div className="group flex h-52 w-60">
       <div className="h-full w-5" />
 
       <div className="h-full w-full pt-6.5">
         <div className="flex h-40 w-full flex-col items-center justify-center gap-2.5">
-          <AppLogoPicker value={image} onChange={onImageChange} />
+          <AppLogoPicker value={image} suggestedImage={suggestedImage} onChange={onImageChange} />
 
-          <div
-            ref={barRef}
-            className="relative z-10 flex h-5.5 max-w-50 items-center overflow-hidden rounded-md text-sm text-white"
-          >
-            <span
-              ref={textRef}
-              className={overflow > 0 ? 'group-hover:animate-marquee whitespace-nowrap' : 'whitespace-nowrap'}
-              style={{ '--marquee-shift': `-${overflow}px` } as CSSProperties}
-            >
-              {name}
-            </span>
-          </div>
+          <AppPreviewName name={name} />
         </div>
       </div>
 
