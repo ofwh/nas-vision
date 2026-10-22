@@ -1,6 +1,7 @@
 'use client';
 
 import { type CSSProperties, useId, useMemo, useState } from 'react';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { LiquidGlassModal } from '@/components/common/LiquidGlassModal';
 import { WindowControls } from '@/components/common/WindowControls';
 import { WindowContext } from '@/hooks/useWindow';
@@ -129,21 +130,23 @@ function WindowModalContent({
               />
             ) : null}
             <div className={cn('flex min-h-0 flex-1 flex-col', contentStyles.spacing)}>
-              <div
+              <ScrollArea
                 className={cn(
-                  'flex min-h-0 flex-1 flex-col overflow-auto overscroll-contain',
+                  'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden [&>[data-slot=scroll-area-viewport]]:flex [&>[data-slot=scroll-area-viewport]]:h-auto [&>[data-slot=scroll-area-viewport]]:min-h-0 [&>[data-slot=scroll-area-viewport]]:flex-1 [&>[data-slot=scroll-area-viewport]]:flex-col [&>[data-slot=scroll-area-viewport]]:overscroll-contain',
                   contentStyles.radius,
-                  className,
                 )}
               >
-                {typeof children === 'function' ? (
-                  children(controls)
-                ) : children !== undefined ? (
-                  children
-                ) : src ? (
-                  <IframeContent key={src} src={src} title={title} />
-                ) : null}
-              </div>
+                <div className={cn('flex min-h-0 flex-1 flex-col', contentStyles.radius, className)}>
+                  {typeof children === 'function' ? (
+                    children(controls)
+                  ) : children !== undefined ? (
+                    children
+                  ) : src ? (
+                    <IframeContent key={src} src={src} title={title} />
+                  ) : null}
+                </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             </div>
             {showHeader && !hasContentRenderer && mode === 'floating' ? (
               <FloatingHeader

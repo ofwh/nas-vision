@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, isValidElement, useState } from 'react';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Loading } from '@/components/common/Loading';
 import { WindowModal } from '@/components/common/WindowModal';
 import type {
@@ -32,9 +33,10 @@ export function WindowContent({ title, left, right, children, className }: Windo
         <h2 className="truncate text-center text-base font-bold">{title}</h2>
         <div className="flex min-w-0 items-center justify-end gap-3">{right}</div>
       </header>
-      <div className="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain">
+      <ScrollArea className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden [&>[data-slot=scroll-area-viewport]]:h-auto [&>[data-slot=scroll-area-viewport]]:min-h-0 [&>[data-slot=scroll-area-viewport]]:flex-1 [&>[data-slot=scroll-area-viewport]]:overscroll-contain">
         <Suspense fallback={<Loading />}>{children}</Suspense>
-      </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </section>
   );
 }
@@ -95,22 +97,24 @@ export function SplitWindowModal({
               {sidebar.header != null ? (
                 <SidebarHeader className="shrink-0 px-6 pt-0 pb-4 text-xl font-bold">{sidebar.header}</SidebarHeader>
               ) : null}
-              <SidebarContent className="gap-1 overflow-x-hidden px-2.5">
-                {sidebar.items.map((item) =>
-                  item.type === 'group' ? (
-                    <SidebarGroup key={item.id} className="p-0">
-                      {item.label != null ? (
-                        <SidebarGroupLabel className="px-2.5 text-white/55">{item.label}</SidebarGroupLabel>
-                      ) : null}
-                      <SidebarGroupContent>{renderMenu(item.items)}</SidebarGroupContent>
-                    </SidebarGroup>
-                  ) : (
-                    <SidebarGroup key={item.id} className="p-0">
-                      <SidebarGroupContent>{renderMenu([item])}</SidebarGroupContent>
-                    </SidebarGroup>
-                  ),
-                )}
-              </SidebarContent>
+              <ScrollArea className="min-h-0 flex-1 overflow-hidden">
+                <SidebarContent className="gap-1 overflow-hidden px-2.5">
+                  {sidebar.items.map((item) =>
+                    item.type === 'group' ? (
+                      <SidebarGroup key={item.id} className="p-0">
+                        {item.label != null ? (
+                          <SidebarGroupLabel className="px-2.5 text-white/55">{item.label}</SidebarGroupLabel>
+                        ) : null}
+                        <SidebarGroupContent>{renderMenu(item.items)}</SidebarGroupContent>
+                      </SidebarGroup>
+                    ) : (
+                      <SidebarGroup key={item.id} className="p-0">
+                        <SidebarGroupContent>{renderMenu([item])}</SidebarGroupContent>
+                      </SidebarGroup>
+                    ),
+                  )}
+                </SidebarContent>
+              </ScrollArea>
               {sidebar.footer != null ? (
                 <SidebarFooter className="shrink-0 px-5 py-4">{sidebar.footer}</SidebarFooter>
               ) : null}

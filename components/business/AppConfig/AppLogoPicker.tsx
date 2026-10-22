@@ -6,7 +6,7 @@ import { Check, Upload, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { APP_ICONS } from '@/constants';
 import { fetchApi, fetchUpload } from '@/lib/api/client';
 import type { UploadRemoveRes, UploadRes } from '@/lib/services/upload';
@@ -135,7 +135,6 @@ function LogoPickerContent({ value, suggestedImage, onConfirm }: LogoPickerConte
   const t = useTranslations();
   const [uploaded, setUploaded] = useState<string | null>(() => (value.startsWith('/static/uploads/') ? value : null));
   const toast = useToast();
-  const [selected, setSelected] = useState(value);
   const [busy, setBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -161,7 +160,7 @@ function LogoPickerContent({ value, suggestedImage, onConfirm }: LogoPickerConte
     }
 
     setUploaded(url);
-    setSelected(url);
+    onConfirm(url);
   };
 
   const drop = async () => {
@@ -179,8 +178,8 @@ function LogoPickerContent({ value, suggestedImage, onConfirm }: LogoPickerConte
       return;
     }
 
-    if (selected === uploaded) {
-      setSelected('');
+    if (value === uploaded) {
+      onConfirm('');
     }
 
     setUploaded(null);
@@ -188,26 +187,26 @@ function LogoPickerContent({ value, suggestedImage, onConfirm }: LogoPickerConte
 
   return (
     <div className="flex flex-col gap-3 p-3">
-      {/* 最高 150px，超出在这一块里滚；宽度交给格子撑，横向不留滚动条。
-          内边距让最后一列和 check 不贴着滚动条与容器边。 */}
-      <div className="grid max-h-50 grid-cols-4 gap-4 overflow-x-hidden overflow-y-auto p-2">
-        <UploadedLogoOption
-          uploaded={uploaded}
-          selected={selected}
-          busy={busy}
-          onSelect={setSelected}
-          onRemove={drop}
-          onUpload={() => inputRef.current?.click()}
-        />
+      <ScrollArea className="w-80 [&_[data-slot=scroll-area-viewport]]:max-h-64">
+        <div className="grid grid-cols-4 gap-4 p-2">
+          <UploadedLogoOption
+            uploaded={uploaded}
+            selected={value}
+            busy={busy}
+            onSelect={onConfirm}
+            onRemove={drop}
+            onUpload={() => inputRef.current?.click()}
+          />
 
-        {suggestedImage ? (
-          <LogoOption icon={suggestedImage} selected={selected === suggestedImage} onSelect={setSelected} />
-        ) : null}
+          {suggestedImage ? (
+            <LogoOption icon={suggestedImage} selected={value === suggestedImage} onSelect={onConfirm} />
+          ) : null}
 
-        {APP_ICONS.map((icon) => (
-          <LogoOption key={icon} icon={icon} selected={selected === icon} onSelect={setSelected} />
-        ))}
-      </div>
+          {APP_ICONS.map((icon) => (
+            <LogoOption key={icon} icon={icon} selected={value === icon} onSelect={onConfirm} />
+          ))}
+        </div>
+      </ScrollArea>
 
       <input
         ref={inputRef}
@@ -224,15 +223,6 @@ function LogoPickerContent({ value, suggestedImage, onConfirm }: LogoPickerConte
           }
         }}
       />
-
-      <Button
-        variant="outline"
-        disabled={busy}
-        onClick={() => onConfirm(selected)}
-        className="border-white/25 bg-white/15 text-white hover:bg-white/25 hover:text-white"
-      >
-        {t('apps.useIcon')}
-      </Button>
     </div>
   );
 }
@@ -273,14 +263,7 @@ export function AppLogoPicker({
       </PopoverTrigger>
 
       <PopoverContent side="bottom" align="center" sideOffset={10} className="w-auto gap-0 rounded-3xl p-0">
-        <LogoPickerContent
-          value={value}
-          suggestedImage={suggestedImage}
-          onConfirm={(url) => {
-            onChange(url);
-            setPicking(false);
-          }}
-        />
+        <LogoPickerContent value={value} suggestedImage={suggestedImage} onConfirm={onChange} />
       </PopoverContent>
     </Popover>
   );
