@@ -15,14 +15,6 @@ export function AppUrlConfigForm({ form, update }: AppFormProps) {
         value={form.url}
         onChange={(event) => update('url', event.target.value)}
       />
-
-      <Input
-        aria-label={t('apps.innerUrl')}
-        placeholder={t('apps.innerUrl')}
-        className={FIELD_CONTROL_CLASS}
-        value={form.innerUrl}
-        onChange={(event) => update('innerUrl', event.target.value)}
-      />
     </FormGroup>
   );
 }

@@ -90,7 +90,7 @@ function AppPluginDialog({
   );
 }
 
-export function AppItem({ id, name, image, type, url, innerUrl, external, config }: AppRecord) {
+export function AppItem({ id, name, image, type, url, external, config }: AppRecord) {
   const t = useTranslations();
   const { page, app: plugin } = usePlugin(
     type === 'plugin' && typeof config.pluginName === 'string' ? config.pluginName : '',
@@ -119,7 +119,7 @@ export function AppItem({ id, name, image, type, url, innerUrl, external, config
   const textRef = useRef<HTMLSpanElement>(null);
   const [overflow, setOverflow] = useState(0);
   const [open, setOpen] = useState(false);
-  const address = url.trim() || innerUrl.trim();
+  const address = url.trim();
 
   const openPage = () => {
     if (type === 'plugin') {

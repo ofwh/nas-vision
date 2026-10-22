@@ -17,7 +17,6 @@ function toItem(row: typeof apps.$inferSelect): AppItem {
     external: row.external,
     permission: row.permission,
     url: row.url ?? '',
-    innerUrl: row.innerUrl ?? '',
     config: row.config,
     rank: row.rank,
     status: row.status,
