@@ -23,6 +23,7 @@ description: 在 NAS Vision 创建、接入或维护插件时，指导模块注�
 
 ## 核心边界
 
+- 插件 UI 开发须阅读并遵守 [UI 开发规范](../../design.md)，反馈与确认统一按该规范接入，不在插件内重复定义通用规则。
 - `manifest.id`、注册表 key、`usePlugin(name)` 的 name 和应用的 `config.pluginName` 一致。
 - 插件按功能拆分模块，复杂模块按职责继续细分，页面入口负责组合与协调。
 - 视图使用 `PluginViewProps.path` 与 `page.navigate` 导航；内部导航与 API 路径相互独立。

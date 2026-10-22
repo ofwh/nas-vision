@@ -4,20 +4,6 @@
 /*---break--- */
 @custom-variant dark (&:is(.dark *));
 
-@utility combobox-input {
-  &[data-slot='input-group'] {
-    @apply h-8 w-auto border-0 bg-transparent px-0 text-white shadow-none focus-visible:ring-0 dark:bg-transparent dark:hover:bg-transparent;
-
-    input {
-      @apply text-right;
-    }
-
-    svg {
-      @apply text-white/80 dark:text-white;
-    }
-  }
-}
-
 :root {
   --bg-image: url('/static/images/bg-light.webp');
   --background: oklch(1 0 0);

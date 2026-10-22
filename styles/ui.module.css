@@ -1,0 +1,395 @@
+.components {
+  --ui-glass-background: rgb(18 18 22 / 8%);
+  --ui-glass-foreground: #fff8f1;
+  --ui-glass-filter: blur(14px) saturate(120%);
+  --ui-glass-shadow:
+    inset 1px 1px 0 rgb(255 255 255 / 35%), inset 0 0 0 1px rgb(255 255 255 / 10%), 0 6px 6px rgb(0 0 0 / 20%),
+    0 0 20px rgb(0 0 0 / 10%);
+}
+
+/* DropdownMenu */
+.components :global([data-slot='dropdown-menu-content']),
+.components :global([data-slot='dropdown-menu-sub-content']) {
+  padding: 0.375rem;
+  border-radius: 0.75rem;
+  background: var(--ui-glass-background);
+  color: var(--ui-glass-foreground);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+  box-shadow: var(--ui-glass-shadow);
+}
+
+.components :global([data-slot='dropdown-menu-item']),
+.components :global([data-slot='dropdown-menu-checkbox-item']),
+.components :global([data-slot='dropdown-menu-radio-item']),
+.components :global([data-slot='dropdown-menu-sub-trigger']) {
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.components
+  :global(
+    :is(
+      [data-slot='dropdown-menu-item']:not([data-variant='destructive']),
+      [data-slot='dropdown-menu-checkbox-item'],
+      [data-slot='dropdown-menu-radio-item'],
+      [data-slot='dropdown-menu-sub-trigger']
+    ):is(:focus, [data-highlighted], [data-popup-open], [data-open])
+  ) {
+  background: rgb(255 255 255 / 10%);
+  color: white;
+}
+
+.components
+  :global(
+    :is(
+        [data-slot='dropdown-menu-item']:not([data-variant='destructive']),
+        [data-slot='dropdown-menu-checkbox-item'],
+        [data-slot='dropdown-menu-radio-item'],
+        [data-slot='dropdown-menu-sub-trigger']
+      ):focus
+      *
+  ) {
+  color: inherit;
+}
+
+.components :global([data-slot='dropdown-menu-separator']) {
+  background: rgb(255 255 255 / 10%);
+}
+
+/* Combobox */
+.components :global([data-slot='combobox-content']) {
+  background: var(--ui-glass-background);
+  color: var(--ui-glass-foreground);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+  box-shadow: var(--ui-glass-shadow);
+}
+
+.components :global([data-slot='combobox-item'][data-highlighted]) {
+  background: rgb(255 255 255 / 10%);
+  color: white;
+}
+
+.components :global([data-slot='combobox-item'][data-highlighted] *) {
+  color: inherit;
+}
+
+.components :global([data-slot='combobox-empty']),
+.components :global([data-slot='combobox-label']) {
+  color: rgb(255 255 255 / 60%);
+}
+
+.components :global([data-slot='combobox-chip']) {
+  background: rgb(255 255 255 / 10%);
+  color: white;
+}
+
+.components :global([data-slot='combobox-chips']) {
+  --input: rgb(255 255 255 / 20%);
+  background: transparent;
+  color: white;
+}
+
+.components :global([data-slot='input-group']:has(input[role='combobox']) svg) {
+  color: rgb(255 255 255 / 80%);
+}
+
+:global(.dark) .components :global([data-slot='input-group']:has(input[role='combobox']) svg) {
+  color: white;
+}
+
+/* Select */
+.components :global([data-slot='select-content']) {
+  background: var(--ui-glass-background);
+  color: var(--ui-glass-foreground);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+  box-shadow: var(--ui-glass-shadow);
+}
+
+.components :global([data-slot='select-trigger']) {
+  --input: rgb(255 255 255 / 20%);
+  --muted-foreground: rgb(255 255 255 / 50%);
+  background: transparent;
+  color: white;
+}
+
+.components :global([data-slot='select-item']:is(:focus, [data-highlighted])) {
+  background: rgb(255 255 255 / 10%);
+  color: white;
+}
+
+.components :global([data-slot='select-item']:focus *) {
+  color: inherit;
+}
+
+.components :global([data-slot='select-label']) {
+  color: rgb(255 255 255 / 60%);
+}
+
+.components :global([data-slot='select-separator']) {
+  background: rgb(255 255 255 / 10%);
+}
+
+.components :global([data-slot='select-scroll-up-button']),
+.components :global([data-slot='select-scroll-down-button']) {
+  background: transparent;
+}
+
+/* Popover */
+.components :global([data-slot='popover-content']) {
+  background: var(--ui-glass-background);
+  color: var(--ui-glass-foreground);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+  box-shadow: var(--ui-glass-shadow);
+}
+
+.components :global([data-slot='popover-description']) {
+  color: rgb(255 255 255 / 60%);
+}
+
+/* HoverCard */
+.components :global([data-slot='hover-card-content']) {
+  background: var(--ui-glass-background);
+  color: var(--ui-glass-foreground);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+  box-shadow: var(--ui-glass-shadow);
+}
+
+/* Tooltip */
+.components :global([data-slot='tooltip-content']) {
+  background: var(--ui-glass-background);
+  color: var(--ui-glass-foreground);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+  box-shadow: var(--ui-glass-shadow);
+}
+
+.components :global([data-slot='tooltip-content'] > [data-side]) {
+  background: var(--ui-glass-background);
+  fill: var(--ui-glass-background);
+}
+
+/* Dialog */
+.components :global([data-slot='dialog-content']) {
+  background: var(--ui-glass-background);
+  color: var(--ui-glass-foreground);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+  box-shadow: var(--ui-glass-shadow);
+}
+
+/* Toast */
+.components :global([data-slot='toast-viewport']) {
+  inset: max(1rem, env(safe-area-inset-top)) 0 auto;
+  z-index: 10000;
+  width: calc(100vw - 2rem);
+  margin-inline: auto;
+}
+
+.components :global([data-slot='toast']) {
+  --offset-y: calc(var(--toast-offset-y) + var(--toast-index) * var(--gap) + var(--toast-swipe-movement-y));
+  --muted-foreground: rgb(255 255 255 / 65%);
+  inset: 0 0 auto;
+  margin-inline: auto;
+  border-radius: 999px;
+  transform-origin: top center;
+  transform: translateX(var(--toast-swipe-movement-x))
+    translateY(calc(var(--toast-swipe-movement-y) + var(--toast-index) * var(--peek) + var(--shrink) * var(--height)))
+    scale(var(--scale));
+  background: var(--ui-glass-background);
+  color: var(--ui-glass-foreground);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+  box-shadow: var(--ui-glass-shadow);
+  border-color: rgb(255 255 255 / 15%);
+}
+
+.components :global([data-slot='toast'])::after {
+  top: auto;
+  bottom: 100%;
+}
+
+.components :global([data-slot='toast'][data-expanded]) {
+  transform: translateX(var(--toast-swipe-movement-x)) translateY(var(--offset-y));
+}
+
+.components :global([data-slot='toast'][data-starting-style]),
+.components :global([data-slot='toast'][data-ending-style]) {
+  transform: translateY(-150%);
+}
+
+.components :global([data-slot='toast'][data-ending-style]) {
+  opacity: 0;
+}
+
+.components :global([data-slot='toast'][data-ending-style][data-swipe-direction='up']) {
+  transform: translateY(calc(var(--toast-swipe-movement-y) - 150%));
+}
+
+.components :global([data-slot='toast'][data-ending-style][data-swipe-direction='down']) {
+  transform: translateY(calc(var(--toast-swipe-movement-y) + 150%));
+}
+
+.components :global([data-slot='toast'][data-ending-style][data-swipe-direction='left']) {
+  transform: translateX(calc(var(--toast-swipe-movement-x) - 150%)) translateY(var(--offset-y));
+}
+
+.components :global([data-slot='toast'][data-ending-style][data-swipe-direction='right']) {
+  transform: translateX(calc(var(--toast-swipe-movement-x) + 150%)) translateY(var(--offset-y));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .components :global([data-slot='toast']) {
+    transition: none;
+  }
+}
+
+.components :global([data-slot='toast-close']) {
+  border-radius: 999px;
+  color: var(--muted-foreground);
+}
+
+.components :global([data-slot='toast-close']:hover) {
+  background: rgb(255 255 255 / 10%);
+  color: var(--ui-glass-foreground);
+}
+
+.components :global([data-slot='toast'][data-type='success'] [data-slot='toast-icon']) {
+  color: #86efac;
+}
+
+.components :global([data-slot='toast'][data-type='info'] [data-slot='toast-icon']) {
+  color: #93c5fd;
+}
+
+.components :global([data-slot='toast'][data-type='warning'] [data-slot='toast-icon']) {
+  color: #fcd34d;
+}
+
+.components :global([data-slot='toast'][data-type='error'] [data-slot='toast-icon']) {
+  color: #fda4af;
+}
+
+.components :global([data-slot='toast-icon'] svg) {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+}
+
+/* Button */
+.components :global([data-slot='button']),
+.components :global([data-slot][class~='group/button']) {
+  --background: transparent;
+  --foreground: white;
+  --muted: rgb(255 255 255 / 15%);
+  --secondary: rgb(255 255 255 / 10%);
+  --secondary-foreground: white;
+  --border: rgb(255 255 255 / 20%);
+  --input: rgb(255 255 255 / 20%);
+}
+
+:global(.dark) .components :global([data-slot='button']),
+:global(.dark) .components :global([data-slot][class~='group/button']) {
+  --muted: rgb(255 255 255 / 30%);
+}
+
+/* Input */
+.components :global([data-slot='input']) {
+  --input: rgb(255 255 255 / 20%);
+  --muted-foreground: rgb(255 255 255 / 50%);
+  background: transparent;
+  color: white;
+}
+
+/* Textarea */
+.components :global([data-slot='textarea']) {
+  --input: rgb(255 255 255 / 20%);
+  --muted-foreground: rgb(255 255 255 / 50%);
+  background: transparent;
+  color: white;
+}
+
+/* InputGroup */
+.components :global([data-slot='input-group']) {
+  --input: rgb(255 255 255 / 20%);
+  --muted-foreground: rgb(255 255 255 / 50%);
+  background: transparent;
+  color: white;
+  --tw-shadow: 0 0 #0000;
+}
+
+/* InputOTP */
+.components :global([data-slot='input-otp-slot']) {
+  --input: rgb(255 255 255 / 20%);
+  --foreground: white;
+  background: rgb(255 255 255 / 8%);
+  color: white;
+  --tw-shadow: 0 0 #0000;
+}
+
+/* Switch */
+.components :global([data-slot='switch'][data-unchecked]) {
+  background: rgb(255 255 255 / 20%);
+}
+
+/* Checkbox */
+.components :global([data-slot='checkbox']:not([data-checked])) {
+  background: rgb(255 255 255 / 8%);
+  border-color: rgb(255 255 255 / 20%);
+}
+
+/* ScrollArea */
+.components :global([data-slot='scroll-area-thumb']) {
+  background: rgb(255 255 255 / 25%);
+}
+
+.components :global([data-slot='scroll-area-thumb']:hover) {
+  background: rgb(255 255 255 / 40%);
+}
+
+/* Slider */
+.components :global([data-slot='slider-track']) {
+  background: rgb(255 255 255 / 20%);
+}
+
+.components :global([data-slot='slider-range']) {
+  background: white;
+}
+
+/* Tabs */
+.components :global([data-slot='tabs-list']) {
+  --muted: rgb(255 255 255 / 8%);
+  --muted-foreground: rgb(255 255 255 / 60%);
+}
+
+.components :global([data-slot='tabs-trigger']) {
+  --background: rgb(255 255 255 / 15%);
+  --foreground: white;
+  --input: rgb(255 255 255 / 20%);
+  --muted-foreground: rgb(255 255 255 / 60%);
+}
+
+/* Sidebar */
+.components :global([data-slot='sidebar-wrapper']) {
+  --sidebar: transparent;
+  --sidebar-foreground: white;
+  --sidebar-accent: rgb(255 255 255 / 10%);
+  --sidebar-accent-foreground: white;
+  --sidebar-border: rgb(255 255 255 / 10%);
+}
+
+/* Separator */
+.components :global([data-slot='separator']) {
+  background: rgb(255 255 255 / 10%);
+}
+
+/* Badge */
+.components :global([data-slot='badge']) {
+  --secondary: rgb(255 255 255 / 10%);
+  --secondary-foreground: white;
+  --border: rgb(255 255 255 / 20%);
+}

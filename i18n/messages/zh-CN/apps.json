@@ -46,5 +46,8 @@
   "windowResize": "窗口调整",
   "defaultWidth": "默认宽度",
   "defaultHeight": "默认高度",
-  "windowSizeInvalid": "窗口宽度和高度须为正整数"
+  "windowSizeInvalid": "窗口宽度和高度须为正整数",
+  "imageRequired": "请选择应用图标",
+  "urlRequired": "请填写页面地址",
+  "pluginFieldRequired": "请填写或选择「{label}」"
 }

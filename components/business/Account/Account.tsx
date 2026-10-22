@@ -14,6 +14,126 @@ import { Loading } from '@/components/common/Loading';
 import { Button } from '@/components/ui/button';
 import { authClient, useSession } from '@/lib/auth-client';
 
+type AccountUser = NonNullable<ReturnType<typeof useSession>['data']>['user'];
+type SecurityDialog = 'changePassword' | 'twoFactorAuthentication';
+
+function AccountHeader({ user }: { user: AccountUser }) {
+  const t = useTranslations();
+
+  return (
+    <>
+      <span className="flex size-24 items-center justify-center rounded-full bg-linear-to-b from-white/25 to-white/10 shadow-lg ring-1 ring-white/20">
+        <UserRound className="size-13 text-white/90" strokeWidth={1.3} aria-hidden />
+      </span>
+      <h3 className="mt-4 max-w-full truncate text-2xl font-semibold tracking-tight">{user.name}</h3>
+      <p className="mt-1 max-w-full text-center text-sm wrap-anywhere text-white/60">{user.email}</p>
+      <span className="mt-3 flex items-center gap-1.5 text-xs text-white/55">
+        <span className="size-1.5 rounded-full bg-emerald-300" />
+        {t('account.signedIn')}
+      </span>
+    </>
+  );
+}
+
+function AccountProfile({
+  user,
+  editing,
+  name,
+  pending,
+  onNameChange,
+  onSave,
+  onCancel,
+}: {
+  user: AccountUser;
+  editing: boolean;
+  name: string;
+  pending: boolean;
+  onNameChange: (name: string) => void;
+  onSave: () => Promise<void>;
+  onCancel: () => void;
+}) {
+  const t = useTranslations();
+
+  return (
+    <div className="mt-8 w-full">
+      <h4 className="mb-2 px-1 text-sm font-medium text-white/75">{t('account.profile')}</h4>
+      <dl className="divide-y divide-white/10 rounded-xl border border-white/10 bg-white/5 px-4 text-sm">
+        <div className="flex items-start justify-between gap-6 py-3.5">
+          <dt className="shrink-0 text-white/65">{t('account.nickname')}</dt>
+          <dd className="min-w-0 text-right wrap-anywhere">
+            {editing ? (
+              <input
+                aria-label={t('account.nickname')}
+                value={name}
+                onChange={(event) => onNameChange(event.target.value)}
+                disabled={pending}
+                autoFocus
+                className="w-full max-w-60 rounded-lg border border-white/20 bg-black/10 px-2 py-1 text-right outline-none focus:border-white/50"
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    void onSave();
+                  }
+
+                  if (event.key === 'Escape') {
+                    onCancel();
+                  }
+                }}
+              />
+            ) : (
+              user.name
+            )}
+          </dd>
+        </div>
+        <div className="flex items-start justify-between gap-6 py-3.5">
+          <dt className="shrink-0 text-white/65">{t('account.username')}</dt>
+          <dd className="text-right wrap-anywhere">{user.displayUsername ?? user.username ?? t('account.notSet')}</dd>
+        </div>
+        <div className="flex items-start justify-between gap-6 py-3.5">
+          <dt className="shrink-0 text-white/65">{t('account.email')}</dt>
+          <dd className="text-right wrap-anywhere">{user.email}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
+function AccountSecuritySettings({
+  enabled,
+  pending,
+  onSelect,
+}: {
+  enabled: boolean;
+  pending: boolean;
+  onSelect: (option: SecurityDialog) => void;
+}) {
+  const t = useTranslations();
+
+  return (
+    <div className="mt-6 w-full">
+      <h4 className="mb-2 px-1 text-sm font-medium text-white/75">{t('account.security')}</h4>
+      <div className="divide-y divide-white/10 overflow-hidden rounded-xl border border-white/10 bg-white/5 text-sm">
+        {(['changePassword', 'twoFactorAuthentication'] as const).map((option) => (
+          <button
+            key={option}
+            type="button"
+            disabled={pending}
+            onClick={() => onSelect(option)}
+            className="flex w-full items-center justify-between gap-6 px-4 py-3.5 text-left transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white/50 disabled:opacity-50"
+          >
+            <span>{t(`account.${option}`)}</span>
+            <span className="flex shrink-0 items-center gap-2 text-white/45">
+              {option === 'twoFactorAuthentication' ? (
+                <span className="text-xs">{t(enabled ? 'account.enabled' : 'account.disabled')}</span>
+              ) : null}
+              <ChevronRight className="size-4" aria-hidden />
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ChangePasswordDialog({ onClose }: { onClose: () => void }) {
   const t = useTranslations();
   const [pending, setPending] = useState(false);
@@ -51,7 +171,7 @@ function TwoFactorDialog({
     <LiquidGlassModal
       open
       title={t('account.twoFactorAuthentication')}
-      size={{ width: 460 }}
+      size={{ width: 360 }}
       style={{ maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100dvh - 32px)' }}
       onOpenChange={(open) => {
         if (!open && !pending) {
@@ -79,7 +199,7 @@ export function Account() {
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
-  const [securityDialog, setSecurityDialog] = useState<'changePassword' | 'twoFactorAuthentication' | null>(null);
+  const [securityDialog, setSecurityDialog] = useState<SecurityDialog | null>(null);
 
   async function handleEdit() {
     if (!session || pending) {
@@ -157,7 +277,7 @@ export function Account() {
               variant="ghost"
               disabled={pending}
               onClick={handleEdit}
-              className="h-10 rounded-full px-5 text-white hover:bg-white/15 hover:text-white"
+              className="h-10 rounded-full px-5 text-white"
             >
               {editing ? t('common.done') : t('common.edit')}
             </Button>
@@ -168,80 +288,21 @@ export function Account() {
       <div className="flex min-h-0 flex-col items-center gap-3 p-5">
         {session ? (
           <div className="flex w-full max-w-130 shrink-0 flex-col items-center pb-4">
-            <span className="flex size-24 items-center justify-center rounded-full bg-linear-to-b from-white/25 to-white/10 shadow-lg ring-1 ring-white/20">
-              <UserRound className="size-13 text-white/90" strokeWidth={1.3} aria-hidden />
-            </span>
-            <h3 className="mt-4 max-w-full truncate text-2xl font-semibold tracking-tight">{session.user.name}</h3>
-            <p className="mt-1 max-w-full text-center text-sm wrap-anywhere text-white/60">{session.user.email}</p>
-            <span className="mt-3 flex items-center gap-1.5 text-xs text-white/55">
-              <span className="size-1.5 rounded-full bg-emerald-300" />
-              {t('account.signedIn')}
-            </span>
-            <div className="mt-8 w-full">
-              <h4 className="mb-2 px-1 text-sm font-medium text-white/75">{t('account.profile')}</h4>
-              <dl className="divide-y divide-white/10 rounded-xl border border-white/10 bg-white/5 px-4 text-sm">
-                <div className="flex items-start justify-between gap-6 py-3.5">
-                  <dt className="shrink-0 text-white/65">{t('account.nickname')}</dt>
-                  <dd className="min-w-0 text-right wrap-anywhere">
-                    {editing ? (
-                      <input
-                        aria-label={t('account.nickname')}
-                        value={name}
-                        onChange={(event) => setName(event.target.value)}
-                        disabled={pending}
-                        autoFocus
-                        className="w-full max-w-60 rounded-lg border border-white/20 bg-black/10 px-2 py-1 text-right outline-none focus:border-white/50"
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter') {
-                            void handleEdit();
-                          }
-
-                          if (event.key === 'Escape') {
-                            setEditing(false);
-                          }
-                        }}
-                      />
-                    ) : (
-                      session.user.name
-                    )}
-                  </dd>
-                </div>
-                <div className="flex items-start justify-between gap-6 py-3.5">
-                  <dt className="shrink-0 text-white/65">{t('account.username')}</dt>
-                  <dd className="text-right wrap-anywhere">
-                    {session.user.displayUsername ?? session.user.username ?? t('account.notSet')}
-                  </dd>
-                </div>
-                <div className="flex items-start justify-between gap-6 py-3.5">
-                  <dt className="shrink-0 text-white/65">{t('account.email')}</dt>
-                  <dd className="text-right wrap-anywhere">{session.user.email}</dd>
-                </div>
-              </dl>
-            </div>
-            <div className="mt-6 w-full">
-              <h4 className="mb-2 px-1 text-sm font-medium text-white/75">{t('account.security')}</h4>
-              <div className="divide-y divide-white/10 overflow-hidden rounded-xl border border-white/10 bg-white/5 text-sm">
-                {(['changePassword', 'twoFactorAuthentication'] as const).map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    disabled={pending}
-                    onClick={() => setSecurityDialog(option)}
-                    className="flex w-full items-center justify-between gap-6 px-4 py-3.5 text-left transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white/50 disabled:opacity-50"
-                  >
-                    <span>{t(`account.${option}`)}</span>
-                    <span className="flex shrink-0 items-center gap-2 text-white/45">
-                      {option === 'twoFactorAuthentication' ? (
-                        <span className="text-xs">
-                          {t(session.user.twoFactorEnabled ? 'account.enabled' : 'account.disabled')}
-                        </span>
-                      ) : null}
-                      <ChevronRight className="size-4" aria-hidden />
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
+            <AccountHeader user={session.user} />
+            <AccountProfile
+              user={session.user}
+              editing={editing}
+              name={name}
+              pending={pending}
+              onNameChange={setName}
+              onSave={handleEdit}
+              onCancel={() => setEditing(false)}
+            />
+            <AccountSecuritySettings
+              enabled={session.user.twoFactorEnabled === true}
+              pending={pending}
+              onSelect={setSecurityDialog}
+            />
             <LiquidGlass className="mt-6 rounded-full" contentClassName="h-full">
               <Button
                 variant="ghost"
@@ -267,11 +328,7 @@ export function Account() {
                 <p role="alert" className="text-sm text-red-200">
                   {t('account.loadFailed')}
                 </p>
-                <Button
-                  variant="ghost"
-                  onClick={() => void refetch()}
-                  className="text-white hover:bg-white/15 hover:text-white"
-                >
+                <Button variant="ghost" onClick={() => void refetch()} className="text-white">
                   {t('account.reload')}
                 </Button>
               </div>

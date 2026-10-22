@@ -1,5 +1,8 @@
 {
   "close": "关闭",
+  "confirm": "确定",
+  "cancel": "取消",
+  "inputRequired": "请输入内容",
   "minimize": "最小化",
   "maximize": "最大化",
   "restore": "还原",

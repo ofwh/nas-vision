@@ -13,9 +13,12 @@
 
 ## UI 组件
 
-- 使用 UI 组件时，优先使用本地已有的组件；本地没有对应组件时，通过 `pnpm dlx shadcn@latest add <name>` 安装并使用。
-- 不修改 `components/ui` 目录下的组件，保持为 shadcn 安装的原始文件。
-- 样式定制通过调用处的 `className`、全局样式或 `components/ui` 目录外的封装实现。
+- 优先使用本地已有组件；缺少对应组件时，通过 `pnpm dlx shadcn@latest add <name>` 安装。
+- 不修改 `components/ui` 目录下的文件，保持 shadcn 提供的原始代码。
+- 应用级 shadcn 默认外观覆盖统一放在 `styles/ui.module.css`，包括玻璃底色、透明度、模糊、阴影及通用交互状态；复用该文件中的样式变量，不在调用处重复设置。
+- 覆盖规则按组件分类，同一组件及其子部件的规则就近保存；优先使用原始组件的 `data-slot` 等稳定标识，不引入业务名称或业务条件。
+- 业务布局、尺寸、对齐、内容展示及特殊交互样式由业务模块通过 Tailwind `className` 设置，不放入 `styles/ui.module.css`。
+- 新安装 shadcn 组件后，检查其默认外观与现有玻璃风格的差异，说明拟统一调整的范围，并询问用户是否需要适配；仅在用户明确确认后实施，通用覆盖归入 `styles/ui.module.css` 对应组件分组。
 
 ## 类型
 

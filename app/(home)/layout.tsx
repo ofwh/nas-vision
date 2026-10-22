@@ -9,9 +9,12 @@ import configService from '@/lib/services/config';
 import { auth } from '@/lib/auth';
 import { SettingsProvider } from '@/components/business/Appearance/SettingsProvider';
 import { GlassFilter } from '@/components/common/GlassFilter';
+import { MessageBox } from '@/components/common/MessageBox';
+import { Toaster } from '@/components/ui/toast';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import '../globals.css';
 import { cn } from '@/lib/utils';
+import uiStyles from '@/styles/ui.module.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -56,11 +59,15 @@ export default async function HomeLayout({ children }: { children: ReactNode }) 
         inter.variable,
       )}
     >
-      <body className="mx-auto flex min-h-full max-w-400 flex-col">
+      <body className={cn('mx-auto flex min-h-full max-w-400 flex-col', uiStyles.components)}>
         <GlassFilter />
         <NextIntlClientProvider>
           <SettingsProvider config={config} signedIn={!!session}>
-            <TooltipProvider>{children}</TooltipProvider>
+            <Toaster>
+              <MessageBox>
+                <TooltipProvider>{children}</TooltipProvider>
+              </MessageBox>
+            </Toaster>
           </SettingsProvider>
         </NextIntlClientProvider>
       </body>

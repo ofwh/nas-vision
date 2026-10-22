@@ -1,5 +1,8 @@
 {
   "close": "Close",
+  "confirm": "Confirm",
+  "cancel": "Cancel",
+  "inputRequired": "Please enter a value",
   "minimize": "Minimize",
   "maximize": "Maximize",
   "restore": "Restore",

@@ -18,7 +18,7 @@ export function SecurityCloseButton({ onClose, disabled }: { onClose: () => void
         title={t('common.close')}
         disabled={disabled}
         onClick={onClose}
-        className="rounded-full text-white hover:bg-white/15 hover:text-white"
+        className="rounded-full text-white"
       >
         <X aria-hidden className="size-5" />
       </Button>
@@ -42,7 +42,7 @@ export function SecurityField({
   );
 }
 
-export const securityButtonClass = 'h-10 rounded-full bg-white/10 px-6 text-white hover:bg-white/15 hover:text-white';
+export const securityButtonClass = 'h-10 rounded-full bg-white/10 px-6 text-white';
 
 export const securityOTPSlotClass =
-  'h-12 w-full min-w-0 rounded-lg border border-white/20 bg-white/8 text-xl text-white shadow-none first:rounded-l-lg last:rounded-r-lg dark:bg-white/8 data-[active=true]:border-sky-300/70 data-[active=true]:ring-sky-300/15 [&_.animate-caret-blink]:bg-white';
+  'h-12 w-full min-w-0 rounded-lg border text-xl first:rounded-l-lg last:rounded-r-lg data-[active=true]:border-sky-300/70 data-[active=true]:ring-sky-300/15';

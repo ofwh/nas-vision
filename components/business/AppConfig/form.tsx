@@ -38,7 +38,7 @@ export function toForm(app?: AppRecord): AppForm {
 }
 
 export const FIELD_CONTROL_CLASS =
-  'h-12 w-full rounded-none border-0 bg-transparent px-4 text-white shadow-none placeholder:text-white/50 focus-visible:border-transparent focus-visible:ring-0 focus-visible:bg-white/5 dark:bg-transparent';
+  'h-12 w-full rounded-none border-0 px-4 shadow-none focus-visible:border-transparent focus-visible:ring-0 focus-visible:bg-white/5!';
 
 export function FormGroup({ label, children }: { label: string; children: ReactNode }) {
   return (
