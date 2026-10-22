@@ -12,6 +12,7 @@
   "header": false,
   "fit": true,
   "resizable": true,
+  "closeOnOverlay": false,
   "configs": [
     {
       "label": "服务地址（支持子路径，如 https://music.example.com）",

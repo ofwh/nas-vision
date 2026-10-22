@@ -35,6 +35,7 @@ export interface PluginManifest {
   fit?: boolean;
   resizable?: boolean;
   top?: boolean;
+  closeOnOverlay?: boolean;
   header?: WindowModalHeader;
   mode?: HeaderMode;
   previews?: string[];
