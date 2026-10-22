@@ -73,6 +73,7 @@ function AppPluginDialog({
       fit={plugin.manifest?.fit}
       resizable={plugin.manifest?.resizable}
       top={plugin.manifest?.top}
+      closeOnOverlay={plugin.manifest?.closeOnOverlay ?? true}
       style={size ? { width: `min(${size.width}px, 90vw)`, height: `min(${size.height}px, 85vh)` } : undefined}
     >
       <PluginPageContext.Provider value={{ ...page, close: onClose }}>
