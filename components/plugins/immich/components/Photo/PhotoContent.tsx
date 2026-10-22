@@ -111,7 +111,7 @@ export default function PhotoContent({
             size="icon-lg"
             aria-label={t('ui.rotateClockwise')}
             title={t('ui.rotateClockwise')}
-            className="rounded-full text-white hover:bg-white/15 hover:text-white"
+            className="rounded-full text-white"
             onClick={onRotate}
           >
             <RotateCwSquare aria-hidden className="size-5" />
@@ -125,7 +125,7 @@ export default function PhotoContent({
               nativeButton={false}
               aria-label={t('ui.map')}
               title={t('ui.map')}
-              className="rounded-full text-white hover:bg-white/15 hover:text-white"
+              className="rounded-full text-white"
               render={
                 <a
                   href={`https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}`}

@@ -25,6 +25,8 @@
   "reordering": "Reordering apps",
   "removeIcon": "Delete uploaded icon",
   "uploadIcon": "Upload icon",
+  "uploadIconFailed": "Unable to upload the icon. Please try again.",
+  "removeIconFailed": "Unable to delete the icon. Please try again.",
   "useIcon": "Use",
   "deleteNamed": "Delete {name}",
   "confirmDeleteNamed": "Confirm deletion of {name}",

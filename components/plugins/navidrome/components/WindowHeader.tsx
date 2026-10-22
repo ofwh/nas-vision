@@ -30,7 +30,7 @@ export default function WindowHeader({
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-full text-white hover:bg-white/15 hover:text-white"
+          className="rounded-full text-white"
           aria-label={t('common.close')}
           title={t('common.close')}
           onClick={close}
@@ -43,13 +43,7 @@ export default function WindowHeader({
           <Surface className="pointer-events-auto shrink-0 rounded-full">
             <Tooltip>
               <TooltipTrigger
-                render={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full text-white hover:bg-white/15 hover:text-white"
-                  />
-                }
+                render={<Button variant="ghost" size="icon" className="rounded-full text-white" />}
                 aria-label={t('playlist.delete')}
                 onClick={onDeletePlaylist}
               >
@@ -61,11 +55,7 @@ export default function WindowHeader({
         ) : null}
         {canPlayAll ? (
           <Surface className="pointer-events-auto shrink-0 rounded-full">
-            <Button
-              variant="ghost"
-              className="rounded-full text-white hover:bg-white/15 hover:text-white"
-              onClick={onPlayAll}
-            >
+            <Button variant="ghost" className="rounded-full text-white" onClick={onPlayAll}>
               <Play aria-hidden size={14} fill="currentColor" />
               {t('player.playAll')}
             </Button>
@@ -75,7 +65,7 @@ export default function WindowHeader({
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full text-white hover:bg-white/15 hover:text-white"
+            className="rounded-full text-white"
             aria-label={t('library.refresh')}
             title={t('library.refresh')}
             disabled={isRefreshing}

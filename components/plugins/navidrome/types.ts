@@ -26,6 +26,7 @@ export type NavidromeMediaParams = { id: string };
 export type NavidromeStarParams = { id: string; starred: boolean };
 export type NavidromePlaylistSaveParams = { id?: string; name: string; description?: string; public?: boolean };
 export type NavidromePlaylistRemoveParams = { id: string };
+export type NavidromePlaylistSongParams = { id: string; songId: string };
 export type SubsonicEntry = Omit<MusicItem, 'kind' | 'name' | 'description'> & {
   name?: string;
   title?: string;

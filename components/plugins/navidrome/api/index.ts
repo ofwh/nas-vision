@@ -46,6 +46,8 @@ export default {
   'api/star': { POST: post(service.star) },
   'api/playlist/save': { POST: post(service.save) },
   'api/playlist/remove': { POST: post(service.remove) },
+  'api/playlist/add-song': { POST: post(service.addSong) },
+  'api/playlist/remove-song': { POST: post(service.removeSong) },
   'api/cover': { GET: media('cover') },
   'api/stream': { GET: media('stream') },
 } satisfies PluginApi;

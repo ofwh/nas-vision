@@ -69,7 +69,7 @@ export default function PlaybackSlider({
             {label}
           </span>
           <Slider
-            className="relative flex h-8 cursor-pointer touch-none items-center focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white data-disabled:cursor-default [&_[data-slot=slider-range]]:relative [&_[data-slot=slider-range]]:bg-white [&_[data-slot=slider-thumb]]:size-2.5 [&_[data-slot=slider-thumb]]:border-0 [&_[data-slot=slider-track]]:h-1 [&_[data-slot=slider-track]]:bg-white/20"
+            className="relative flex h-8 cursor-pointer touch-none items-center focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white data-disabled:cursor-default [&_[data-slot=slider-range]]:relative [&_[data-slot=slider-thumb]]:size-2.5 [&_[data-slot=slider-thumb]]:border-0 [&_[data-slot=slider-track]]:h-1"
             aria-labelledby={`${hintId}-label`}
             aria-valuetext={formatValue(current)}
             value={[current]}

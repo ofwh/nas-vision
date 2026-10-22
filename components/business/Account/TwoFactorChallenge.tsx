@@ -3,6 +3,7 @@
 import { useState, type SubmitEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
+import { useToast } from '@/hooks/useToast';
 import { authErrorMessage } from '@/lib/api/auth-error';
 import { Button } from '@/components/ui/button';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
@@ -14,7 +15,7 @@ export function TwoFactorChallenge({ onSuccess, onCancel }: { onSuccess: () => v
   const locale = useLocale();
   const [code, setCode] = useState('');
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -23,19 +24,19 @@ export function TwoFactorChallenge({ onSuccess, onCancel }: { onSuccess: () => v
     }
 
     setPending(true);
-    setError(null);
+
     try {
       const result = await authClient.twoFactor.verifyTotp({ code: code.trim() });
 
       if (result.error) {
-        setError(authErrorMessage(result.error, locale));
+        toast.add({ type: 'error', title: authErrorMessage(result.error, locale) });
 
         return;
       }
 
       onSuccess();
     } catch {
-      setError(t('common.connectionFailed'));
+      toast.add({ type: 'error', title: t('common.connectionFailed') });
     } finally {
       setPending(false);
     }
@@ -66,11 +67,6 @@ export function TwoFactorChallenge({ onSuccess, onCancel }: { onSuccess: () => v
           ))}
         </InputOTPGroup>
       </InputOTP>
-      {error ? (
-        <p role="alert" className="text-center text-sm text-red-200">
-          {error}
-        </p>
-      ) : null}
       <Button
         type="submit"
         disabled={pending || code.length !== 6}

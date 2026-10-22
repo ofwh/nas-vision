@@ -92,8 +92,18 @@
     "delete": "删除歌单",
     "deleteConfirm": "确定删除歌单“{name}”吗？此操作无法撤销，歌曲文件会保留。",
     "deleting": "正在删除…",
+    "deleted": "歌单已删除",
     "deleteFailed": "删除歌单失败，请重试。",
     "cancel": "取消",
     "confirm": "确定"
+  },
+  "songActions": {
+    "more": "{name} 的更多操作",
+    "star": "收藏",
+    "unstar": "取消收藏",
+    "addToPlaylist": "添加到歌单",
+    "noPlaylists": "暂无歌单",
+    "addFailed": "添加到歌单失败，请重试。",
+    "removeFailed": "从歌单移除失败，请重试。"
   }
 }

@@ -7,6 +7,7 @@ import type {
   NavidromeStarParams,
   NavidromePlaylistSaveParams,
   NavidromePlaylistRemoveParams,
+  NavidromePlaylistSongParams,
   SubsonicEntry,
 } from '../types';
 import { json, request } from './client';
@@ -244,6 +245,47 @@ export async function media(
   return response;
 }
 
-const service = { list, star, save, remove, media };
+export async function addSong(params: NavidromePlaylistSongParams, config: PluginConfig): Promise<{ id: string }> {
+  if (!params) {
+    throw new NavidromeError('PARAMS_INVALID');
+  }
+
+  validId(params.id);
+  validId(params.songId);
+  await json(config, 'updatePlaylist', { playlistId: params.id, songIdToAdd: params.songId });
+
+  return { id: params.id };
+}
+
+export async function removeSong(params: NavidromePlaylistSongParams, config: PluginConfig): Promise<{ id: string }> {
+  if (!params) {
+    throw new NavidromeError('PARAMS_INVALID');
+  }
+
+  validId(params.id);
+  validId(params.songId);
+  const data = await json(config, 'getPlaylist', { id: params.id });
+
+  if (!data.playlist) {
+    throw new NavidromeError('INVALID_RESPONSE');
+  }
+
+  const entries = data.playlist.entry ?? data.playlist.song ?? [];
+
+  if (!Array.isArray(entries)) {
+    throw new NavidromeError('INVALID_RESPONSE');
+  }
+
+  // 倒序移除同一歌曲的所有条目，避免删除后索引偏移。
+  for (let index = entries.length - 1; index >= 0; index -= 1) {
+    if (entries[index].id === params.songId) {
+      await json(config, 'updatePlaylist', { playlistId: params.id, songIndexToRemove: String(index) });
+    }
+  }
+
+  return { id: params.id };
+}
+
+const service = { list, star, save, remove, media, addSong, removeSong };
 
 export default service;

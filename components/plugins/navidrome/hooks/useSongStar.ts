@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSWRConfig } from 'swr';
 import { unstable_serialize as serializeInfinite } from 'swr/infinite';
+import { useToast } from '@/hooks/useToast';
 import { pluginPath, pluginRequest } from '@/lib/plugins/client';
 import type { MusicItem } from '../types';
 import { usePlaybackStore } from '../stores/context';
@@ -10,12 +11,11 @@ export default function useSongStar() {
   const { cache, mutate } = useSWRConfig();
   const t = useNavidromeTranslations();
   const updateSong = usePlaybackStore((state) => state.updateSong);
-  const [actionError, setActionError] = useState('');
+  const toast = useToast();
   const [starring, setStarring] = useState<string | null>(null);
 
   async function star(song: MusicItem) {
     setStarring(song.id);
-    setActionError('');
     try {
       await pluginRequest(pluginPath('navidrome', '/api/star'), { id: song.id, starred: !song.starred });
       updateSong(song.id, song.starred ? undefined : new Date().toISOString());
@@ -40,11 +40,11 @@ export default function useSongStar() {
       );
       await Promise.all([...aggregates].map((key) => mutate(key)));
     } catch (error) {
-      setActionError(error instanceof Error ? error.message : t('library.starFailed'));
+      toast.add({ type: 'error', title: error instanceof Error ? error.message : t('library.starFailed') });
     } finally {
       setStarring(null);
     }
   }
 
-  return { star, starring, actionError, clearError: () => setActionError('') };
+  return { star, starring };
 }

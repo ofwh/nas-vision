@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useState, type SubmitEvent } from 'react';
 import { UserRoundKey, UserRoundPlus } from 'lucide-react';
+import { useToast } from '@/hooks/useToast';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
@@ -179,7 +180,7 @@ export function AuthForm({
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
   const [pending, setPending] = useState(false);
   const [twoFactorRequired, setTwoFactorRequired] = useState(false);
   const isSignUp = mode === 'sign-up';
@@ -190,7 +191,6 @@ export function AuthForm({
       return;
     }
 
-    setError(null);
     setPending(true);
     try {
       const result = isSignUp
@@ -198,7 +198,10 @@ export function AuthForm({
         : await authClient.signIn.username({ username, password });
 
       if (result.error) {
-        setError(result.error.message ?? (isSignUp ? t('account.signUpFailed') : t('account.signInFailed')));
+        toast.add({
+          type: 'error',
+          title: result.error.message ?? (isSignUp ? t('account.signUpFailed') : t('account.signInFailed')),
+        });
 
         return;
       }
@@ -212,7 +215,7 @@ export function AuthForm({
 
       onSuccess();
     } catch {
-      setError(t('common.connectionFailed'));
+      toast.add({ type: 'error', title: t('common.connectionFailed') });
     } finally {
       setPending(false);
     }
@@ -224,7 +227,6 @@ export function AuthForm({
         onSuccess={onSuccess}
         onCancel={() => {
           setTwoFactorRequired(false);
-          setError(null);
         }}
       />
     );
@@ -255,11 +257,6 @@ export function AuthForm({
             />
           )}
         </fieldset>
-        {error ? (
-          <p role="alert" className="text-sm text-red-200">
-            {error}
-          </p>
-        ) : null}
         <LiquidGlass className="mt-2 self-center rounded-full" contentClassName="h-full">
           <Button
             type="submit"

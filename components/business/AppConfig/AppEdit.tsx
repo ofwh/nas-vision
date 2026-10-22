@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { AppPreview } from '@/components/business/AppConfig/AppPreview';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/useToast';
 import type { JsonObject } from '@/lib/api';
 import { fetchApi } from '@/lib/api/client';
 import { isPluginFieldEmpty, matchesPluginCondition } from '@/lib/plugins/config';
@@ -73,12 +74,13 @@ function AppEditActions({
 
 export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditProps) {
   const t = useTranslations();
+  const toast = useToast();
   const app = useAppList((state) => state.apps.find((item) => item.id === id));
   const [form, setForm] = useState<AppForm>(() => toForm(app));
   const [pluginName, setPluginName] = useState(typeof app?.config.pluginName === 'string' ? app.config.pluginName : '');
   const plugin = usePlugin(pluginName);
   const [pluginConfig, setPluginConfig] = useState<PluginConfig | null>(null);
-  const [error, setError] = useState<string | null>(null);
+
   const [saving, setSaving] = useState(false);
 
   const update = <K extends keyof AppForm>(key: K, value: AppForm[K]) => {
@@ -94,27 +96,26 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
       return;
     }
 
-    setError(null);
     if (!form.image.trim()) {
-      setError(t('apps.imageRequired'));
+      toast.add({ type: 'error', title: t('apps.imageRequired') });
 
       return;
     }
 
     if (!form.name.trim()) {
-      setError(t('apps.nameRequired'));
+      toast.add({ type: 'error', title: t('apps.nameRequired') });
 
       return;
     }
 
     if (form.type === 'url' && !form.url.trim()) {
-      setError(t('apps.urlRequired'));
+      toast.add({ type: 'error', title: t('apps.urlRequired') });
 
       return;
     }
 
     if (form.type === 'plugin' && (!pluginName || pluginConfig === null || !plugin.app.manifest)) {
-      setError(t('apps.pluginRequired'));
+      toast.add({ type: 'error', title: t('apps.pluginRequired') });
 
       return;
     }
@@ -128,7 +129,7 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
       );
 
       if (missingField) {
-        setError(t('apps.pluginFieldRequired', { label: missingField.label }));
+        toast.add({ type: 'error', title: t('apps.pluginFieldRequired', { label: missingField.label }) });
 
         return;
       }
@@ -139,7 +140,7 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
       form.external === 'iframe' &&
       ![form.width, form.height].every((value) => Number.isSafeInteger(Number(value)) && Number(value) > 0)
     ) {
-      setError(t('apps.windowSizeInvalid'));
+      toast.add({ type: 'error', title: t('apps.windowSizeInvalid') });
 
       return;
     }
@@ -180,7 +181,7 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
       const response = await fetchApi<AppSaveRes>('/api/apps/update', params);
 
       if (!response.success) {
-        setError(response.message);
+        toast.add({ type: 'error', title: response.message });
 
         return;
       }
@@ -188,7 +189,7 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
       await useAppList.getState().list();
       onSuccess();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t('common.connectionFailed'));
+      toast.add({ type: 'error', title: cause instanceof Error ? cause.message : t('common.connectionFailed') });
     } finally {
       setSaving(false);
       onPendingChange?.(false);
@@ -225,12 +226,6 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
           />
         )}
         <AppConfigForm form={form} update={update} />
-
-        {error ? (
-          <p role="alert" className="shrink-0 px-4 text-sm text-white/70">
-            {error}
-          </p>
-        ) : null}
       </fieldset>
     </div>
   );

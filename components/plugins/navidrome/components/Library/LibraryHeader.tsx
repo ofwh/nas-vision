@@ -48,7 +48,7 @@ export default function LibraryHeader({
       >
         <Search size={17} />
         <Input
-          className="h-full min-w-0 border-0 bg-transparent text-xs text-white shadow-none placeholder:text-[#fff8f1]/42 focus-visible:shadow-none focus-visible:ring-0 md:text-xs dark:bg-transparent"
+          className="h-full min-w-0 border-0 text-xs text-white shadow-none placeholder:text-[#fff8f1]/42 focus-visible:shadow-none focus-visible:ring-0 md:text-xs"
           aria-label={t('search.label')}
           value={search}
           maxLength={256}

@@ -18,14 +18,16 @@
       "key": "serverUrl",
       "type": "input",
       "value": "",
-      "defaults": ""
+      "defaults": "",
+      "required": true
     },
     {
       "label": "Navidrome 用户名",
       "key": "username",
       "type": "input",
       "value": "",
-      "defaults": ""
+      "defaults": "",
+      "required": true
     },
     {
       "label": "Navidrome 密码",
@@ -33,7 +35,8 @@
       "type": "input",
       "secret": true,
       "value": "",
-      "defaults": ""
+      "defaults": "",
+      "required": true
     }
   ]
 }

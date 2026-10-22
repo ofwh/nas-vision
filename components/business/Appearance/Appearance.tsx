@@ -2,6 +2,8 @@
 
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useToast } from '@/hooks/useToast';
 import { WindowContent } from '@/components/common/SplitWindowModal';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -189,7 +191,14 @@ function VeilSettings({
 
 export function Appearance() {
   const t = useTranslations();
-  const { theme, veil, saving, save } = useSettings((state) => state);
+  const toast = useToast();
+  const { theme, veil, saving, save, error } = useSettings((state) => state);
+
+  useEffect(() => {
+    if (error) {
+      toast.add({ type: 'error', title: error });
+    }
+  }, [error, toast]);
 
   return (
     <WindowContent title={t('appearance.title')}>

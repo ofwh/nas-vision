@@ -8,6 +8,7 @@ import { usePlaybackStore } from '../../stores/context';
 import { songKeys } from '../../utils/playback';
 import duration from '../../utils/duration';
 import Cover from '../Cover';
+import SongActions from './SongActions';
 
 type SongListProps = {
   songs: MusicItem[];
@@ -95,6 +96,7 @@ export default function SongList({ songs, isQueue, source, starringId, onPlay, o
             <Button
               variant="ghost"
               size="icon"
+              className="bg-transparent!"
               aria-label={t(song.starred ? 'library.unstar' : 'library.star', { name })}
               aria-pressed={Boolean(song.starred)}
               disabled={starringId !== null}
@@ -107,6 +109,7 @@ export default function SongList({ songs, isQueue, source, starringId, onPlay, o
               <Heart size={16} fill={song.starred ? 'currentColor' : 'none'} />
             </Button>
             <span className="w-9 text-right text-[11px] tabular-nums">{duration(song.duration)}</span>
+            <SongActions song={song} starring={starringId !== null} onStar={() => onStar(song)} />
           </div>
         ))}
       </div>

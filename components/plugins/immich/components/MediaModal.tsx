@@ -53,7 +53,7 @@ export function MediaModalCloseButton({ className }: { className?: string }) {
           size="icon-lg"
           aria-label={t('ui.close')}
           title={t('ui.close')}
-          className="rounded-full text-white hover:bg-white/15 hover:text-white"
+          className="rounded-full text-white"
           onClick={close}
         >
           <X aria-hidden className="size-5" />
