@@ -2,6 +2,7 @@
 
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
 import { useRef } from 'react';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Dialog, DialogOverlay, DialogPortal, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
@@ -175,9 +176,15 @@ export function LiquidGlassModal({
                 hasAutoHeight ? 'flex-auto' : 'flex-1',
               )}
             >
-              <div className={cn('flex min-h-0 flex-1 flex-col overflow-auto overscroll-contain', !fit && 'p-5')}>
+              <ScrollArea
+                className={cn(
+                  'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden [&>[data-slot=scroll-area-viewport]]:flex [&>[data-slot=scroll-area-viewport]]:h-auto [&>[data-slot=scroll-area-viewport]]:min-h-0 [&>[data-slot=scroll-area-viewport]]:flex-1 [&>[data-slot=scroll-area-viewport]]:flex-col [&>[data-slot=scroll-area-viewport]]:overscroll-contain',
+                  !fit && '[&>[data-slot=scroll-area-viewport]]:p-5',
+                )}
+              >
                 {children}
-              </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             </LiquidGlass>
             {footer != null ? (
               <div className="absolute bottom-0 left-1/2 z-10 max-w-full shrink-0 -translate-x-1/2 translate-y-1/2 self-center">

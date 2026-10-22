@@ -3,9 +3,11 @@
 import { useTranslations } from 'next-intl';
 import { Check, X } from 'lucide-react';
 import { useState } from 'react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { AppPreview } from '@/components/business/AppConfig/AppPreview';
 import { Button } from '@/components/ui/button';
+import plugins from '@/components/plugins';
 import { useToast } from '@/hooks/useToast';
 import type { JsonObject } from '@/lib/api';
 import { fetchApi } from '@/lib/api/client';
@@ -208,24 +210,30 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
         />
       </div>
 
-      {/* overflow-x-hidden 挡掉"overflow-y 非 visible"连带出来的横向滚动条 */}
-      <fieldset disabled={saving} className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-x-hidden overflow-y-auto">
-        <AppInfoForm form={form} update={update} />
-        {form.type === 'url' ? (
-          <AppUrlConfigForm form={form} update={update} />
-        ) : (
-          <AppPluginConfigForm
-            key={pluginName}
-            name={pluginName}
-            onNameChange={(name) => {
-              setPluginName(name);
-              setPluginConfig(null);
-            }}
-            onConfigChange={setPluginConfig}
-          />
-        )}
-        <AppConfigForm form={form} update={update} />
-      </fieldset>
+      <ScrollArea className="min-h-0 min-w-0 flex-1 overflow-hidden">
+        <fieldset disabled={saving} className="flex min-w-0 flex-col gap-2.5">
+          <AppInfoForm form={form} update={update} />
+          {form.type === 'url' ? (
+            <AppUrlConfigForm form={form} update={update} />
+          ) : (
+            <AppPluginConfigForm
+              key={pluginName}
+              name={pluginName}
+              onNameChange={(name) => {
+                setPluginName(name);
+                setPluginConfig(null);
+                const icon = plugins[name]?.manifest.icon;
+
+                if (icon) {
+                  update('image', icon);
+                }
+              }}
+              onConfigChange={setPluginConfig}
+            />
+          )}
+          <AppConfigForm form={form} update={update} />
+        </fieldset>
+      </ScrollArea>
     </div>
   );
 }
