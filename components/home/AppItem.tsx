@@ -200,16 +200,15 @@ export function AppItem({ id, name, image, type, url, external, config }: AppRec
           >
             {/* 别在玻璃上写 opacity：会自建 backdrop 根，毛玻璃就看不到背景了 */}
             {/* 放大走 transform，不占布局；长出来的部分靠 z-10 的文案盖住 */}
-            <LiquidGlass
-              className="group/icon h-32 w-32 rounded-full transition-transform duration-500 ease-out hover:scale-110"
-              contentClassName="h-full"
-            >
-              {image ? <img src={image} alt="" className="h-full w-full rounded-full object-cover" /> : null}
+            <div className="group/icon relative h-32 w-32 rounded-full transition-transform duration-500 ease-out hover:scale-110">
+              <LiquidGlass className="h-full w-full rounded-full" contentClassName="h-full">
+                {image ? <img src={image} alt="" className="h-full w-full rounded-full object-cover" /> : null}
+              </LiquidGlass>
               <span
                 aria-hidden
-                className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(ellipse_at_center,transparent_50%,rgb(255_234_215/16%)_100%)] opacity-0 shadow-[inset_0_0_18px_2px_rgb(255_234_215/18%),inset_0_0_0_1px_rgb(255_248_241/24%)] transition-opacity duration-650 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/icon:opacity-100 group-focus-visible/app:opacity-100 motion-reduce:transition-none"
+                className="pointer-events-none absolute inset-0 rounded-full opacity-0 shadow-[0_0_0_1px_rgb(255_248_241/24%),0_0_12px_2px_rgb(255_234_215/18%),0_0_26px_5px_rgb(255_234_215/8%)] transition-opacity duration-650 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/icon:opacity-100 group-focus-visible/app:opacity-100 motion-reduce:transition-none"
               />
-            </LiquidGlass>
+            </div>
 
             <div
               ref={barRef}

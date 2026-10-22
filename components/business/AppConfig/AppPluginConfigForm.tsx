@@ -384,9 +384,12 @@ export function AppPluginConfigForm({
     }
 
     const values = value === undefined ? loaded.values : { ...loaded.values, [key]: value };
+    const activeInvalid = invalid.filter((key) =>
+      loaded.fields.some((field) => field.key === key && matchesPluginCondition(field.conditions, values)),
+    );
 
-    setLoaded({ ...loaded, values, invalid });
-    onConfigChange(invalid.length ? null : values);
+    setLoaded({ ...loaded, values, invalid: activeInvalid });
+    onConfigChange(activeInvalid.length ? null : values);
   };
 
   return (
