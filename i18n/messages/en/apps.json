@@ -13,7 +13,6 @@
   "name": "Name",
   "type": "Type",
   "url": "Page URL",
-  "innerUrl": "Local network URL (optional)",
   "options": "App options",
   "openMode": "Open mode",
   "permission": "Access",

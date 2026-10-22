@@ -153,7 +153,6 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
       external: form.external,
       permission: form.permission,
       url: form.url,
-      innerUrl: form.innerUrl,
       config:
         form.type === 'plugin'
           ? { pluginName }

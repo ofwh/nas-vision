@@ -20,7 +20,6 @@ export const apps = sqliteTable('apps', {
   external: text('external').$type<AppOpenMode>().notNull().default('newtab'),
   permission: text('permission').$type<AppPermission>().notNull().default('public'),
   url: text('url'),
-  innerUrl: text('inner_url'),
   config: text('config', { mode: 'json' }).$type<AppConfig>().notNull().default({}),
   rank: text('rank').notNull(),
   status: integer('status').$type<Flag>().notNull().default(1),

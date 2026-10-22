@@ -8,7 +8,6 @@ export type AppForm = {
   image: string;
   type: AppType;
   url: string;
-  innerUrl: string;
   external: AppOpenMode;
   permission: AppPermission;
   status: boolean;
@@ -25,7 +24,6 @@ export function toForm(app?: AppRecord): AppForm {
     image: app?.image ?? '',
     type: app?.type ?? 'url',
     url: app?.url ?? '',
-    innerUrl: app?.innerUrl ?? '',
     external: app?.external ?? 'newtab',
     permission: app?.permission ?? 'public',
     status: app ? app.status === 1 : true,

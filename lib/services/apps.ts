@@ -11,7 +11,6 @@ export type AppBaseItem = {
   external: AppOpenMode;
   permission: AppPermission;
   url: string;
-  innerUrl: string;
   config: AppConfig;
 };
 
@@ -91,7 +90,6 @@ export function save(input: AppSaveParams): Result<AppItem> {
     !['newtab', 'iframe', 'replace'].includes(input.external) ||
     !['public', 'signed-in'].includes(input.permission) ||
     typeof input.url !== 'string' ||
-    typeof input.innerUrl !== 'string' ||
     !input.config ||
     typeof input.config !== 'object' ||
     Array.isArray(input.config)
