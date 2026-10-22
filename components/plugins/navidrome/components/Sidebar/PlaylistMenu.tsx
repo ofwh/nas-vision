@@ -38,7 +38,7 @@ export default function PlaylistMenu({ activeId, onOpen }: PlaylistMenuProps) {
         </div>
       </div>
       {creating ? <CreatePlaylistModal onClose={() => setCreating(false)} onCreated={upsert} /> : null}
-      <ScrollArea className="h-0 min-h-0 min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-thumb]]:bg-white/25 [&_[data-slot=scroll-area-viewport]]:overscroll-contain">
+      <ScrollArea className="h-0 min-h-0 min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-viewport]]:overscroll-contain">
         <div className="flex flex-col gap-[5px]">
           {items.map((item) => (
             <Button

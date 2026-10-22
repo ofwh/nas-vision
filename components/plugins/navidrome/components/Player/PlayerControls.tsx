@@ -47,7 +47,7 @@ export default function PlayerControls() {
       <Button
         variant="ghost"
         size="icon"
-        className="rounded-full bg-transparent hover:bg-white/15 hover:text-inherit max-[700px]:h-8 max-[700px]:w-7 dark:hover:bg-white/15"
+        className="rounded-full bg-transparent hover:text-inherit max-[700px]:h-8 max-[700px]:w-7"
         aria-label={t('player.previous')}
         disabled={!song}
         onClick={onPrevious}
@@ -57,7 +57,7 @@ export default function PlayerControls() {
       <Button
         variant="ghost"
         size="icon"
-        className="size-11 rounded-full bg-white/8 shadow-[0_4px_10px_rgb(0_0_0/35%),0_8px_20px_rgb(0_0_0/25%),inset_0_1px_0_rgb(255_255_255/15%)] hover:bg-white/15 hover:text-inherit dark:hover:bg-white/15"
+        className="size-11 rounded-full bg-white/8 shadow-[0_4px_10px_rgb(0_0_0/35%),0_8px_20px_rgb(0_0_0/25%),inset_0_1px_0_rgb(255_255_255/15%)] hover:text-inherit"
         aria-label={t(playing ? 'player.pause' : 'player.play')}
         disabled={!song}
         onClick={toggle}
@@ -67,7 +67,7 @@ export default function PlayerControls() {
       <Button
         variant="ghost"
         size="icon"
-        className="rounded-full bg-transparent hover:bg-white/15 hover:text-inherit max-[700px]:h-8 max-[700px]:w-7 dark:hover:bg-white/15"
+        className="rounded-full bg-transparent hover:text-inherit max-[700px]:h-8 max-[700px]:w-7"
         aria-label={t('player.next')}
         disabled={!song}
         onClick={onNext}

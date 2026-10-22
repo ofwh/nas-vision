@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState, type SubmitEvent } from 'react';
 import { Loader } from 'lucide-react';
+import { useToast } from '@/hooks/useToast';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { WindowModal } from '@/components/common/WindowModal';
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,7 @@ export default function CreatePlaylistModal({ onClose, onCreated }: CreatePlayli
   const [isPublic, setIsPublic] = useState(true);
   const created = useRef<MusicItem | null>(null);
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -33,9 +34,8 @@ export default function CreatePlaylistModal({ onClose, onCreated }: CreatePlayli
       return;
     }
 
-    setError(null);
     if (!name.trim() || name.trim().length > 200) {
-      setError(t('errors.PLAYLIST_NAME_INVALID'));
+      toast.add({ type: 'error', title: t('errors.PLAYLIST_NAME_INVALID') });
 
       return;
     }
@@ -61,7 +61,7 @@ export default function CreatePlaylistModal({ onClose, onCreated }: CreatePlayli
       onCreated({ ...created.current, ...result.data });
       onClose();
     } catch (error) {
-      setError(error instanceof Error ? error.message : t('playlist.createFailed'));
+      toast.add({ type: 'error', title: error instanceof Error ? error.message : t('playlist.createFailed') });
     } finally {
       setPending(false);
     }
@@ -91,17 +91,15 @@ export default function CreatePlaylistModal({ onClose, onCreated }: CreatePlayli
             <Input
               aria-label={t('playlist.name')}
               placeholder={t('playlist.name')}
-              className="h-12 w-full rounded-none border-0 bg-transparent px-4 text-white shadow-none placeholder:text-white/50 focus-visible:border-transparent focus-visible:bg-white/5 focus-visible:ring-0 dark:bg-transparent"
+              className="h-12 w-full rounded-none border-0 px-4 shadow-none focus-visible:border-transparent focus-visible:bg-white/5! focus-visible:ring-0"
               value={name}
               maxLength={200}
-              aria-invalid={Boolean(error)}
-              aria-describedby={error ? `${formId}-error` : undefined}
               onChange={(event) => setName(event.target.value)}
             />
             <Textarea
               aria-label={t('playlist.description')}
               placeholder={t('playlist.description')}
-              className="min-h-24 resize-none rounded-none border-0 bg-transparent px-4 py-3 text-white shadow-none placeholder:text-white/50 focus-visible:border-transparent focus-visible:bg-white/5 focus-visible:ring-0 dark:bg-transparent"
+              className="min-h-24 resize-none rounded-none border-0 px-4 py-3 shadow-none focus-visible:border-transparent focus-visible:bg-white/5! focus-visible:ring-0"
               value={description}
               maxLength={2000}
               onChange={(event) => setDescription(event.target.value)}
@@ -110,26 +108,15 @@ export default function CreatePlaylistModal({ onClose, onCreated }: CreatePlayli
               <label htmlFor={`${formId}-public`} className="cursor-pointer text-sm">
                 {t('playlist.public')}
               </label>
-              <Switch
-                id={`${formId}-public`}
-                checked={isPublic}
-                onCheckedChange={setIsPublic}
-                disabled={pending}
-                className="data-unchecked:bg-white/20 dark:data-unchecked:bg-white/20"
-              />
+              <Switch id={`${formId}-public`} checked={isPublic} onCheckedChange={setIsPublic} disabled={pending} />
             </div>
           </fieldset>
-          {error ? (
-            <p id={`${formId}-error`} role="alert" className="px-4 text-center text-sm leading-5 text-red-200">
-              {error}
-            </p>
-          ) : null}
           <LiquidGlass className="w-full rounded-full" contentClassName="h-full">
             <Button
               type="submit"
               variant="ghost"
               disabled={pending}
-              className="h-10 w-full justify-center rounded-full text-white hover:bg-white/15 hover:text-white"
+              className="h-10 w-full justify-center rounded-full text-white"
             >
               {pending ? <Loader aria-hidden className="size-5 animate-spin" /> : null}
               {t(pending ? 'playlist.creating' : 'playlist.create')}

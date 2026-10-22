@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Check, Copy, ShieldCheck } from 'lucide-react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import QRCode from 'react-qr-code';
+import { useToast } from '@/hooks/useToast';
 import { authErrorMessage } from '@/lib/api/auth-error';
 import { errorMessage } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,6 @@ type Step = 'password' | 'setup' | 'verify' | 'enabled';
 
 type TwoFactorFormProps = {
   pending: boolean;
-  error: string | null;
   onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
 };
 
@@ -28,7 +28,6 @@ function TwoFactorPasswordForm({
   password,
   onPasswordChange,
   pending,
-  error,
   onSubmit,
 }: TwoFactorFormProps & {
   enabled: boolean;
@@ -63,12 +62,6 @@ function TwoFactorPasswordForm({
           value={password}
           onChange={(event) => onPasswordChange(event.target.value)}
         />
-
-        {error ? (
-          <p role="alert" className="text-center text-sm text-red-200">
-            {error}
-          </p>
-        ) : null}
         <Button
           type="submit"
           disabled={pending}
@@ -81,25 +74,15 @@ function TwoFactorPasswordForm({
   );
 }
 
-function TwoFactorSetupView({
-  enrollment,
-  error,
-  onErrorChange,
-  onNext,
-}: {
-  enrollment: Enrollment;
-  error: string | null;
-  onErrorChange: (error: string | null) => void;
-  onNext: () => void;
-}) {
+function TwoFactorSetupView({ enrollment, onNext }: { enrollment: Enrollment; onNext: () => void }) {
   const t = useTranslations();
   const locale = useLocale();
   const [copied, setCopied] = useState(false);
   const setupInput = useRef<HTMLInputElement>(null);
+  const toast = useToast();
   const setupKey = new URL(enrollment.totpURI).searchParams.get('secret') ?? '';
 
   async function copySetupKey() {
-    onErrorChange(null);
     try {
       if (!navigator.clipboard || !window.isSecureContext) {
         throw new Error('Clipboard unavailable');
@@ -111,7 +94,7 @@ function TwoFactorSetupView({
       setCopied(false);
       setupInput.current?.focus();
       setupInput.current?.select();
-      onErrorChange(errorMessage({ code: 'account.COPY_FAILED' }, locale));
+      toast.add({ type: 'error', title: errorMessage({ code: 'account.COPY_FAILED' }, locale) });
     }
   }
 
@@ -148,11 +131,6 @@ function TwoFactorSetupView({
           {t('account.copied')}
         </span>
       ) : null}
-      {error ? (
-        <p role="alert" className="text-sm text-red-200">
-          {error}
-        </p>
-      ) : null}
       <Button className={`${securityButtonClass} w-full justify-center text-center`} onClick={onNext}>
         {t('account.nextStep')}
       </Button>
@@ -164,7 +142,6 @@ function TwoFactorVerificationForm({
   code,
   onCodeChange,
   pending,
-  error,
   onSubmit,
   onBack,
 }: TwoFactorFormProps & {
@@ -198,12 +175,6 @@ function TwoFactorVerificationForm({
           ))}
         </InputOTPGroup>
       </InputOTP>
-
-      {error ? (
-        <p role="alert" className="text-center text-sm text-red-200">
-          {error}
-        </p>
-      ) : null}
       <div className="flex flex-col gap-1">
         <Button
           type="submit"
@@ -268,7 +239,7 @@ export function TwoFactor({
   const [code, setCode] = useState('');
   const [enrollment, setEnrollment] = useState<Enrollment | null>(null);
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -278,13 +249,13 @@ export function TwoFactor({
 
     setPending(true);
     onPendingChange?.(true);
-    setError(null);
+
     try {
       if (step === 'verify') {
         const result = await authClient.twoFactor.verifyTotp({ code });
 
         if (result.error) {
-          setError(authErrorMessage(result.error, locale));
+          toast.add({ type: 'error', title: authErrorMessage(result.error, locale) });
 
           return;
         }
@@ -296,7 +267,7 @@ export function TwoFactor({
         const result = await authClient.twoFactor.disable({ password });
 
         if (result.error) {
-          setError(authErrorMessage(result.error, locale));
+          toast.add({ type: 'error', title: authErrorMessage(result.error, locale) });
 
           return;
         }
@@ -308,7 +279,7 @@ export function TwoFactor({
         const result = await authClient.twoFactor.enable({ password, method: 'totp' });
 
         if (result.error) {
-          setError(authErrorMessage(result.error, locale));
+          toast.add({ type: 'error', title: authErrorMessage(result.error, locale) });
 
           return;
         }
@@ -320,7 +291,7 @@ export function TwoFactor({
         }
       }
     } catch {
-      setError(t('common.connectionFailed'));
+      toast.add({ type: 'error', title: t('common.connectionFailed') });
     } finally {
       setPending(false);
       onPendingChange?.(false);
@@ -336,16 +307,12 @@ export function TwoFactor({
           password={password}
           onPasswordChange={setPassword}
           pending={pending}
-          error={error}
           onSubmit={handleSubmit}
         />
       ) : step === 'setup' && enrollment ? (
         <TwoFactorSetupView
           enrollment={enrollment}
-          error={error}
-          onErrorChange={setError}
           onNext={() => {
-            setError(null);
             setStep('verify');
           }}
         />
@@ -354,11 +321,10 @@ export function TwoFactor({
           code={code}
           onCodeChange={setCode}
           pending={pending}
-          error={error}
           onSubmit={handleSubmit}
           onBack={() => {
             setCode('');
-            setError(null);
+
             setStep('setup');
           }}
         />

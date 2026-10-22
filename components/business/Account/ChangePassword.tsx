@@ -3,6 +3,7 @@
 import { useId, useState, type SubmitEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Loader, UserRoundKey } from 'lucide-react';
+import { useToast } from '@/hooks/useToast';
 import { authErrorMessage } from '@/lib/api/auth-error';
 import { errorMessage } from '@/lib/api';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
@@ -38,7 +39,6 @@ function ChangePasswordForm({
   newPassword,
   confirmation,
   pending,
-  error,
   onSubmit,
   onCurrentPasswordChange,
   onNewPasswordChange,
@@ -49,7 +49,6 @@ function ChangePasswordForm({
   newPassword: string;
   confirmation: string;
   pending: boolean;
-  error: string | null;
   onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
   onCurrentPasswordChange: (value: string) => void;
   onNewPasswordChange: (value: string) => void;
@@ -102,11 +101,6 @@ function ChangePasswordForm({
           </div>
         </div>
       </fieldset>
-      {error ? (
-        <p role="alert" className="px-4 text-center text-sm leading-5 text-red-200">
-          {error}
-        </p>
-      ) : null}
       <LiquidGlass className="w-full rounded-full" contentClassName="h-full">
         <Button
           type="submit"
@@ -139,17 +133,17 @@ export function ChangePassword({
   const [newPassword, setNewPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   function validatePasswordLength(value: string): boolean {
     if (value.length < 6) {
-      setError(errorMessage({ code: 'account.PASSWORD_TOO_SHORT' }, locale));
+      toast.add({ type: 'error', title: errorMessage({ code: 'account.PASSWORD_TOO_SHORT' }, locale) });
 
       return false;
     }
 
     if (value.length > 128) {
-      setError(errorMessage({ code: 'account.PASSWORD_TOO_LONG' }, locale));
+      toast.add({ type: 'error', title: errorMessage({ code: 'account.PASSWORD_TOO_LONG' }, locale) });
 
       return false;
     }
@@ -163,27 +157,26 @@ export function ChangePassword({
       return;
     }
 
-    setError(null);
     if (!currentPassword) {
-      setError(errorMessage({ code: 'account.CURRENT_PASSWORD_REQUIRED' }, locale));
+      toast.add({ type: 'error', title: errorMessage({ code: 'account.CURRENT_PASSWORD_REQUIRED' }, locale) });
 
       return;
     }
 
     if (!newPassword) {
-      setError(errorMessage({ code: 'account.NEW_PASSWORD_REQUIRED' }, locale));
+      toast.add({ type: 'error', title: errorMessage({ code: 'account.NEW_PASSWORD_REQUIRED' }, locale) });
 
       return;
     }
 
     if (!confirmation) {
-      setError(errorMessage({ code: 'account.CONFIRM_PASSWORD_REQUIRED' }, locale));
+      toast.add({ type: 'error', title: errorMessage({ code: 'account.CONFIRM_PASSWORD_REQUIRED' }, locale) });
 
       return;
     }
 
     if (newPassword !== confirmation) {
-      setError(errorMessage({ code: 'account.PASSWORD_MISMATCH' }, locale));
+      toast.add({ type: 'error', title: errorMessage({ code: 'account.PASSWORD_MISMATCH' }, locale) });
 
       return;
     }
@@ -193,7 +186,7 @@ export function ChangePassword({
     }
 
     if (newPassword === currentPassword) {
-      setError(errorMessage({ code: 'account.PASSWORD_UNCHANGED' }, locale));
+      toast.add({ type: 'error', title: errorMessage({ code: 'account.PASSWORD_UNCHANGED' }, locale) });
 
       return;
     }
@@ -204,14 +197,14 @@ export function ChangePassword({
       const result = await authClient.changePassword({ currentPassword, newPassword, revokeOtherSessions: true });
 
       if (result.error) {
-        setError(authErrorMessage(result.error, locale));
+        toast.add({ type: 'error', title: authErrorMessage(result.error, locale) });
 
         return;
       }
 
       onSuccess();
     } catch {
-      setError(t('common.connectionFailed'));
+      toast.add({ type: 'error', title: t('common.connectionFailed') });
     } finally {
       setPending(false);
       onPendingChange?.(false);
@@ -230,7 +223,6 @@ export function ChangePassword({
         newPassword={newPassword}
         confirmation={confirmation}
         pending={pending}
-        error={error}
         onSubmit={handleSubmit}
         onCurrentPasswordChange={setCurrentPassword}
         onNewPasswordChange={setNewPassword}

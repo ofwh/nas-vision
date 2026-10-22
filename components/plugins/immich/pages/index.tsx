@@ -78,7 +78,7 @@ function Gallery({
       ) : (
         <ScrollArea
           ref={setScrollArea}
-          className="min-h-0 w-full min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-thumb]]:bg-white/35 [&_[data-slot=scroll-area-thumb]]:hover:bg-white/55 [&_[data-slot=scroll-area-viewport]]:overscroll-contain"
+          className="min-h-0 w-full min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-viewport]]:overscroll-contain"
         >
           <main className="flex min-h-full w-full min-w-0 flex-col">
             {data && !items.length ? (

@@ -11,6 +11,7 @@ import { APP_ICONS } from '@/constants';
 import { fetchApi, fetchUpload } from '@/lib/api/client';
 import type { UploadRemoveRes, UploadRes } from '@/lib/services/upload';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/useToast';
 
 const ACCEPT = 'image/png,image/webp';
 
@@ -133,6 +134,7 @@ function LogoOption({
 function LogoPickerContent({ value, suggestedImage, onConfirm }: LogoPickerContentProps) {
   const t = useTranslations();
   const [uploaded, setUploaded] = useState<string | null>(() => (value.startsWith('/static/uploads/') ? value : null));
+  const toast = useToast();
   const [selected, setSelected] = useState(value);
   const [busy, setBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -150,6 +152,11 @@ function LogoPickerContent({ value, suggestedImage, onConfirm }: LogoPickerConte
     const url = response.data?.files[0]?.url;
 
     if (!response.success || !url) {
+      toast.add({
+        type: 'error',
+        title: !response.success && response.message ? response.message : t('apps.uploadIconFailed'),
+      });
+
       return;
     }
 
@@ -167,6 +174,8 @@ function LogoPickerContent({ value, suggestedImage, onConfirm }: LogoPickerConte
 
     setBusy(false);
     if (!response.success) {
+      toast.add({ type: 'error', title: response.message || t('apps.removeIconFailed') });
+
       return;
     }
 

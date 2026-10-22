@@ -92,8 +92,18 @@
     "delete": "Delete playlist",
     "deleteConfirm": "Delete playlist “{name}”? This cannot be undone. Song files will be kept.",
     "deleting": "Deleting…",
+    "deleted": "Playlist deleted",
     "deleteFailed": "Unable to delete the playlist. Please retry.",
     "cancel": "Cancel",
     "confirm": "Confirm"
+  },
+  "songActions": {
+    "more": "More actions for {name}",
+    "star": "Favorite",
+    "unstar": "Unfavorite",
+    "addToPlaylist": "Add to playlist",
+    "noPlaylists": "No playlists available",
+    "addFailed": "Unable to add to playlist. Please retry.",
+    "removeFailed": "Unable to remove from playlist. Please retry."
   }
 }

@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { fetchApi } from '@/lib/api/client';
 import type { AppItem, AppDeleteRes } from '@/lib/services/apps';
 import { useAppList } from '@/stores/app-list';
+import { useToast } from '@/hooks/useToast';
 
 function AppConfigActions({
   removing,
@@ -151,6 +152,7 @@ function AppEditDialog({ id, onClose }: { id?: string; onClose: () => void }) {
 
 export function AppConfig() {
   const t = useTranslations();
+  const toast = useToast();
   const [dragging, setDragging] = useState(false);
   const sorting = useAppList((state) => state.sorting);
   const sortError = useAppList((state) => state.sortError);
@@ -158,7 +160,6 @@ export function AppConfig() {
   const [removing, setRemoving] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
   const apps = useAppList((state) => state.apps);
   const status = useAppList((state) => state.status);
   const error = useAppList((state) => state.error);
@@ -169,6 +170,12 @@ export function AppConfig() {
     void list();
   }, [list]);
 
+  useEffect(() => {
+    if (sortError) {
+      toast.add({ type: 'error', title: t('apps.sortFailed', { error: sortError }) });
+    }
+  }, [sortError, t, toast]);
+
   const busy = dragging || sorting || deletingId !== null;
 
   const remove = async (id: string) => {
@@ -177,12 +184,11 @@ export function AppConfig() {
     }
 
     setDeletingId(id);
-    setDeleteError(null);
     try {
       const response = await fetchApi<AppDeleteRes>('/api/apps/delete', { id });
 
       if (!response.success) {
-        setDeleteError(response.message);
+        toast.add({ type: 'error', title: response.message });
 
         return;
       }
@@ -190,7 +196,7 @@ export function AppConfig() {
       setPendingId(null);
       await useAppList.getState().list();
     } catch {
-      setDeleteError(t('apps.deleteFailed'));
+      toast.add({ type: 'error', title: t('apps.deleteFailed') });
     } finally {
       setDeletingId(null);
     }
@@ -209,7 +215,6 @@ export function AppConfig() {
           onToggleRemoving={() => {
             setRemoving((value) => !value);
             setPendingId(null);
-            setDeleteError(null);
           }}
           onAdd={() => setEditing({})}
         />
@@ -240,18 +245,7 @@ export function AppConfig() {
         <p role="status" aria-live="polite" className="sr-only">
           {sorting ? t('apps.savingOrder') : dragging ? t('apps.reordering') : ''}
         </p>
-        {sortError ? (
-          <p role="alert" className="px-1 text-sm text-red-300">
-            {t('apps.sortFailed', { error: sortError })}
-          </p>
-        ) : null}
         {status === 'error' ? <p className="px-1 text-sm text-white/70">{error}</p> : null}
-
-        {deleteError ? (
-          <p role="alert" className="px-1 text-sm text-red-300">
-            {deleteError}
-          </p>
-        ) : null}
       </div>
 
       {editing ? <AppEditDialog id={editing.id} onClose={() => setEditing(null)} /> : null}

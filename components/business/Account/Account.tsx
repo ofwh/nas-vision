@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { ChevronRight, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/useToast';
 import { AuthForm, type AuthMode } from '@/components/business/Account/AuthForm';
 import { ChangePassword } from '@/components/business/Account/ChangePassword';
 import { TwoFactor } from '@/components/business/Account/TwoFactor';
@@ -196,7 +197,7 @@ export function Account() {
   const { data: session, isPending, error: sessionError, refetch } = useSession();
   const [mode, setMode] = useState<AuthMode>('sign-in');
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState('');
   const [securityDialog, setSecurityDialog] = useState<SecurityDialog | null>(null);
@@ -208,25 +209,25 @@ export function Account() {
 
     if (!editing) {
       setName(session.user.name);
-      setError(null);
+
       setEditing(true);
 
       return;
     }
 
     if (!name.trim()) {
-      setError(t('account.nicknameRequired'));
+      toast.add({ type: 'error', title: t('account.nicknameRequired') });
 
       return;
     }
 
     setPending(true);
-    setError(null);
+
     try {
       const result = await authClient.updateUser({ name: name.trim() });
 
       if (result.error) {
-        setError(result.error.message ?? t('common.saveFailed'));
+        toast.add({ type: 'error', title: result.error.message ?? t('common.saveFailed') });
 
         return;
       }
@@ -235,7 +236,7 @@ export function Account() {
       await refetch();
       router.refresh();
     } catch {
-      setError(t('common.connectionFailed'));
+      toast.add({ type: 'error', title: t('common.connectionFailed') });
     } finally {
       setPending(false);
     }
@@ -247,12 +248,12 @@ export function Account() {
     }
 
     setPending(true);
-    setError(null);
+
     try {
       const result = await authClient.signOut();
 
       if (result.error) {
-        setError(result.error.message ?? t('account.signOutFailed'));
+        toast.add({ type: 'error', title: result.error.message ?? t('account.signOutFailed') });
 
         return;
       }
@@ -261,7 +262,7 @@ export function Account() {
       setEditing(false);
       router.refresh();
     } catch {
-      setError(t('common.connectionFailed'));
+      toast.add({ type: 'error', title: t('common.connectionFailed') });
     } finally {
       setPending(false);
     }
@@ -313,11 +314,6 @@ export function Account() {
                 {t('account.signOut')}
               </Button>
             </LiquidGlass>
-            {error ? (
-              <p role="alert" className="mt-4 text-sm text-red-200">
-                {error}
-              </p>
-            ) : null}
           </div>
         ) : (
           <>

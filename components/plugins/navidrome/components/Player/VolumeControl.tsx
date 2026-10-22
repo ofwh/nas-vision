@@ -119,7 +119,7 @@ export default function VolumeControl({ volume, muted, onChange, onToggleMute }:
                     </span>
                     <Slider
                       orientation="vertical"
-                      className="relative flex h-24 w-4 cursor-pointer touch-none items-center justify-center data-vertical:h-24 [&_[data-slot=slider-range]]:bg-white [&_[data-slot=slider-thumb]]:size-2.5 [&_[data-slot=slider-thumb]]:border-0 [&_[data-slot=slider-track]]:w-1 [&_[data-slot=slider-track]]:bg-white/20 [&>div]:h-24 [&>div]:min-h-0"
+                      className="relative flex h-24 w-4 cursor-pointer touch-none items-center justify-center data-vertical:h-24 [&_[data-slot=slider-thumb]]:size-2.5 [&_[data-slot=slider-thumb]]:border-0 [&_[data-slot=slider-track]]:w-1 [&>div]:h-24 [&>div]:min-h-0"
                       aria-labelledby={`${hintId}-label`}
                       value={[value]}
                       min={0}

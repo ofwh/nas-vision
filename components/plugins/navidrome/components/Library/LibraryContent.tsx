@@ -11,7 +11,6 @@ type LibraryContentProps = {
   items: MusicItem[];
   isLoading: boolean;
   error?: Error;
-  actionError: string;
   isQueue: boolean;
   isSearch: boolean;
   source: string;
@@ -30,7 +29,6 @@ export default function LibraryContent({
   items,
   isLoading,
   error,
-  actionError,
   isQueue,
   isSearch,
   source,
@@ -49,13 +47,8 @@ export default function LibraryContent({
   return (
     <main className="flex min-h-0 min-w-0 flex-1 flex-col">
       {header}
-      <ScrollArea className="h-0 min-h-0 min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-thumb]]:bg-white/25 [&_[data-slot=scroll-area-viewport]]:overscroll-contain">
+      <ScrollArea className="h-0 min-h-0 min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-viewport]]:overscroll-contain">
         <div className="@container w-full min-w-0 px-[30px] pt-[23px] pb-[30px] @max-[850px]/music-window:px-[22px] @max-[560px]/music-window:px-4">
-          {actionError ? (
-            <p role="alert" className="my-2.5 rounded-[10px] bg-[rgb(160_45_30/15%)] p-3 text-xs text-[#ffc1af]">
-              {actionError}
-            </p>
-          ) : null}
           <LibraryStatus
             isLoading={isLoading}
             error={items.length ? undefined : error}
