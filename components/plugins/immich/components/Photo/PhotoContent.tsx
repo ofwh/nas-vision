@@ -140,7 +140,7 @@ export default function PhotoContent({
           </LiquidGlass>
         ) : null}
       </div>
-      <ScrollArea className="pointer-events-none absolute inset-x-0 bottom-0 flex max-h-full flex-col overflow-hidden bg-gradient-to-t from-black/85 to-black/50 opacity-0 transition-opacity duration-300 ease-out group-hover/image:pointer-events-auto group-hover/image:opacity-100 motion-reduce:transition-none [&>[data-slot=scroll-area-viewport]]:min-h-0">
+      <ScrollArea className="pointer-events-none absolute! inset-x-0 bottom-0 flex max-h-full flex-col overflow-hidden bg-gradient-to-t from-black/85 to-black/50 opacity-0 transition-opacity duration-300 ease-out group-hover/image:pointer-events-auto group-hover/image:opacity-100 motion-reduce:transition-none [&>[data-slot=scroll-area-viewport]]:min-h-0">
         <div className="p-4">
           {isLoading ? (
             <p role="status" className="text-sm text-white/50">
