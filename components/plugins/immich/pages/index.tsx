@@ -66,15 +66,17 @@ function Gallery({
           {t('ui.loading')}
         </div>
       ) : error ? (
-        <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto p-6">
-          <div role="alert" className="max-w-full rounded-xl bg-white/5 p-6 text-center wrap-break-word">
-            <p className="text-sm text-red-300">{error.message}</p>
-            <p className="mt-2 text-sm text-white/50">{t('ui.settingsHint')}</p>
-            <Button variant="ghost" className="mt-4" onClick={retry}>
-              {t('ui.retry')}
-            </Button>
+        <ScrollArea className="min-h-0 flex-1 overflow-hidden">
+          <div className="flex min-h-full items-center justify-center p-6">
+            <div role="alert" className="max-w-full rounded-xl bg-white/5 p-6 text-center wrap-break-word">
+              <p className="text-sm text-red-300">{error.message}</p>
+              <p className="mt-2 text-sm text-white/50">{t('ui.settingsHint')}</p>
+              <Button variant="ghost" className="mt-4" onClick={retry}>
+                {t('ui.retry')}
+              </Button>
+            </div>
           </div>
-        </div>
+        </ScrollArea>
       ) : (
         <ScrollArea
           ref={setScrollArea}

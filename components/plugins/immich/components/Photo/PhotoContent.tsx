@@ -1,6 +1,7 @@
 'use client';
 
 import { Map, RotateCwSquare, Star } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Button } from '@/components/ui/button';
 import { MediaModalCloseButton } from '../MediaModal';
@@ -139,19 +140,21 @@ export default function PhotoContent({
           </LiquidGlass>
         ) : null}
       </div>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 max-h-full overflow-y-auto bg-gradient-to-t from-black/85 to-black/50 p-4 opacity-0 transition-opacity duration-300 ease-out group-hover/image:pointer-events-auto group-hover/image:opacity-100 motion-reduce:transition-none">
-        {isLoading ? (
-          <p role="status" className="text-sm text-white/50">
-            {t('ui.loadingInfo')}
-          </p>
-        ) : null}
-        {error ? (
-          <p role="alert" className="text-sm text-red-300">
-            {error.message}
-          </p>
-        ) : null}
-        <PhotoInfo firstRow={basicInfo} secondRow={shootingInfo} />
-      </div>
+      <ScrollArea className="pointer-events-none absolute inset-x-0 bottom-0 flex max-h-full flex-col overflow-hidden bg-gradient-to-t from-black/85 to-black/50 opacity-0 transition-opacity duration-300 ease-out group-hover/image:pointer-events-auto group-hover/image:opacity-100 motion-reduce:transition-none [&>[data-slot=scroll-area-viewport]]:min-h-0">
+        <div className="p-4">
+          {isLoading ? (
+            <p role="status" className="text-sm text-white/50">
+              {t('ui.loadingInfo')}
+            </p>
+          ) : null}
+          {error ? (
+            <p role="alert" className="text-sm text-red-300">
+              {error.message}
+            </p>
+          ) : null}
+          <PhotoInfo firstRow={basicInfo} secondRow={shootingInfo} />
+        </div>
+      </ScrollArea>
     </div>
   );
 }
