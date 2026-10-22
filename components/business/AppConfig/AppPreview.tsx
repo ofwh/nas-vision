@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { AppLogoPicker } from '@/components/business/AppConfig/AppLogoPicker';
 
 function AppPreviewName({ name }: { name: string }) {
+  const previewName = name.trim();
   const barRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const [overflow, setOverflow] = useState(0);
@@ -26,20 +27,24 @@ function AppPreviewName({ name }: { name: string }) {
     observer.observe(text);
 
     return () => observer.disconnect();
-  }, [name]);
+  }, [previewName]);
 
   return (
     <div
       ref={barRef}
       className="relative z-10 flex h-5.5 max-w-50 items-center overflow-hidden rounded-md text-sm text-white"
     >
-      <span
-        ref={textRef}
-        className={overflow > 0 ? 'group-hover:animate-marquee whitespace-nowrap' : 'whitespace-nowrap'}
-        style={{ '--marquee-shift': `-${overflow}px` } as CSSProperties}
-      >
-        {name}
-      </span>
+      {previewName ? (
+        <span
+          ref={textRef}
+          className={overflow > 0 ? 'group-hover:animate-marquee whitespace-nowrap' : 'whitespace-nowrap'}
+          style={{ '--marquee-shift': `-${overflow}px` } as CSSProperties}
+        >
+          {previewName}
+        </span>
+      ) : (
+        <span aria-hidden className="h-4 w-24 rounded-md bg-white/15" />
+      )}
     </div>
   );
 }

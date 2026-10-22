@@ -47,7 +47,7 @@ export default function LibraryContent({
   return (
     <main className="flex min-h-0 min-w-0 flex-1 flex-col">
       {header}
-      <ScrollArea className="h-0 min-h-0 min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-viewport]]:overscroll-contain">
+      <ScrollArea className="mt-[23px] h-0 min-h-0 min-w-0 flex-1 overflow-hidden [&_[data-slot=scroll-area-viewport]]:overscroll-contain">
         <div className="@container w-full min-w-0 px-[30px] pt-[23px] pb-[30px] @max-[850px]/music-window:px-[22px] @max-[560px]/music-window:px-4">
           <LibraryStatus
             isLoading={isLoading}

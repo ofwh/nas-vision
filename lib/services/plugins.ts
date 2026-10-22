@@ -1,6 +1,7 @@
 import 'server-only';
 import plugins from '@/components/plugins';
 import { appError, type Result } from '@/lib/api';
+import { isPluginFieldEmpty, matchesPluginCondition } from '@/lib/plugins/config';
 import * as repository from '@/lib/db/repositories/plugins';
 import type {
   PluginConfigRes,
@@ -91,6 +92,15 @@ export async function update(params: PluginUpdateParams): Promise<Result<PluginQ
   const values = params.config;
 
   if (!values || typeof values !== 'object' || Array.isArray(values) || !Object.values(values).every(isFieldValue)) {
+    return { ok: false, error: appError('plugin.INVALID_CONFIG') };
+  }
+
+  const missingField = plugin.value.manifest.configs?.some(
+    (field) =>
+      field.required && matchesPluginCondition(field.conditions, values) && isPluginFieldEmpty(values[field.key]),
+  );
+
+  if (missingField) {
     return { ok: false, error: appError('plugin.INVALID_CONFIG') };
   }
 
