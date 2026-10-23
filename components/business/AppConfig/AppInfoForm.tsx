@@ -1,13 +1,14 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import type { ReactNode } from 'react';
 import { Input } from '@/components/ui/input';
 import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxList } from '@/components/ui/combobox';
 import type { AppType } from '@/lib/db/schema';
 import { FormGroup, FIELD_CONTROL_CLASS, type AppFormProps } from './form';
 import { AppSelectItem } from './AppSelectItem';
 
-export function AppInfoForm({ form, update }: AppFormProps) {
+export function AppInfoForm({ form, update, children }: AppFormProps & { children: ReactNode }) {
   const t = useTranslations();
   const TYPE_ITEMS: { value: AppType; label: string; description?: string }[] = [
     { value: 'url', label: t('apps.pageType') },
@@ -50,6 +51,7 @@ export function AppInfoForm({ form, update }: AppFormProps) {
           </ComboboxContent>
         </Combobox>
       </div>
+      {children}
     </FormGroup>
   );
 }
