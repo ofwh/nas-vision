@@ -17,7 +17,13 @@ export default function useSongStar() {
   async function star(song: MusicItem) {
     setStarring(song.id);
     try {
-      await pluginRequest(pluginPath('navidrome', '/api/star'), { id: song.id, starred: !song.starred });
+      try {
+        await pluginRequest(pluginPath('navidrome', '/api/star'), { id: song.id, starred: !song.starred });
+      } catch (error) {
+        toast.add({ type: 'error', title: error instanceof Error ? error.message : t('library.starFailed') });
+
+        return;
+      }
       updateSong(song.id, song.starred ? undefined : new Date().toISOString());
       const aggregates = new Set<string>();
 
@@ -39,8 +45,8 @@ export default function useSongStar() {
         { revalidate: false },
       );
       await Promise.all([...aggregates].map((key) => mutate(key)));
-    } catch (error) {
-      toast.add({ type: 'error', title: error instanceof Error ? error.message : t('library.starFailed') });
+    } catch {
+      toast.add({ type: 'warning', title: t('library.refreshFailed') });
     } finally {
       setStarring(null);
     }

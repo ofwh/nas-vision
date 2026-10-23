@@ -25,6 +25,7 @@
     "emptyPlaylists": "点击右侧加号，创建你的第一张歌单",
     "back": "返回资料库",
     "refresh": "刷新资料库",
+    "refreshFailed": "操作已完成，资料库刷新失败，请手动刷新。",
     "discovering": "正在寻找好音乐…",
     "loading": "正在加载音乐资料库…",
     "loadingMore": "正在加载更多…",
@@ -85,6 +86,7 @@
   "playlist": {
     "create": "新建歌单",
     "creating": "正在创建…",
+    "created": "歌单已创建",
     "name": "歌单名称",
     "createFailed": "创建歌单失败，请重试。",
     "description": "描述（可选）",

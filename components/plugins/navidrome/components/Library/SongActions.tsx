@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { useSWRConfig } from 'swr';
 import { unstable_serialize as serializeInfinite } from 'swr/infinite';
-import { Ellipsis, Heart, ListPlus } from 'lucide-react';
+import { Ellipsis, Heart, ListPlus, Loader } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +33,7 @@ function PlaylistSongMenuItem({
   open,
   added,
   adding,
+  pending,
   onChange,
 }: {
   playlist: MusicItem;
@@ -40,6 +41,7 @@ function PlaylistSongMenuItem({
   open: boolean;
   added: boolean | undefined;
   adding: boolean;
+  pending: boolean;
   onChange: (added: boolean) => void;
 }) {
   const locale = useLocale();
@@ -50,6 +52,7 @@ function PlaylistSongMenuItem({
   return (
     <DropdownMenuCheckboxItem
       checked={checked}
+      aria-busy={pending}
       disabled={adding || listing.isLoading || Boolean(listing.error)}
       closeOnClick={false}
       onCheckedChange={(value) => {
@@ -59,6 +62,7 @@ function PlaylistSongMenuItem({
       }}
     >
       <span className="max-w-56 truncate">{playlist.name || t('common.unnamed')}</span>
+      {pending ? <Loader aria-hidden className="size-4 animate-spin" /> : null}
     </DropdownMenuCheckboxItem>
   );
 }
@@ -68,19 +72,36 @@ export default function SongActions({ song, starring, onStar }: SongActionsProps
   const t = useNavidromeTranslations();
   const playlists = usePlaylistsStore((state) => state);
   const { cache, mutate } = useSWRConfig();
-  const [adding, setAdding] = useState(false);
+  const [pendingPlaylistId, setPendingPlaylistId] = useState<string | null>(null);
+  const submitting = useRef(false);
   const [submenuOpen, setSubmenuOpen] = useState(false);
   const [membership, setMembership] = useState<Partial<Record<string, boolean>>>({});
   const toast = useToast();
 
   async function updatePlaylist(id: string, added: boolean) {
-    setAdding(true);
+    if (submitting.current) {
+      return;
+    }
+
+    submitting.current = true;
+    setPendingPlaylistId(id);
 
     try {
-      await pluginRequest(pluginPath('navidrome', added ? '/api/playlist/add-song' : '/api/playlist/remove-song'), {
-        id,
-        songId: song.id,
-      });
+      try {
+        await pluginRequest(pluginPath('navidrome', added ? '/api/playlist/add-song' : '/api/playlist/remove-song'), {
+          id,
+          songId: song.id,
+        });
+      } catch (error) {
+        if (added) {
+          toast.add({
+            type: 'error',
+            title: error instanceof Error ? error.message : t('songActions.addFailed'),
+          });
+        }
+
+        return;
+      }
       setMembership((current) => ({ ...current, [id]: added }));
       const aggregates = new Set<string>();
 
@@ -103,13 +124,13 @@ export default function SongActions({ song, starring, onStar }: SongActionsProps
       );
       await Promise.all([...aggregates].map((key) => mutate(key)));
       await playlists.list(locale);
-    } catch (error) {
-      toast.add({
-        type: 'error',
-        title: error instanceof Error ? error.message : t(added ? 'songActions.addFailed' : 'songActions.removeFailed'),
-      });
+    } catch {
+      if (added) {
+        toast.add({ type: 'warning', title: t('library.refreshFailed') });
+      }
     } finally {
-      setAdding(false);
+      submitting.current = false;
+      setPendingPlaylistId(null);
     }
   }
 
@@ -146,7 +167,8 @@ export default function SongActions({ song, starring, onStar }: SongActionsProps
                   songId={song.id}
                   open={submenuOpen}
                   added={membership[playlist.id]}
-                  adding={adding}
+                  adding={pendingPlaylistId !== null}
+                  pending={pendingPlaylistId === playlist.id}
                   onChange={(added) => void updatePlaylist(playlist.id, added)}
                 />
               ))}

@@ -25,6 +25,7 @@
     "emptyPlaylists": "Click the plus button to create your first playlist",
     "back": "Back to library",
     "refresh": "Refresh library",
+    "refreshFailed": "The operation completed, but the library could not be refreshed. Please refresh manually.",
     "discovering": "Finding your music…",
     "loading": "Loading your music library…",
     "loadingMore": "Loading more…",
@@ -85,6 +86,7 @@
   "playlist": {
     "create": "Create playlist",
     "creating": "Creating…",
+    "created": "Playlist created",
     "name": "Playlist name",
     "createFailed": "Unable to create playlist. Please retry.",
     "description": "Description (optional)",

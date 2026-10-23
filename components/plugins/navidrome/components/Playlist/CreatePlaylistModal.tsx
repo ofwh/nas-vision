@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, useRef, useState, type SubmitEvent } from 'react';
-import { Loader } from 'lucide-react';
+import { Check, Loader } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { WindowModal } from '@/components/common/WindowModal';
@@ -24,13 +24,13 @@ export default function CreatePlaylistModal({ onClose, onCreated }: CreatePlayli
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(true);
-  const created = useRef<MusicItem | null>(null);
+  const submitting = useRef(false);
   const [pending, setPending] = useState(false);
   const toast = useToast();
 
   async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending) {
+    if (submitting.current) {
       return;
     }
 
@@ -40,29 +40,28 @@ export default function CreatePlaylistModal({ onClose, onCreated }: CreatePlayli
       return;
     }
 
+    submitting.current = true;
     setPending(true);
     try {
       const endpoint = pluginPath('navidrome', '/api/playlist/save');
 
-      if (!created.current) {
-        const result = await pluginRequest<MusicItem>(endpoint, { name: name.trim() });
-
-        created.current = result.data;
-      }
+      const created = await pluginRequest<MusicItem>(endpoint, { name: name.trim() });
 
       const params: NavidromePlaylistSaveParams = {
-        id: created.current.id,
+        id: created.data.id,
         name: name.trim(),
         description: description.trim(),
         public: isPublic,
       };
-      const result = await pluginRequest<MusicItem>(endpoint, params);
+      const result = await pluginRequest<MusicItem>(endpoint, params).catch(() => undefined);
 
-      onCreated({ ...created.current, ...result.data });
+      onCreated({ ...created.data, ...result?.data });
+      toast.add({ type: 'success', title: t('playlist.created') });
       onClose();
     } catch (error) {
       toast.add({ type: 'error', title: error instanceof Error ? error.message : t('playlist.createFailed') });
     } finally {
+      submitting.current = false;
       setPending(false);
     }
   }
@@ -75,6 +74,29 @@ export default function CreatePlaylistModal({ onClose, onCreated }: CreatePlayli
       fit
       size={{ width: 440 }}
       style={{ maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100dvh - 32px)' }}
+      header={{
+        right: (
+          <LiquidGlass className="size-10 rounded-full" contentClassName="h-full">
+            <Button
+              type="submit"
+              form={formId}
+              variant="ghost"
+              size="icon-lg"
+              aria-label={t(pending ? 'playlist.creating' : 'playlist.create')}
+              title={t('playlist.create')}
+              aria-busy={pending}
+              disabled={pending}
+              className="rounded-full text-white"
+            >
+              {pending ? (
+                <Loader aria-hidden className="size-5 animate-spin" />
+              ) : (
+                <Check aria-hidden className="size-5" />
+              )}
+            </Button>
+          </LiquidGlass>
+        ),
+      }}
       onOpenChange={(open) => {
         if (!open && !pending) {
           onClose();
@@ -111,17 +133,6 @@ export default function CreatePlaylistModal({ onClose, onCreated }: CreatePlayli
               <Switch id={`${formId}-public`} checked={isPublic} onCheckedChange={setIsPublic} disabled={pending} />
             </div>
           </fieldset>
-          <LiquidGlass className="w-full rounded-full" contentClassName="h-full">
-            <Button
-              type="submit"
-              variant="ghost"
-              disabled={pending}
-              className="h-10 w-full justify-center rounded-full text-white"
-            >
-              {pending ? <Loader aria-hidden className="size-5 animate-spin" /> : null}
-              {t(pending ? 'playlist.creating' : 'playlist.create')}
-            </Button>
-          </LiquidGlass>
         </form>
       </div>
     </WindowModal>
