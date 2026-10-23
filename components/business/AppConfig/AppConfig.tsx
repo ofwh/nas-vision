@@ -8,7 +8,6 @@ import { useEffect, useState } from 'react';
 import { AppEdit } from '@/components/business/AppConfig/AppEdit';
 import { AppRow } from '@/components/business/AppConfig/AppRow';
 import { WindowContent } from '@/components/common/SplitWindowModal';
-import { LiquidGlassModal } from '@/components/common/LiquidGlassModal';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Loading } from '@/components/common/Loading';
 import { Button } from '@/components/ui/button';
@@ -128,28 +127,6 @@ function SortableAppList({
   );
 }
 
-function AppEditDialog({ id, onClose }: { id?: string; onClose: () => void }) {
-  const t = useTranslations();
-  const [pending, setPending] = useState(false);
-
-  return (
-    <LiquidGlassModal
-      open
-      size={{ width: 480, height: 760 }}
-      style={{ maxHeight: '75vh' }}
-      title={id ? t('apps.editTitle') : t('apps.createTitle')}
-      fit
-      onOpenChange={(open) => {
-        if (!open && !pending) {
-          onClose();
-        }
-      }}
-    >
-      <AppEdit id={id} onSuccess={onClose} onCancel={onClose} onPendingChange={setPending} />
-    </LiquidGlassModal>
-  );
-}
-
 export function AppConfig() {
   const t = useTranslations();
   const toast = useToast();
@@ -248,7 +225,9 @@ export function AppConfig() {
         {status === 'error' ? <p className="px-1 text-sm text-white/70">{error}</p> : null}
       </div>
 
-      {editing ? <AppEditDialog id={editing.id} onClose={() => setEditing(null)} /> : null}
+      {editing ? (
+        <AppEdit id={editing.id} onSuccess={() => setEditing(null)} onCancel={() => setEditing(null)} />
+      ) : null}
     </WindowContent>
   );
 }

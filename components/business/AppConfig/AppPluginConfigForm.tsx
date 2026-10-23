@@ -30,7 +30,7 @@ import type {
   PluginQueryRes,
   PluginSettingOption,
 } from '@/types/plugins';
-import { FormGroup, FIELD_CONTROL_CLASS } from './form';
+import { FIELD_CONTROL_CLASS } from './form';
 import { AppSelectItem } from './AppSelectItem';
 
 function parseValue(text: string, sample: PluginFieldType): PluginFieldType | undefined {
@@ -393,7 +393,7 @@ export function AppPluginConfigForm({
   };
 
   return (
-    <FormGroup label={t('apps.pluginOptions')}>
+    <div className="divide-y divide-white/15">
       <PluginNameField name={name} options={options} loading={listLoading} onNameChange={onNameChange} />
       {name !== '' && !loaded && !error ? (
         <p role="status" className="p-4 text-sm text-white/70">
@@ -415,6 +415,6 @@ export function AppPluginConfigForm({
           {error ?? listError?.message}
         </p>
       ) : null}
-    </FormGroup>
+    </div>
   );
 }

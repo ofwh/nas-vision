@@ -1,12 +1,12 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Check, X } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { useState } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { AppPreview } from '@/components/business/AppConfig/AppPreview';
 import { Button } from '@/components/ui/button';
+import { WindowModal } from '@/components/common/WindowModal';
 import plugins from '@/components/plugins';
 import { useToast } from '@/hooks/useToast';
 import type { JsonObject } from '@/lib/api';
@@ -27,54 +27,9 @@ export type AppEditProps = {
   id?: string;
   onSuccess: () => void;
   onCancel: () => void;
-  onPendingChange?: (pending: boolean) => void;
 };
 
-function AppEditActions({
-  saving,
-  onCancel,
-  onSubmit,
-}: {
-  saving: boolean;
-  onCancel: () => void;
-  onSubmit: () => Promise<void>;
-}) {
-  const t = useTranslations();
-
-  return (
-    <div className="flex shrink-0 items-center justify-between">
-      <LiquidGlass className="size-10 rounded-full" contentClassName="h-full">
-        <Button
-          variant="ghost"
-          size="icon-lg"
-          aria-label={t('common.close')}
-          title={t('common.close')}
-          className="rounded-full text-white"
-          disabled={saving}
-          onClick={onCancel}
-        >
-          <X aria-hidden className="size-5" />
-        </Button>
-      </LiquidGlass>
-
-      <LiquidGlass className="size-10 rounded-full" contentClassName="h-full">
-        <Button
-          variant="ghost"
-          size="icon-lg"
-          aria-label={saving ? t('common.saving') : t('common.save')}
-          title={t('common.save')}
-          disabled={saving}
-          onClick={onSubmit}
-          className="rounded-full text-white"
-        >
-          <Check aria-hidden className="size-5" />
-        </Button>
-      </LiquidGlass>
-    </div>
-  );
-}
-
-export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditProps) {
+export function AppEdit({ id, onSuccess, onCancel }: AppEditProps) {
   const t = useTranslations();
   const toast = useToast();
   const app = useAppList((state) => state.apps.find((item) => item.id === id));
@@ -173,7 +128,6 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
     }
 
     setSaving(true);
-    onPendingChange?.(true);
     try {
       if (form.type === 'plugin' && pluginConfig) {
         await plugin.config.update(pluginConfig);
@@ -193,47 +147,74 @@ export function AppEdit({ id, onSuccess, onCancel, onPendingChange }: AppEditPro
       toast.add({ type: 'error', title: cause instanceof Error ? cause.message : t('common.connectionFailed') });
     } finally {
       setSaving(false);
-      onPendingChange?.(false);
     }
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 bg-[#545458]/25 p-4">
-      <AppEditActions saving={saving} onCancel={onCancel} onSubmit={submit} />
+    <WindowModal
+      open
+      mode="floating"
+      size={{ width: 480 }}
+      style={{ maxWidth: '90vw', maxHeight: '85vh' }}
+      title={id ? t('apps.editTitle') : t('apps.createTitle')}
+      fit
+      header={{
+        right: (
+          <LiquidGlass className="size-10 rounded-full" contentClassName="h-full">
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              aria-label={saving ? t('common.saving') : t('common.save')}
+              title={t('common.save')}
+              disabled={saving}
+              onClick={submit}
+              className="rounded-full text-white"
+            >
+              <Check aria-hidden className="size-5" />
+            </Button>
+          </LiquidGlass>
+        ),
+      }}
+      onOpenChange={(open) => {
+        if (!open && !saving) {
+          onCancel();
+        }
+      }}
+    >
+      <div className="flex min-w-0 shrink-0 flex-col gap-3 bg-[#545458]/25 p-4 pt-16">
+        <div className="flex h-52 shrink-0 items-center justify-center">
+          <AppPreview
+            name={form.name}
+            image={form.image}
+            suggestedImage={form.type === 'plugin' ? plugin.app.manifest?.icon || undefined : undefined}
+            onImageChange={(url) => update('image', url)}
+          />
+        </div>
 
-      <div className="flex h-52 shrink-0 items-center justify-center">
-        <AppPreview
-          name={form.name}
-          image={form.image}
-          suggestedImage={form.type === 'plugin' ? plugin.app.manifest?.icon || undefined : undefined}
-          onImageChange={(url) => update('image', url)}
-        />
-      </div>
-
-      <ScrollArea className="min-h-0 min-w-0 flex-1 overflow-hidden">
         <fieldset disabled={saving} className="flex min-w-0 flex-col gap-2.5">
-          <AppInfoForm form={form} update={update} />
-          {form.type === 'url' ? (
-            <AppUrlConfigForm form={form} update={update} />
-          ) : (
-            <AppPluginConfigForm
-              key={pluginName}
-              name={pluginName}
-              onNameChange={(name) => {
-                setPluginName(name);
-                setPluginConfig(null);
-                const icon = plugins[name]?.manifest.icon;
+          <AppInfoForm form={form} update={update}>
+            {form.type === 'url' ? (
+              <AppUrlConfigForm form={form} update={update} />
+            ) : (
+              <AppPluginConfigForm
+                key={pluginName}
+                name={pluginName}
+                onNameChange={(name) => {
+                  setPluginName(name);
+                  setPluginConfig(null);
+                  const icon = plugins[name]?.manifest.icon;
 
-                if (icon) {
-                  update('image', icon);
-                }
-              }}
-              onConfigChange={setPluginConfig}
-            />
-          )}
+                  if (icon) {
+                    update('image', icon);
+                  }
+                }}
+                onConfigChange={setPluginConfig}
+              />
+            )}
+          </AppInfoForm>
           <AppConfigForm form={form} update={update} />
         </fieldset>
-      </ScrollArea>
-    </div>
+      </div>
+    </WindowModal>
   );
 }
