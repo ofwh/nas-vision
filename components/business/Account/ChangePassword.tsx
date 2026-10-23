@@ -2,7 +2,7 @@
 
 import { useId, useState, type SubmitEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { Loader, UserRoundKey } from 'lucide-react';
+import { Check, Loader, UserRoundKey } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import { authErrorMessage } from '@/lib/api/auth-error';
 import { errorMessage } from '@/lib/api';
@@ -10,7 +10,7 @@ import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { authClient } from '@/lib/auth-client';
-import { SecurityCloseButton } from './SecurityFields';
+import { WindowModal } from '@/components/common/WindowModal';
 
 const FIELD_CONTROL_CLASS =
   'h-12 w-full rounded-none border-0 px-4 shadow-none focus-visible:border-transparent focus-visible:ring-0 focus-visible:bg-white/5!';
@@ -101,31 +101,11 @@ function ChangePasswordForm({
           </div>
         </div>
       </fieldset>
-      <LiquidGlass className="w-full rounded-full" contentClassName="h-full">
-        <Button
-          type="submit"
-          variant="ghost"
-          aria-busy={pending}
-          disabled={pending}
-          className="h-10 w-full justify-center rounded-full text-white"
-        >
-          {pending ? <Loader aria-hidden className="size-5 animate-spin" /> : null}
-          {pending ? t('common.saving') : t('common.save')}
-        </Button>
-      </LiquidGlass>
     </form>
   );
 }
 
-export function ChangePassword({
-  onSuccess,
-  onCancel,
-  onPendingChange,
-}: {
-  onSuccess: () => void;
-  onCancel: () => void;
-  onPendingChange?: (pending: boolean) => void;
-}) {
+export function ChangePassword({ onSuccess, onCancel }: { onSuccess: () => void; onCancel: () => void }) {
   const t = useTranslations();
   const locale = useLocale();
   const formId = useId();
@@ -158,19 +138,31 @@ export function ChangePassword({
     }
 
     if (!currentPassword) {
-      toast.add({ type: 'error', title: errorMessage({ code: 'account.CURRENT_PASSWORD_REQUIRED' }, locale) });
+      toast.add({
+        type: 'error',
+
+        title: errorMessage({ code: 'account.CURRENT_PASSWORD_REQUIRED' }, locale),
+      });
 
       return;
     }
 
     if (!newPassword) {
-      toast.add({ type: 'error', title: errorMessage({ code: 'account.NEW_PASSWORD_REQUIRED' }, locale) });
+      toast.add({
+        type: 'error',
+
+        title: errorMessage({ code: 'account.NEW_PASSWORD_REQUIRED' }, locale),
+      });
 
       return;
     }
 
     if (!confirmation) {
-      toast.add({ type: 'error', title: errorMessage({ code: 'account.CONFIRM_PASSWORD_REQUIRED' }, locale) });
+      toast.add({
+        type: 'error',
+
+        title: errorMessage({ code: 'account.CONFIRM_PASSWORD_REQUIRED' }, locale),
+      });
 
       return;
     }
@@ -185,14 +177,7 @@ export function ChangePassword({
       return;
     }
 
-    if (newPassword === currentPassword) {
-      toast.add({ type: 'error', title: errorMessage({ code: 'account.PASSWORD_UNCHANGED' }, locale) });
-
-      return;
-    }
-
     setPending(true);
-    onPendingChange?.(true);
     try {
       const result = await authClient.changePassword({ currentPassword, newPassword, revokeOtherSessions: true });
 
@@ -202,32 +187,66 @@ export function ChangePassword({
         return;
       }
 
+      toast.add({ type: 'success', title: t('account.passwordChanged') });
       onSuccess();
     } catch {
       toast.add({ type: 'error', title: t('common.connectionFailed') });
     } finally {
       setPending(false);
-      onPendingChange?.(false);
     }
   }
 
   return (
-    <div className="flex shrink-0 flex-col gap-3 bg-[#545458]/25 p-4">
-      <div className="flex shrink-0 items-center justify-between">
-        <SecurityCloseButton onClose={onCancel} disabled={pending} />
+    <WindowModal
+      open
+      mode="floating"
+      title={t('account.changePassword')}
+      size={{ width: 360 }}
+      style={{ maxWidth: '90dvw', maxHeight: '85dvh' }}
+      fit
+      header={{
+        right: (
+          <LiquidGlass className="size-10 rounded-full" contentClassName="h-full">
+            <Button
+              type="submit"
+              form={formId}
+              variant="ghost"
+              size="icon-lg"
+              aria-label={pending ? t('common.saving') : t('common.save')}
+              title={t('common.save')}
+              aria-busy={pending}
+              disabled={pending}
+              className="rounded-full text-white"
+            >
+              {pending ? (
+                <Loader aria-hidden className="size-5 animate-spin" />
+              ) : (
+                <Check aria-hidden className="size-5" />
+              )}
+            </Button>
+          </LiquidGlass>
+        ),
+      }}
+      onOpenChange={(open) => {
+        if (!open && !pending) {
+          onCancel();
+        }
+      }}
+    >
+      <div className="flex min-w-0 shrink-0 flex-col gap-3 bg-[#545458]/25 p-4 pt-16">
+        <ChangePasswordHeader formId={formId} />
+        <ChangePasswordForm
+          formId={formId}
+          currentPassword={currentPassword}
+          newPassword={newPassword}
+          confirmation={confirmation}
+          pending={pending}
+          onSubmit={handleSubmit}
+          onCurrentPasswordChange={setCurrentPassword}
+          onNewPasswordChange={setNewPassword}
+          onConfirmationChange={setConfirmation}
+        />
       </div>
-      <ChangePasswordHeader formId={formId} />
-      <ChangePasswordForm
-        formId={formId}
-        currentPassword={currentPassword}
-        newPassword={newPassword}
-        confirmation={confirmation}
-        pending={pending}
-        onSubmit={handleSubmit}
-        onCurrentPasswordChange={setCurrentPassword}
-        onNewPasswordChange={setNewPassword}
-        onConfirmationChange={setConfirmation}
-      />
-    </div>
+    </WindowModal>
   );
 }
