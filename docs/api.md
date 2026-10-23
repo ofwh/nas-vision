@@ -94,6 +94,7 @@ service 判断业务错误，API 负责响应适配。公共模块不导入、�
 | `17`   | Navidrome 插件（停用保留，不再分配） | —                                            |
 | `50`   | Immich 插件                          | `components/plugins/immich/api/errors.ts`    |
 | `51`   | Navidrome 插件                       | `components/plugins/navidrome/api/errors.ts` |
+| `52`   | 天气插件                             | `components/plugins/weather/api/errors.ts`   |
 
 ### 分配流程
 

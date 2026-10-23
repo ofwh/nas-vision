@@ -40,6 +40,7 @@ export function list(): PluginListRes {
       description: manifest.description,
       icon: manifest.icon,
       status: manifest.status,
+      languages: manifest.languages,
     })),
   };
 }
@@ -47,7 +48,9 @@ export function list(): PluginListRes {
 export async function config(params: PluginConfigParams): Promise<Result<PluginConfigRes>> {
   const plugin = get(params?.id);
 
-  return plugin.ok ? { ok: true, value: { configs: plugin.value.manifest.configs ?? [] } } : plugin;
+  return plugin.ok
+    ? { ok: true, value: { configs: plugin.value.manifest.configs ?? [], languages: plugin.value.manifest.languages } }
+    : plugin;
 }
 
 export async function query(params: PluginQueryParams): Promise<Result<PluginQueryRes>> {

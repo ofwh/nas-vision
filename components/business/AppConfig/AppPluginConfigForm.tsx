@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Eye, EyeOff } from 'lucide-react';
 import type { BaseResponse } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/combobox';
 import { pluginRequest } from '@/lib/plugins/client';
 import { matchesPluginCondition } from '@/lib/plugins/config';
+import { localizePluginConfigs, localizePluginInfo } from '@/lib/plugins/languages';
 import type {
   PluginConfig,
   PluginListRes,
@@ -325,6 +326,7 @@ export function AppPluginConfigForm({
   onConfigChange: (config: PluginConfig | null) => void;
 }) {
   const t = useTranslations();
+  const locale = useLocale();
   const {
     data: catalog,
     error: listError,
@@ -332,13 +334,14 @@ export function AppPluginConfigForm({
   } = useSWR<BaseResponse<PluginListRes>, Error>('/api/plugin/list', (url: string) =>
     pluginRequest<PluginListRes>(url, {}),
   );
-  const options = catalog?.data.plugins ?? [];
+  const options = catalog?.data.plugins.map((item) => localizePluginInfo(item, locale)) ?? [];
   const [loaded, setLoaded] = useState<{
     fields: PluginSettingOption[];
+    languages: PluginConfigRes['languages'];
     values: PluginConfig;
     invalid: string[];
   } | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ message?: string } | null>(null);
 
   useEffect(() => {
     if (!name) {
@@ -359,19 +362,31 @@ export function AppPluginConfigForm({
           return;
         }
 
-        setLoaded({ fields: structure.data.configs, values: saved.data.config, invalid: [] });
-        onConfigChange(saved.data.config);
+        const values: PluginConfig = {
+          ...Object.fromEntries<PluginFieldType>(
+            structure.data.configs.map((field) => [field.key, field.defaults ?? '']),
+          ),
+          ...saved.data.config,
+        };
+
+        setLoaded({
+          fields: structure.data.configs,
+          languages: structure.data.languages,
+          values,
+          invalid: [],
+        });
+        onConfigChange(values);
       })
       .catch((cause: unknown) => {
         if (active) {
-          setError(cause instanceof Error ? cause.message : t('common.connectionFailed'));
+          setError({ message: cause instanceof Error ? cause.message : undefined });
         }
       });
 
     return () => {
       active = false;
     };
-  }, [name, onConfigChange, t]);
+  }, [name, onConfigChange]);
   const update = (key: string, value: PluginFieldType | undefined) => {
     if (!loaded) {
       return;
@@ -400,19 +415,20 @@ export function AppPluginConfigForm({
           {t('apps.loadingPlugin')}
         </p>
       ) : null}
-      {loaded?.fields
-        .filter((field) => matchesPluginCondition(field.conditions, loaded.values))
-        .map((field) => (
-          <PluginConfigField
-            key={field.key}
-            field={field}
-            value={loaded.values[field.key] ?? ''}
-            onChange={(value) => update(field.key, value)}
-          />
-        ))}
+      {loaded &&
+        localizePluginConfigs(loaded.fields, loaded.languages, locale)
+          .filter((field) => matchesPluginCondition(field.conditions, loaded.values))
+          .map((field) => (
+            <PluginConfigField
+              key={field.key}
+              field={field}
+              value={loaded.values[field.key] ?? ''}
+              onChange={(value) => update(field.key, value)}
+            />
+          ))}
       {error || listError ? (
         <p role="alert" className="p-4 text-sm text-red-300">
-          {error ?? listError?.message}
+          {error ? (error.message ?? t('common.connectionFailed')) : listError?.message}
         </p>
       ) : null}
     </div>
