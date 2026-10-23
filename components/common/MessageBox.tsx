@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useId, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
+import { Check, X } from 'lucide-react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { WindowModal } from '@/components/common/WindowModal';
 import { Button } from '@/components/ui/button';
@@ -13,80 +14,107 @@ import {
   type ConfirmOptions,
   type MessageBoxContextValue,
   type MessageBoxOptions,
+  type MessageBoxAction,
   type PromptOptions,
 } from '@/hooks/useMessageBox';
 
-type MessageBoxFrameProps = MessageBoxOptions & {
+type MessageBoxButtonProps = {
+  action: MessageBoxAction;
+  label: string;
+} & ({ form: string; onClick?: never } | { form?: never; onClick: () => void });
+
+function MessageBoxButton({ action, label, form, onClick }: MessageBoxButtonProps) {
+  const Icon = typeof action === 'string' ? null : action;
+  const buttonLabel = typeof action === 'string' ? action : label;
+
+  return (
+    <LiquidGlass className="shrink-0 rounded-full" contentClassName="h-full">
+      <Button
+        type={form ? 'submit' : 'button'}
+        form={form}
+        variant="ghost"
+        size={Icon ? 'icon-lg' : 'lg'}
+        aria-label={buttonLabel}
+        title={buttonLabel}
+        onClick={onClick}
+        className="rounded-full text-white"
+      >
+        {Icon ? <Icon aria-hidden className="size-5" /> : buttonLabel}
+      </Button>
+    </LiquidGlass>
+  );
+}
+
+type MessageBoxFrameProps = ConfirmOptions & {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  cancelText?: string;
+  hasCancel?: boolean;
   children?: ReactNode;
 };
 
 function MessageBoxFrame({
   open,
   title,
-  description,
   content,
-  confirmText,
-  cancelText,
+  confirm = Check,
+  cancel = X,
+  showClose = true,
+  size,
+  hasCancel = false,
   onClose,
   onConfirm,
   children,
 }: MessageBoxFrameProps) {
   const t = useTranslations('common');
+  const formId = useId();
+  const cancelButton =
+    hasCancel && cancel !== null ? <MessageBoxButton action={cancel} label={t('cancel')} onClick={onClose} /> : null;
 
   return (
     <WindowModal
       open={open}
-      title={title}
+      title={title || t('confirm')}
       mode="floating"
+      showClose={showClose}
+      header={{
+        left: showClose ? undefined : cancelButton,
+        center: title || <></>,
+        right: (
+          <>
+            {showClose ? cancelButton : null}
+            {confirm !== null ? <MessageBoxButton action={confirm} label={t('confirm')} form={formId} /> : null}
+          </>
+        ),
+      }}
       fit
       top
-      size={{ width: 300 }}
-      style={{ maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100dvh - 32px)' }}
+      size={size ?? {}}
+      style={{ maxWidth: '90dvw', maxHeight: '85dvh' }}
       onOpenChange={(nextOpen) => {
         if (!nextOpen) {
           onClose();
         }
       }}
     >
-      <div className="flex shrink-0 flex-col bg-[#545458]/25 px-4 pt-20 pb-4">
+      <div className="flex min-w-0 shrink-0 flex-col bg-[#545458]/25 px-4 pt-20 pb-4">
         <form
+          id={formId}
           noValidate
           onSubmit={(event) => {
             event.preventDefault();
             onConfirm();
           }}
-          className="flex flex-col gap-4 text-white"
+          className="flex min-w-0 flex-col gap-4 text-white"
         >
-          {description != null && (
+          {typeof content === 'string' ? (
             <DialogDescription className="px-4 py-3 text-center text-sm leading-6 wrap-break-word text-white">
-              {description}
+              {content}
             </DialogDescription>
+          ) : (
+            content
           )}
-          {content}
           {children}
-          <div className="flex flex-col gap-2">
-            <LiquidGlass className="w-full rounded-full" contentClassName="h-full">
-              <Button type="submit" variant="ghost" className="h-10 w-full justify-center rounded-full text-white">
-                {confirmText ?? t('confirm')}
-              </Button>
-            </LiquidGlass>
-            {cancelText != null && (
-              <LiquidGlass className="w-full rounded-full" contentClassName="h-full">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={onClose}
-                  className="h-10 w-full justify-center rounded-full text-white"
-                >
-                  {cancelText}
-                </Button>
-              </LiquidGlass>
-            )}
-          </div>
         </form>
       </div>
     </WindowModal>
@@ -99,10 +127,8 @@ export type ConfirmMessageBoxProps = ConfirmOptions & {
   onCancel: () => void;
 };
 
-function ConfirmMessageBox({ onCancel, cancelText, ...props }: ConfirmMessageBoxProps) {
-  const t = useTranslations('common');
-
-  return <MessageBoxFrame {...props} cancelText={cancelText ?? t('cancel')} onClose={onCancel} />;
+function ConfirmMessageBox({ onCancel, ...props }: ConfirmMessageBoxProps) {
+  return <MessageBoxFrame {...props} hasCancel onClose={onCancel} />;
 }
 
 export type AlertMessageBoxProps = MessageBoxOptions & {
@@ -122,12 +148,11 @@ export type PromptMessageBoxProps = PromptOptions & {
 
 function PromptMessageBox({
   required = false,
+  type = 'text',
   defaultValue = '',
   placeholder,
-  inputLabel,
   onConfirm,
   onCancel,
-  cancelText,
   ...props
 }: PromptMessageBoxProps) {
   const t = useTranslations('common');
@@ -137,7 +162,7 @@ function PromptMessageBox({
   return (
     <MessageBoxFrame
       {...props}
-      cancelText={cancelText ?? t('cancel')}
+      hasCancel
       onClose={onCancel}
       onConfirm={() => {
         const value = inputRef.current?.value ?? defaultValue;
@@ -152,15 +177,18 @@ function PromptMessageBox({
         onConfirm(value);
       }}
     >
-      <Input
-        ref={inputRef}
-        required={required}
-        defaultValue={defaultValue}
-        placeholder={placeholder}
-        aria-label={inputLabel ?? props.title}
-        autoFocus
-        className="rounded-full"
-      />
+      <div className="min-w-0 shrink-0">
+        <Input
+          ref={inputRef}
+          type={type}
+          required={required}
+          defaultValue={defaultValue}
+          placeholder={placeholder}
+          aria-label={props.title || t('inputRequired')}
+          autoFocus
+          className="rounded-full px-4"
+        />
+      </div>
     </MessageBoxFrame>
   );
 }

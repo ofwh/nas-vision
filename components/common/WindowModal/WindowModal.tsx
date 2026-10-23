@@ -28,6 +28,7 @@ function WindowModalContent({
   footer,
   mode,
   header,
+  showClose = true,
   controls: controlsConfig,
   style,
   fit,
@@ -63,6 +64,7 @@ function WindowModalContent({
   ) : null;
   const headerMode = mode ?? 'controls';
   const hasContentRenderer = typeof children === 'function';
+  const hasFloatingHeader = showHeader && !hasContentRenderer && headerMode === 'floating';
   const spacingType = fit === true ? 'none' : headerMode === 'floating' ? 'small' : 'default';
   const spacingStyles = {
     none: {
@@ -121,7 +123,12 @@ function WindowModalContent({
             )
           }
         >
-          <div className="relative flex min-h-0 flex-1 flex-col">
+          <div
+            className={cn(
+              'relative min-h-0 flex-1',
+              hasFloatingHeader ? 'grid grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)]' : 'flex flex-col',
+            )}
+          >
             {showHeader && !hasContentRenderer && headerMode === 'controls' ? (
               <ControlsHeader
                 title={title}
@@ -129,7 +136,13 @@ function WindowModalContent({
                 header={typeof header === 'object' ? header : undefined}
               />
             ) : null}
-            <div className={cn('flex min-h-0 flex-1 flex-col', contentStyles.spacing)}>
+            <div
+              className={cn(
+                'flex min-h-0 min-w-0 flex-1 flex-col',
+                hasFloatingHeader && 'col-start-1 row-start-1',
+                contentStyles.spacing,
+              )}
+            >
               <ScrollArea
                 className={cn(
                   'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden [&>[data-slot=scroll-area-viewport]]:flex [&>[data-slot=scroll-area-viewport]]:h-auto [&>[data-slot=scroll-area-viewport]]:min-h-0 [&>[data-slot=scroll-area-viewport]]:flex-1 [&>[data-slot=scroll-area-viewport]]:flex-col [&>[data-slot=scroll-area-viewport]]:overscroll-contain',
@@ -148,8 +161,9 @@ function WindowModalContent({
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
             </div>
-            {showHeader && !hasContentRenderer && mode === 'floating' ? (
+            {hasFloatingHeader ? (
               <FloatingHeader
+                showClose={showClose}
                 title={title}
                 header={typeof header === 'object' ? header : undefined}
                 transparent={isTransparent}

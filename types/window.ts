@@ -24,7 +24,7 @@ export type WindowContextValue = {
 };
 
 export type ModalSize = {
-  width: number;
+  width?: number;
   height?: number;
 };
 
@@ -51,6 +51,7 @@ export type HeaderContent = { left?: ReactNode; center?: ReactNode; right?: Reac
 export type WindowModalHeader = boolean | HeaderContent;
 
 export type WindowModalProps = Omit<LiquidGlassModalProps, 'children' | 'header'> & {
+  showClose?: boolean;
   id?: string;
   src?: string;
   mode?: HeaderMode;
