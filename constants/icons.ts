@@ -98,3 +98,7 @@ export const APP_ICONS: readonly string[] = [
   '/static/icons/Youtube.png',
   '/static/icons/ZLibrary.png',
 ];
+
+const icons = { APP_ICONS };
+
+export default icons;

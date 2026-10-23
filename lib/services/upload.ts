@@ -1,5 +1,6 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { UPLOAD_RELATIVE_DIR, UPLOAD_URL_PREFIX } from '@/constants';
 import { appError, type Result } from '@/lib/api';
 
 export type UploadParams = {
@@ -25,9 +26,8 @@ export type UploadRemoveRes = {
   url: string;
 };
 
-const URL_PREFIX = '/static/uploads';
 /** 落在 public 下，Next 直接当静态资源发；但生产只在启动时扫一次 public，新文件要等重启。 */
-const UPLOAD_ROOT = path.join(process.cwd(), 'public/static/uploads');
+const UPLOAD_ROOT = path.join(process.cwd(), 'public', UPLOAD_RELATIVE_DIR);
 
 export async function upload({ files }: UploadParams): Promise<Result<UploadRes>> {
   if (!files.length) {
@@ -69,11 +69,11 @@ export async function remove(input: UploadRemoveParams): Promise<Result<UploadRe
 
 /** url 由调用方给，必须落在 UPLOAD_ROOT 内，否则 ../ 就能删到外面去。 */
 function resolve(url: string): string | null {
-  if (!url.startsWith(`${URL_PREFIX}/`)) {
+  if (!url.startsWith(`${UPLOAD_URL_PREFIX}/`)) {
     return null;
   }
 
-  const target = path.resolve(UPLOAD_ROOT, url.slice(URL_PREFIX.length + 1));
+  const target = path.resolve(UPLOAD_ROOT, url.slice(UPLOAD_URL_PREFIX.length + 1));
 
   return target.startsWith(`${UPLOAD_ROOT}${path.sep}`) ? target : null;
 }
@@ -84,7 +84,7 @@ async function save(file: File): Promise<UploadItem> {
 
   await writeFile(path.join(UPLOAD_ROOT, name), Buffer.from(await file.arrayBuffer()));
 
-  return { name: file.name, url: `${URL_PREFIX}/${name}`, size: file.size };
+  return { name: file.name, url: `${UPLOAD_URL_PREFIX}/${name}`, size: file.size };
 }
 
 /** 取不到规范扩展名就不带：原子名是我们生成的，多一个点反而会带出奇怪的类型。 */

@@ -1,6 +1,8 @@
 import isLocalhost from 'is-localhost-ip';
 import { appError, type Result } from '@/lib/api';
 
+const IFRAME_CHECK_TIMEOUT_MS = 3000;
+
 export type IframeCheckParams = {
   referer: string;
   url: string;
@@ -9,8 +11,6 @@ export type IframeCheckParams = {
 export type IframeCheckRes = {
   deny: string | null;
 };
-
-const TIMEOUT = 3000;
 
 export async function check(input: IframeCheckParams, signedIn: boolean): Promise<Result<IframeCheckRes>> {
   const { referer, url } = input ?? {};
@@ -46,7 +46,7 @@ async function fetchHeaders(target: URL, referer?: string): Promise<Headers | nu
   try {
     const response = await fetch(target, {
       redirect: 'follow',
-      signal: AbortSignal.timeout(TIMEOUT),
+      signal: AbortSignal.timeout(IFRAME_CHECK_TIMEOUT_MS),
       headers: referer ? { referer } : undefined,
     });
 
