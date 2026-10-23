@@ -1,4 +1,4 @@
-import { Play, RefreshCw, Trash2, X } from 'lucide-react';
+import { Loader, Play, RefreshCw, Trash2, X } from 'lucide-react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -11,6 +11,7 @@ type WindowHeaderProps = {
   isRefreshing: boolean;
   onRefresh: () => void;
   onDeletePlaylist?: () => void;
+  deleting: boolean;
 };
 
 export default function WindowHeader({
@@ -19,6 +20,7 @@ export default function WindowHeader({
   isRefreshing,
   onRefresh,
   onDeletePlaylist,
+  deleting,
 }: WindowHeaderProps) {
   const t = useNavidromeTranslations();
   const { close, maximized } = useWindow();
@@ -43,11 +45,23 @@ export default function WindowHeader({
           <Surface className="pointer-events-auto shrink-0 rounded-full">
             <Tooltip>
               <TooltipTrigger
-                render={<Button variant="ghost" size="icon" className="rounded-full text-white" />}
-                aria-label={t('playlist.delete')}
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={deleting}
+                    aria-busy={deleting}
+                    className="rounded-full text-white"
+                  />
+                }
+                aria-label={t(deleting ? 'playlist.deleting' : 'playlist.delete')}
                 onClick={onDeletePlaylist}
               >
-                <Trash2 aria-hidden size={17} />
+                {deleting ? (
+                  <Loader aria-hidden size={17} className="animate-spin" />
+                ) : (
+                  <Trash2 aria-hidden size={17} />
+                )}
               </TooltipTrigger>
               <TooltipContent>{t('playlist.delete')}</TooltipContent>
             </Tooltip>

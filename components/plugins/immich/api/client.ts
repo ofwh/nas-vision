@@ -1,3 +1,4 @@
+import { PLUGIN_REQUEST_TIMEOUT_MS } from '@/constants';
 import type { PluginConfig } from '@/types/plugins';
 import { ImmichError } from './errors';
 
@@ -44,8 +45,8 @@ type RequestOptions = { range?: string | null; signal?: AbortSignal; stream?: bo
 
 async function send(url: string, init: RequestInit, stream = false): Promise<Response> {
   const controller = new AbortController();
-  const timer = stream ? setTimeout(() => controller.abort(), 20_000) : undefined;
-  const timeout = stream ? controller.signal : AbortSignal.timeout(20_000);
+  const timer = stream ? setTimeout(() => controller.abort(), PLUGIN_REQUEST_TIMEOUT_MS) : undefined;
+  const timeout = stream ? controller.signal : AbortSignal.timeout(PLUGIN_REQUEST_TIMEOUT_MS);
   const signal = init.signal ? AbortSignal.any([init.signal, timeout]) : timeout;
 
   try {

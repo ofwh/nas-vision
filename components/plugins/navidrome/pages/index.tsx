@@ -16,7 +16,7 @@ import LibraryContent from '../components/Library/LibraryContent';
 import LibraryHeader from '../components/Library/LibraryHeader';
 import PlayerFooter from '../components/Player/PlayerFooter';
 import WindowHeader from '../components/WindowHeader';
-import useDeletePlaylist from '../hooks/useDeletePlaylist';
+import usePlaylist from '../hooks/usePlaylist';
 
 export default function Navidrome(props: PluginViewProps) {
   const { config } = usePlugin('navidrome');
@@ -47,7 +47,7 @@ function MusicLibrary({ path }: PluginViewProps) {
   );
   const playlists = usePlaylistsStore((state) => state);
   const [showQueue, setShowQueue] = useState(false);
-  const deletePlaylist = useDeletePlaylist();
+  const { deletePlaylist, deleting } = usePlaylist();
   const { star, starring } = useSongStar();
   const params: NavidromeListParams = query ? { section: 'search', query } : selection;
   const deferredParams: NavidromeListParams = query ? { section: 'search', query } : parsePath(deferredPath);
@@ -85,6 +85,7 @@ function MusicLibrary({ path }: PluginViewProps) {
   return (
     <div className="nv-plugin-navidrome @container/music-window relative flex h-full min-h-0 min-w-0 flex-1 overflow-hidden text-[#fff8f1] [&_button[aria-pressed=true]]:text-[#f0a17e]">
       <WindowHeader
+        deleting={deleting}
         onDeletePlaylist={
           playlistId ? () => void deletePlaylist(playlistId, title, () => navigate('playlists')) : undefined
         }
