@@ -1,7 +1,7 @@
 {
   "id": "immich",
-  "name": "Immich",
-  "description": "浏览自部署 Immich 的目录、相册、照片和视频，查看照片信息与播放视频。",
+  "name": "plugin.name",
+  "description": "plugin.description",
   "icon": "./assets/icon.png",
   "status": "on",
   "size": {
@@ -13,7 +13,7 @@
   "mode": "floating",
   "configs": [
     {
-      "label": "服务地址（如 http://immich-server:2283，可带 /api）",
+      "label": "plugin.configs.serverUrl.label",
       "key": "serverUrl",
       "type": "input",
       "value": "",
@@ -21,27 +21,27 @@
       "required": true
     },
     {
-      "label": "认证方式",
+      "label": "plugin.configs.authMode.label",
       "key": "authMode",
       "type": "combobox",
       "value": "apiKey",
       "defaults": "apiKey",
       "options": [
         {
-          "label": "API Key",
+          "label": "plugin.configs.authMode.options.apiKey.label",
           "value": "apiKey",
-          "description": "需要 asset.read、asset.view；目录模式需 folder.read，相册模式需 album.read"
+          "description": "plugin.configs.authMode.options.apiKey.description"
         },
         {
-          "label": "邮箱和密码",
+          "label": "plugin.configs.authMode.options.password.label",
           "value": "password",
-          "description": "需在 Immich 启用密码登录；仅 OAuth 登录的服务请使用 API Key"
+          "description": "plugin.configs.authMode.options.password.description"
         }
       ],
       "required": true
     },
     {
-      "label": "API Key",
+      "label": "plugin.configs.apiKey.label",
       "key": "apiKey",
       "type": "input",
       "secret": true,
@@ -54,7 +54,7 @@
       "required": true
     },
     {
-      "label": "登录邮箱",
+      "label": "plugin.configs.email.label",
       "key": "email",
       "type": "input",
       "value": "",
@@ -66,7 +66,7 @@
       "required": true
     },
     {
-      "label": "登录密码",
+      "label": "plugin.configs.password.label",
       "key": "password",
       "type": "input",
       "secret": true,
@@ -79,27 +79,27 @@
       "required": true
     },
     {
-      "label": "展示模式",
+      "label": "plugin.configs.directoryMode.label",
       "key": "directoryMode",
       "type": "combobox",
       "value": "folders",
       "defaults": "folders",
       "options": [
         {
-          "label": "目录",
+          "label": "plugin.configs.directoryMode.options.folders.label",
           "value": "folders",
-          "description": "按 Immich 原始文件路径逐层浏览"
+          "description": "plugin.configs.directoryMode.options.folders.description"
         },
         {
-          "label": "相册",
+          "label": "plugin.configs.directoryMode.options.albums.label",
           "value": "albums",
-          "description": "将相册作为目录展示"
+          "description": "plugin.configs.directoryMode.options.albums.description"
         }
       ],
       "required": true
     },
     {
-      "label": "起始目录（可选，填写 Immich 容器内的原始目录路径）",
+      "label": "plugin.configs.rootPath.label",
       "key": "rootPath",
       "type": "input",
       "value": "",
@@ -110,5 +110,45 @@
       }
     }
   ],
-  "header": false
+  "header": false,
+  "languages": {
+    "zh-CN": {
+      "plugin.name": "Immich",
+      "plugin.description": "浏览自部署 Immich 的目录、相册、照片和视频，查看照片信息与播放视频。",
+      "plugin.configs.serverUrl.label": "服务地址（如 http://immich-server:2283）",
+      "plugin.configs.authMode.label": "认证方式",
+      "plugin.configs.authMode.options.apiKey.label": "API Key",
+      "plugin.configs.authMode.options.apiKey.description": "需要 asset.read、asset.view；目录模式需 folder.read，相册模式需 album.read",
+      "plugin.configs.authMode.options.password.label": "邮箱和密码",
+      "plugin.configs.authMode.options.password.description": "需在 Immich 启用密码登录；仅 OAuth 登录的服务请使用 API Key",
+      "plugin.configs.apiKey.label": "API Key",
+      "plugin.configs.email.label": "登录邮箱",
+      "plugin.configs.password.label": "登录密码",
+      "plugin.configs.directoryMode.label": "展示模式",
+      "plugin.configs.directoryMode.options.folders.label": "目录",
+      "plugin.configs.directoryMode.options.folders.description": "按 Immich 原始文件路径逐层浏览",
+      "plugin.configs.directoryMode.options.albums.label": "相册",
+      "plugin.configs.directoryMode.options.albums.description": "将相册作为目录展示",
+      "plugin.configs.rootPath.label": "起始目录（可选，填写 Immich 容器内的原始目录路径）"
+    },
+    "en": {
+      "plugin.name": "Immich",
+      "plugin.description": "Browse folders, albums, photos, and videos on your self-hosted Immich server, view photo details, and play videos.",
+      "plugin.configs.serverUrl.label": "Server URL (e.g. http://immich-server:2283)",
+      "plugin.configs.authMode.label": "Authentication method",
+      "plugin.configs.authMode.options.apiKey.label": "API Key",
+      "plugin.configs.authMode.options.apiKey.description": "Requires asset.read and asset.view; folder mode requires folder.read, album mode requires album.read",
+      "plugin.configs.authMode.options.password.label": "Email and password",
+      "plugin.configs.authMode.options.password.description": "Password login must be enabled in Immich; use an API Key for OAuth-only servers",
+      "plugin.configs.apiKey.label": "API Key",
+      "plugin.configs.email.label": "Login email",
+      "plugin.configs.password.label": "Login password",
+      "plugin.configs.directoryMode.label": "Browse mode",
+      "plugin.configs.directoryMode.options.folders.label": "Folders",
+      "plugin.configs.directoryMode.options.folders.description": "Browse the original Immich file paths folder by folder",
+      "plugin.configs.directoryMode.options.albums.label": "Albums",
+      "plugin.configs.directoryMode.options.albums.description": "Display albums as folders",
+      "plugin.configs.rootPath.label": "Root folder (optional, original folder path inside the Immich container)"
+    }
+  }
 }

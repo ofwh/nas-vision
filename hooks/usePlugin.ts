@@ -4,9 +4,11 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { unstable_serialize as serializeInfinite } from 'swr/infinite';
 import useSWRMutation from 'swr/mutation';
+import { useLocale } from 'next-intl';
 import { appError, errorMessage, type BaseResponse, type JsonObject } from '@/lib/api';
 import plugins from '@/components/plugins';
 import { pluginPath, pluginRequest } from '@/lib/plugins/client';
+import { localizePluginConfigs, localizePluginInfo } from '@/lib/plugins/languages';
 import type { PluginConfig, PluginModule, PluginQueryRes } from '@/types/plugins';
 
 type PluginPage = {
@@ -52,6 +54,7 @@ export function usePluginUpload<T>(name: string, path: string, formData?: FormDa
 }
 
 export function usePlugin(name: string) {
+  const locale = useLocale();
   const { cache, mutate } = useSWRConfig();
   const parentPage = useContext(PluginPageContext);
   const [isOpen, setOpen] = useState(false);
@@ -127,13 +130,20 @@ export function usePlugin(name: string) {
     return { success: response.code === 0, data: response.data };
   }
 
+  const manifest = app.data?.manifest ?? plugins[name]?.manifest;
+
   return {
     page,
     config: { query: useQuery, update },
     api: { fetch: useFetch, upload: useUpload },
     app: {
       ...app.data,
-      manifest: app.data?.manifest ?? plugins[name]?.manifest,
+      manifest: manifest
+        ? {
+            ...localizePluginInfo(manifest, locale),
+            configs: manifest.configs ? localizePluginConfigs(manifest.configs, manifest.languages, locale) : undefined,
+          }
+        : undefined,
       error: app.error,
       isLoading: app.isLoading,
     },

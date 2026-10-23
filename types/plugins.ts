@@ -1,6 +1,9 @@
 import type { ComponentType } from 'react';
 import type { HeaderMode, WindowModalHeader } from '@/types/window';
 import type { JsonObject, Result } from '@/lib/api';
+import type { Locale } from '@/i18n/config';
+
+export type PluginLanguages = Partial<Record<Locale, Record<string, string>>>;
 
 export type PluginFieldType = string | number | boolean | string[] | number[] | boolean[];
 export type PluginFieldOption = { label: string; value: PluginFieldType; description: string };
@@ -40,17 +43,20 @@ export interface PluginManifest {
   mode?: HeaderMode;
   previews?: string[];
   configs?: PluginSettingOption[];
+  languages?: PluginLanguages;
 }
 export type PluginViewProps = { path: string };
 export type PluginApiHandler = (request: Request, config: PluginConfig) => Result<Response> | Promise<Result<Response>>;
 export type PluginApi = Record<string, Partial<Record<'GET' | 'POST', PluginApiHandler>>>;
 export type PluginModule = { component: ComponentType<PluginViewProps>; api: PluginApi; manifest: PluginManifest };
 export type PluginQueryRes = { manifest: PluginManifest; config: PluginConfig };
-export type PluginConfigRes = { configs: PluginSettingOption[] };
+export type PluginConfigRes = { configs: PluginSettingOption[]; languages?: PluginLanguages };
 export type PluginRequestParams = JsonObject;
 export type PluginQueryParams = { id: string };
 export type PluginConfigParams = { id: string };
 export type PluginUpdateParams = { id: string; config: PluginConfig };
 export type PluginListParams = Record<string, never>;
-export type PluginListItem = Pick<PluginManifest, 'name' | 'description' | 'icon' | 'status'> & { id: string };
+export type PluginListItem = Pick<PluginManifest, 'name' | 'description' | 'icon' | 'status' | 'languages'> & {
+  id: string;
+};
 export type PluginListRes = { plugins: PluginListItem[] };

@@ -28,7 +28,7 @@ description: 在 NAS Vision 创建、接入或维护插件时，指导模块注�
 - 插件按功能拆分模块，复杂模块按职责继续细分，页面入口负责组合与协调。
 - 视图使用 `PluginViewProps.path` 与 `page.navigate` 导航；内部导航与 API 路径相互独立。
 - 仅在有业务接口时增加 API 和 service；需要外部请求或数据库时再增加 client 或 repository。分层与类型要求遵守 AGENTS.md。
-- 页面与接口返回文案集中保存在插件自身 `i18n/` 目录，不加入宿主公共语言文件；语言选择复用宿主 locale。插件信息及配置标签仍保存在 `manifest.json`，不处理 locale。
+- 插件文案的归属与编写要求遵守[语言规范](references/architecture.md#语言)。
 - 私有资源、样式、DTO 和错误留在插件目录；公共类型仅描述框架能力。错误响应遵守 [API 错误规范](../../api.md)。
 - 当前注册表同时被浏览器和服务端导入，`api/` 目录不提供构建隔离。共享导出链不能包含密钥字面量、`server-only` 或 Node 专属依赖；需要服务端专属模块时先分离注册入口。
 - 浏览器通过同源插件 API 请求服务端能力。`secret` 仅控制表单遮蔽，不提供加密或配置响应脱敏。

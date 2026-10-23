@@ -1,7 +1,7 @@
 {
   "id": "navidrome",
-  "name": "Navidrome",
-  "description": "浏览音乐资料库、专辑与歌单，搜索、收藏并播放 Navidrome 音乐。",
+  "name": "plugin.name",
+  "description": "plugin.description",
   "icon": "",
   "status": "on",
   "size": {
@@ -15,7 +15,7 @@
   "closeOnOverlay": false,
   "configs": [
     {
-      "label": "服务地址（支持子路径，如 https://music.example.com）",
+      "label": "plugin.configs.serverUrl.label",
       "key": "serverUrl",
       "type": "input",
       "value": "",
@@ -23,7 +23,7 @@
       "required": true
     },
     {
-      "label": "Navidrome 用户名",
+      "label": "plugin.configs.username.label",
       "key": "username",
       "type": "input",
       "value": "",
@@ -31,7 +31,7 @@
       "required": true
     },
     {
-      "label": "Navidrome 密码",
+      "label": "plugin.configs.password.label",
       "key": "password",
       "type": "input",
       "secret": true,
@@ -39,5 +39,21 @@
       "defaults": "",
       "required": true
     }
-  ]
+  ],
+  "languages": {
+    "zh-CN": {
+      "plugin.name": "Navidrome",
+      "plugin.description": "浏览音乐资料库、专辑与歌单，搜索、收藏并播放 Navidrome 音乐。",
+      "plugin.configs.serverUrl.label": "服务地址（如 https://music.example.com）",
+      "plugin.configs.username.label": "用户名",
+      "plugin.configs.password.label": "密码"
+    },
+    "en": {
+      "plugin.name": "Navidrome",
+      "plugin.description": "Browse your music library, albums, and playlists; search, favorite, and play music from Navidrome.",
+      "plugin.configs.serverUrl.label": "Server URL (e.g. https://music.example.com)",
+      "plugin.configs.username.label": "Username",
+      "plugin.configs.password.label": "Password"
+    }
+  }
 }

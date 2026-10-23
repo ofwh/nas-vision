@@ -55,9 +55,7 @@ export const manifest = definition as PluginManifest;
 
 ## manifest
 
-必需字段：`id`、`name`、`description`、`icon`、`status`、`size: { width, height }`。
-
-可选字段：`previews`、`configs`，以及窗口选项 `mode`、`header`、`transparent`、`fit`、`resizable`、`top`。具体类型以 `types/plugins.ts` 为准；窗口行为见[弹窗技能](../../nas-vision-modals/SKILL.md)。JSON 只保存可序列化声明，用户可编辑选项放在 `configs`。
+字段及必填约束以 [PluginManifest](../../../../types/plugins.ts) 为准；窗口行为见[弹窗技能](../../nas-vision-modals/SKILL.md)。JSON 只保存可序列化声明，用户可编辑选项放在 `configs`，文案规则见[语言](#语言)。
 
 ## 配置
 
@@ -76,22 +74,24 @@ export const manifest = definition as PluginManifest;
 
 值仅支持 `string`、`number`、`boolean` 及各自的同类型数组。条件以严格相等比较；隐藏字段不会自动清空。
 
-| POST 地址            | body             | 返回 data              |
-| -------------------- | ---------------- | ---------------------- |
-| `/api/plugin/config` | `{ id }`         | `{ configs }`          |
-| `/api/plugin/query`  | `{ id }`         | `{ manifest, config }` |
-| `/api/plugin/update` | `{ id, config }` | `{ manifest, config }` |
-| `/api/plugin/list`   | `{}`             | `{ plugins }`          |
+配置接口的请求参数与返回结构以 [types/plugins.ts](../../../../types/plugins.ts) 中对应的 Params、Res 类型为准。
 
 配置按插件 ID 保存，同一插件的多个应用条目共享配置。无已保存配置时按 `defaults ?? ''` 初始化；已有配置直接返回，新增字段不会自动补入默认值。service 应处理字段缺失，并将 `PluginConfig` 的联合值收窄后使用。
 
 ## 语言
 
-插件文案统一放在自身 `i18n/{locale}.json`，通过插件内 `i18n/index.ts` 提供读取或翻译入口。页面文案、无障碍标签、空态、交互提示及接口返回文案使用同一组资源，不在组件、service、错误定义文件中混写语言文本，也不加入宿主 `i18n/messages` 或公共 API 文案。
+语言集合复用 `i18n/config.ts`。
 
-- 语言集合与默认语言复用 `i18n/config.ts`，不同语言的键保持一致并用类型约束。客户端通过 `useLocale()`、服务端通过 `getLocale()` 获取当前语言，未知语言回退默认语言；动态文案使用命名参数，需要计数时使用 ICU 复数格式。
+### manifest 文案
+
+插件名称、描述、配置标签及选项文案集中保存在 `manifest.languages[locale]`。各语言使用一致的扁平键，统一以 `plugin.` 为前缀，对应字段填写完整键。
+
+### 页面与接口文案
+
+页面文案、无障碍标签、空态、交互提示及接口返回文案集中保存在插件自身 `i18n/{locale}.json`，通过插件内 `i18n/index.ts` 提供读取或翻译入口，不在组件、service、错误定义文件中混写语言文本，也不加入宿主 `i18n/messages` 或公共 API 文案。
+
+- 不同语言的键保持一致并用类型约束；动态文案使用命名参数，需要计数时使用 ICU 复数格式。
 - 客户端翻译可用 `createTranslator` 并显式传入插件资源，不依赖宿主全局消息注册；服务端错误响应读取同目录的 `errors` 文案，错误码与类型仍留在 `api/errors.ts`。业务数据中的名称等保留原值，缺失名称由展示层提供本地化回退。
-- 插件名称、描述、配置标签等插件信息保留在 `manifest.json`，不提取到 i18n、不处理 locale；根入口直接导出 manifest，宿主不增加 manifest 多语言解析。
 - 按语言变化的请求缓存应包含 locale，避免切换语言后复用上一语言的页面文案或错误提示。持续交互状态优先保存错误标识，在渲染时翻译，避免语言切换重置业务状态。
 
 ## API 边界
