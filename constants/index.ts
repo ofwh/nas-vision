@@ -1,1 +1,2 @@
-export { APP_ICONS } from './icons';
+export * from './icons';
+export * from './app';

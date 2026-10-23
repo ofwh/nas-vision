@@ -7,7 +7,7 @@ import { useRef, useState } from 'react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { APP_ICONS } from '@/constants';
+import { APP_ICONS, UPLOAD_URL_PREFIX } from '@/constants';
 import { fetchApi, fetchUpload } from '@/lib/api/client';
 import type { UploadRemoveRes, UploadRes } from '@/lib/services/upload';
 import { cn } from '@/lib/utils';
@@ -133,7 +133,9 @@ function LogoOption({
 
 function LogoPickerContent({ value, suggestedImage, onConfirm }: LogoPickerContentProps) {
   const t = useTranslations();
-  const [uploaded, setUploaded] = useState<string | null>(() => (value.startsWith('/static/uploads/') ? value : null));
+  const [uploaded, setUploaded] = useState<string | null>(() =>
+    value.startsWith(`${UPLOAD_URL_PREFIX}/`) ? value : null,
+  );
   const toast = useToast();
   const [busy, setBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);

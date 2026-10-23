@@ -5,6 +5,7 @@ import { cookies, headers } from 'next/headers';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Geist, Geist_Mono, Inter } from 'next/font/google';
+import { TOAST_TIMEOUT_MS } from '@/constants';
 import configService from '@/lib/services/config';
 import { auth } from '@/lib/auth';
 import { SettingsProvider } from '@/components/business/Appearance/SettingsProvider';
@@ -63,7 +64,7 @@ export default async function HomeLayout({ children }: { children: ReactNode }) 
         <GlassFilter />
         <NextIntlClientProvider>
           <SettingsProvider config={config} signedIn={!!session}>
-            <Toaster>
+            <Toaster timeout={TOAST_TIMEOUT_MS}>
               <MessageBox>
                 <TooltipProvider>{children}</TooltipProvider>
               </MessageBox>
