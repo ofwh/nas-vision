@@ -9,7 +9,6 @@ import { AuthForm, type AuthMode } from '@/components/business/Account/AuthForm'
 import { ChangePassword } from '@/components/business/Account/ChangePassword';
 import { TwoFactor } from '@/components/business/Account/TwoFactor';
 import { WindowContent } from '@/components/common/SplitWindowModal';
-import { LiquidGlassModal } from '@/components/common/LiquidGlassModal';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Loading } from '@/components/common/Loading';
 import { Button } from '@/components/ui/button';
@@ -132,62 +131,6 @@ function AccountSecuritySettings({
         ))}
       </div>
     </div>
-  );
-}
-
-function ChangePasswordDialog({ onClose }: { onClose: () => void }) {
-  const t = useTranslations();
-  const [pending, setPending] = useState(false);
-
-  return (
-    <LiquidGlassModal
-      open
-      title={t('account.changePassword')}
-      size={{ width: 440 }}
-      style={{ maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100dvh - 32px)' }}
-      onOpenChange={(open) => {
-        if (!open && !pending) {
-          onClose();
-        }
-      }}
-    >
-      <ChangePassword onSuccess={onClose} onCancel={onClose} onPendingChange={setPending} />
-    </LiquidGlassModal>
-  );
-}
-
-function TwoFactorDialog({
-  enabled,
-  onClose,
-  onUpdated,
-}: {
-  enabled: boolean;
-  onClose: () => void;
-  onUpdated: () => Promise<void>;
-}) {
-  const t = useTranslations();
-  const [pending, setPending] = useState(false);
-
-  return (
-    <LiquidGlassModal
-      open
-      title={t('account.twoFactorAuthentication')}
-      size={{ width: 360 }}
-      style={{ maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100dvh - 32px)' }}
-      onOpenChange={(open) => {
-        if (!open && !pending) {
-          onClose();
-        }
-      }}
-    >
-      <TwoFactor
-        enabled={enabled}
-        onSuccess={onClose}
-        onCancel={onClose}
-        onPendingChange={setPending}
-        onUpdated={onUpdated}
-      />
-    </LiquidGlassModal>
   );
 }
 
@@ -344,12 +287,13 @@ export function Account() {
         )}
       </div>
       {session && securityDialog === 'changePassword' ? (
-        <ChangePasswordDialog onClose={() => setSecurityDialog(null)} />
+        <ChangePassword onSuccess={() => setSecurityDialog(null)} onCancel={() => setSecurityDialog(null)} />
       ) : null}
       {session && securityDialog === 'twoFactorAuthentication' ? (
-        <TwoFactorDialog
+        <TwoFactor
           enabled={session.user.twoFactorEnabled === true}
-          onClose={() => setSecurityDialog(null)}
+          onSuccess={() => setSecurityDialog(null)}
+          onCancel={() => setSecurityDialog(null)}
           onUpdated={async () => {
             await refetch();
             router.refresh();
