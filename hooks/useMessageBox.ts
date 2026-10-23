@@ -1,23 +1,28 @@
 'use client';
 
 import { createContext, useContext, type ReactNode } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import type { ModalSize } from '@/types/window';
+
+export type MessageBoxAction = string | LucideIcon;
 
 export type MessageBoxOptions = {
-  title: string;
-  description?: ReactNode;
+  title?: string;
   content?: ReactNode;
-  confirmText?: string;
+  confirm?: MessageBoxAction | null;
+  showClose?: boolean;
+  size?: ModalSize;
 };
 
 export type ConfirmOptions = MessageBoxOptions & {
-  cancelText?: string;
+  cancel?: MessageBoxAction | null;
 };
 
 export type PromptOptions = ConfirmOptions & {
   required?: boolean;
   defaultValue?: string;
   placeholder?: string;
-  inputLabel?: string;
+  type?: 'text' | 'password';
 };
 
 export type MessageBoxContextValue = {
