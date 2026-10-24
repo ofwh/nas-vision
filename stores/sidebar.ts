@@ -29,6 +29,7 @@ export type SidebarItem = {
   name: string;
   menu: SidebarMenu;
   only: boolean;
+  owner?: string;
 };
 
 type SidebarStore = {
@@ -36,12 +37,15 @@ type SidebarStore = {
   signedIn: boolean;
   setSignedIn: (signedIn: boolean) => void;
   type: SidebarMenuType | null;
-  setType: (type: SidebarMenuType | null) => void;
+  baseType: SidebarMenuType | null;
+  typeScopes: { owner: string; type: SidebarMenuType | null }[];
+  setType: (type: SidebarMenuType | null, owner?: string) => void;
   activeId: string | null;
   openedName: string | null;
   close: (name: string) => void;
-  register: (menus: SidebarMenu[], only?: boolean) => void;
+  register: (menus: SidebarMenu[], only?: boolean, owner?: string) => void;
   unmount: (name: string) => void;
+  release: (owner: string) => void;
   setActive: (name: string) => void;
 };
 
@@ -89,15 +93,26 @@ export const useSidebarStore = create<SidebarStore>((set, get) => ({
     set({ signedIn, ...selection });
   },
   type: null,
-  setType: (type) => {
+  baseType: null,
+  typeScopes: [],
+  setType: (requestedType, owner) => {
     const state = get();
+    const baseType = owner === undefined ? requestedType : state.baseType;
+    const typeScopes =
+      owner === undefined
+        ? state.typeScopes
+        : state.typeScopes.some((scope) => scope.owner === owner)
+          ? state.typeScopes.map((scope) => (scope.owner === owner ? { owner, type: requestedType } : scope))
+          : [...state.typeScopes, { owner, type: requestedType }];
+
+    const type = typeScopes.length ? typeScopes[typeScopes.length - 1].type : baseType;
     const selection = reconcileSelection({ ...state, type });
 
     if (selection.activeId !== state.activeId) {
       state.items.find((item) => item.name === state.activeId)?.menu.onDeactivate?.();
     }
 
-    set({ type, ...selection });
+    set({ type, baseType, typeScopes, ...selection });
   },
   activeId: null,
   openedName: null,
@@ -106,12 +121,12 @@ export const useSidebarStore = create<SidebarStore>((set, get) => ({
       openedName: state.openedName === name ? null : state.openedName,
       activeId: state.activeId === name ? (selectSidebarItems(state)[0]?.name ?? null) : state.activeId,
     })),
-  register: (menus, only = false) =>
+  register: (menus, only = false, owner) =>
     set((state) => {
       const entries = new Map(state.items.map((item) => [item.name, item]));
 
       for (const menu of menus) {
-        entries.set(menu.name, { name: menu.name, menu: { auth: false, ...menu }, only });
+        entries.set(menu.name, { name: menu.name, menu: { auth: false, ...menu }, only, owner });
       }
       const items = [...entries.values()].sort((a, b) => (a.menu.order ?? 0) - (b.menu.order ?? 0));
 
@@ -125,6 +140,14 @@ export const useSidebarStore = create<SidebarStore>((set, get) => ({
         items,
         ...reconcileSelection({ ...state, items }),
       };
+    }),
+  release: (owner) =>
+    set((state) => {
+      const items = state.items.filter((item) => item.owner !== owner);
+      const typeScopes = state.typeScopes.filter((scope) => scope.owner !== owner);
+      const type = typeScopes.length ? typeScopes[typeScopes.length - 1].type : state.baseType;
+
+      return { items, typeScopes, type, ...reconcileSelection({ ...state, items, type }) };
     }),
   setActive: (name) => {
     const state = get();
@@ -146,12 +169,16 @@ export const useSidebarStore = create<SidebarStore>((set, get) => ({
 
         if (
           state.activeId === name &&
-          selectSidebarItems(state).some((item) => item.name === name && item.menu.render)
+          selectSidebarItems(state).some((current) => current === item && current.menu.render)
         ) {
           set({ openedName: name });
         }
       },
-      close: () => get().close(name),
+      close: () => {
+        if (get().items.includes(item)) {
+          get().close(name);
+        }
+      },
     });
   },
 }));

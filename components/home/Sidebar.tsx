@@ -5,6 +5,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { useSession } from '@/lib/auth-client';
 import { selectSidebarItems, useSidebarStore, type SidebarItem } from '@/stores/sidebar';
+import styles from '@/styles/Sidebar.module.css';
 
 const ICON_SIZE = 24;
 const ICON_STROKE = 1.7;
@@ -21,6 +22,24 @@ const LABEL_RIGHT = ICON_PADDING + CONTAINER_PADDING;
 
 const containerHeight = (itemCount: number) =>
   2 * CONTAINER_PADDING + itemCount * ITEM_SIZE + Math.max(0, itemCount - 1) * ITEM_GAP;
+
+type SidebarEntry = {
+  name: string;
+  label: string;
+  icon: SidebarItem['menu']['icon'];
+  index: number;
+  exiting: boolean;
+};
+
+function sidebarEntries(items: SidebarItem[]): SidebarEntry[] {
+  return items.map((item, index) => ({
+    name: item.name,
+    label: item.menu.label,
+    icon: item.menu.icon,
+    index,
+    exiting: false,
+  }));
+}
 
 export function Sidebar({ visible = true }: { visible?: boolean }) {
   const { data: session } = useSession();
@@ -64,12 +83,25 @@ function SidebarContent() {
   const items = useSidebarStore(useShallow(selectSidebarItems));
   const activeId = useSidebarStore((state) => state.activeId);
   const setActive = useSidebarStore((state) => state.setActive);
+  const [rendered, setRendered] = useState(() => ({ items, entries: sidebarEntries(items) }));
+
+  if (rendered.items !== items) {
+    const names = new Set(items.map((item) => item.name));
+
+    setRendered({
+      items,
+      entries: [
+        ...sidebarEntries(items),
+        ...rendered.entries.filter((entry) => !names.has(entry.name)).map((entry) => ({ ...entry, exiting: true })),
+      ],
+    });
+  }
 
   const listRef = useRef<HTMLDivElement>(null);
   const [expandedWidth, setExpandedWidth] = useState(LABEL_LEFT + LABEL_RIGHT);
 
   useEffect(() => {
-    const labels = listRef.current?.querySelectorAll<HTMLElement>('[data-sidebar-label]');
+    const labels = listRef.current?.querySelectorAll<HTMLElement>('[data-sidebar-label]:not([data-exiting])');
 
     if (!labels?.length) {
       return;
@@ -118,7 +150,7 @@ function SidebarContent() {
           height: containerHeight(items.length),
         } as CSSProperties
       }
-      className="group w-17 shrink-0 rounded-[34px] transition-[width] duration-300 ease-out hover:w-[var(--sidebar-expand)] motion-reduce:transition-none"
+      className="group w-17 shrink-0 rounded-[34px] [transition:width_300ms_ease-out,height_240ms_ease-out_140ms] hover:w-[var(--sidebar-expand)] motion-reduce:transition-none"
     >
       <div
         aria-hidden
@@ -128,45 +160,60 @@ function SidebarContent() {
         style={{ transform: `translateY(${itemTop(hoveredItem ? hover.index : 0)}px)`, height: ITEM_SIZE }}
       />
 
-      {items.map((item, index) => {
+      {rendered.entries.map((item) => {
         const active = item.name === activeId;
 
         return (
           <div
             key={item.name}
-            role="button"
-            tabIndex={0}
-            aria-label={item.menu.label}
-            aria-pressed={active}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                setActive(item.name);
-              }
-            }}
-            onPointerEnter={() => setHover((prev) => ({ index, visible: true, sliding: prev.visible }))}
-            onClick={() => setActive(item.name)}
-            className="group/item absolute inset-x-0 cursor-pointer"
-            style={{ top: itemTop(index), height: ITEM_SIZE }}
+            className="absolute inset-x-0 top-0 transition-transform duration-240 ease-out motion-reduce:transition-none"
+            style={{ transform: `translateY(${itemTop(item.index)}px)`, height: ITEM_SIZE }}
           >
-            {active ? <div className="absolute inset-y-0 right-3 left-3 rounded-full bg-white/15" /> : null}
-
-            <span
-              className={`absolute top-1/2 left-5.5 flex h-6 w-6 -translate-y-1/2 items-center justify-center transition-colors duration-200 group-hover/item:text-white ${
-                active ? 'text-white' : 'text-white/85'
-              }`}
+            <div
+              role="button"
+              tabIndex={item.exiting ? -1 : 0}
+              inert={item.exiting}
+              aria-hidden={item.exiting || undefined}
+              aria-label={item.label}
+              aria-pressed={active}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  setActive(item.name);
+                }
+              }}
+              onPointerEnter={() => setHover((prev) => ({ index: item.index, visible: true, sliding: prev.visible }))}
+              onClick={() => setActive(item.name)}
+              onAnimationEnd={(event) => {
+                if (item.exiting && event.target === event.currentTarget) {
+                  setRendered((state) => ({
+                    ...state,
+                    entries: state.entries.filter((entry) => entry.name !== item.name || !entry.exiting),
+                  }));
+                }
+              }}
+              className={`group/item absolute inset-0 cursor-pointer ${item.exiting ? styles.exit : styles.enter}`}
             >
-              <item.menu.icon size={ICON_SIZE} strokeWidth={ICON_STROKE} aria-hidden />
-            </span>
+              {active ? <div className="absolute inset-y-0 right-3 left-3 rounded-full bg-white/15" /> : null}
 
-            <span
-              data-sidebar-label
-              className={`absolute top-1/2 left-14.5 w-max -translate-y-1/2 text-sm whitespace-nowrap opacity-0 transition-[color,opacity] duration-200 group-hover:opacity-100 group-hover/item:text-white ${
-                active ? 'text-white' : 'text-white/85'
-              }`}
-            >
-              {item.menu.label}
-            </span>
+              <span
+                className={`absolute top-1/2 left-5.5 flex h-6 w-6 -translate-y-1/2 items-center justify-center transition-colors duration-200 group-hover/item:text-white ${
+                  active ? 'text-white' : 'text-white/85'
+                }`}
+              >
+                <item.icon size={ICON_SIZE} strokeWidth={ICON_STROKE} aria-hidden />
+              </span>
+
+              <span
+                data-sidebar-label
+                data-exiting={item.exiting || undefined}
+                className={`absolute top-1/2 left-14.5 w-max -translate-y-1/2 text-sm whitespace-nowrap opacity-0 transition-[color,opacity] duration-200 group-hover:opacity-100 group-hover/item:text-white ${
+                  active ? 'text-white' : 'text-white/85'
+                }`}
+              >
+                {item.label}
+              </span>
+            </div>
           </div>
         );
       })}

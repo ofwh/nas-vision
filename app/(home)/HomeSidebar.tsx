@@ -15,11 +15,11 @@ export function HomeSidebar() {
   useEffect(() => {
     const { register } = useSidebarStore.getState();
     const menus: SidebarMenu[] = [
-      { name: 'home', label: t('home'), type: 'home', icon: House, order: 0, onClick: () => {} },
+      { name: 'home', label: t('home'), type: 'common', icon: House, order: 0, onClick: () => {} },
       {
         name: 'settings',
         label: t('settings'),
-        type: 'common',
+        type: 'home',
         icon: Cog,
         order: 2,
         onClick: ({ open }) => open(),
@@ -29,7 +29,7 @@ export function HomeSidebar() {
         name: 'apps',
         auth: true,
         label: t('apps'),
-        type: 'common',
+        type: 'home',
         icon: LayoutGrid,
         order: 1,
         onClick: ({ open }) => open(),
