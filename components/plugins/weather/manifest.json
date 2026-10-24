@@ -1,0 +1,228 @@
+{
+  "id": "weather",
+  "name": "plugin.name",
+  "description": "plugin.description",
+  "icon": "./assets/icon.png",
+  "status": "on",
+  "size": {
+    "width": 960,
+    "height": 760
+  },
+  "transparent": true,
+  "header": false,
+  "fit": true,
+  "resizable": false,
+  "closeOnOverlay": true,
+  "configs": [
+    {
+      "key": "provider",
+      "label": "plugin.configs.provider.label",
+      "type": "combobox",
+      "value": "qweather",
+      "defaults": "qweather",
+      "required": true,
+      "options": [
+        {
+          "label": "plugin.configs.provider.options.qweather.label",
+          "value": "qweather",
+          "description": "plugin.configs.provider.options.qweather.description"
+        },
+        {
+          "label": "plugin.configs.provider.options.caiyun.label",
+          "value": "caiyun",
+          "description": "plugin.configs.provider.options.caiyun.description"
+        }
+      ]
+    },
+    {
+      "key": "qweatherApiKey",
+      "label": "plugin.configs.qweatherApiKey.label",
+      "type": "input",
+      "value": "",
+      "defaults": "",
+      "secret": true,
+      "required": true,
+      "conditions": {
+        "key": "provider",
+        "value": "qweather"
+      }
+    },
+    {
+      "key": "caiyunToken",
+      "label": "plugin.configs.caiyunToken.label",
+      "type": "input",
+      "value": "",
+      "defaults": "",
+      "secret": true,
+      "required": true,
+      "conditions": {
+        "key": "provider",
+        "value": "caiyun"
+      }
+    },
+    {
+      "key": "qweatherHost",
+      "label": "plugin.configs.qweatherHost.label",
+      "type": "input",
+      "value": "",
+      "defaults": "",
+      "required": true,
+      "conditions": {
+        "key": "provider",
+        "value": "qweather"
+      }
+    },
+    {
+      "key": "temperatureUnit",
+      "label": "plugin.configs.temperatureUnit.label",
+      "type": "combobox",
+      "value": "celsius",
+      "defaults": "celsius",
+      "required": true,
+      "options": [
+        {
+          "label": "plugin.configs.temperatureUnit.options.celsius.label",
+          "value": "celsius"
+        },
+        {
+          "label": "plugin.configs.temperatureUnit.options.fahrenheit.label",
+          "value": "fahrenheit"
+        }
+      ]
+    },
+    {
+      "key": "pressureUnit",
+      "label": "plugin.configs.pressureUnit.label",
+      "type": "combobox",
+      "value": "hectopascal",
+      "defaults": "hectopascal",
+      "required": true,
+      "options": [
+        {
+          "label": "plugin.configs.pressureUnit.options.hectopascal.label",
+          "value": "hectopascal"
+        },
+        {
+          "label": "plugin.configs.pressureUnit.options.pascal.label",
+          "value": "pascal"
+        }
+      ]
+    },
+    {
+      "key": "windSpeedUnit",
+      "label": "plugin.configs.windSpeedUnit.label",
+      "type": "combobox",
+      "value": "kilometer_per_hour",
+      "defaults": "kilometer_per_hour",
+      "required": true,
+      "options": [
+        {
+          "label": "plugin.configs.windSpeedUnit.options.kilometer_per_hour.label",
+          "value": "kilometer_per_hour"
+        },
+        {
+          "label": "plugin.configs.windSpeedUnit.options.meter_per_second.label",
+          "value": "meter_per_second"
+        },
+        {
+          "label": "plugin.configs.windSpeedUnit.options.mile_per_hour.label",
+          "value": "mile_per_hour"
+        }
+      ]
+    },
+    {
+      "key": "visibilityUnit",
+      "label": "plugin.configs.visibilityUnit.label",
+      "type": "combobox",
+      "value": "kilometer",
+      "defaults": "kilometer",
+      "required": true,
+      "options": [
+        {
+          "label": "plugin.configs.visibilityUnit.options.kilometer.label",
+          "value": "kilometer"
+        },
+        {
+          "label": "plugin.configs.visibilityUnit.options.meter.label",
+          "value": "meter"
+        }
+      ]
+    },
+    {
+      "key": "precipitationUnit",
+      "label": "plugin.configs.precipitationUnit.label",
+      "type": "combobox",
+      "value": "millimeter",
+      "defaults": "millimeter",
+      "required": true,
+      "options": [
+        {
+          "label": "plugin.configs.precipitationUnit.options.millimeter.label",
+          "value": "millimeter"
+        },
+        {
+          "label": "plugin.configs.precipitationUnit.options.inch.label",
+          "value": "inch"
+        }
+      ]
+    }
+  ],
+  "languages": {
+    "zh-CN": {
+      "plugin.name": "天气",
+      "plugin.description": "实时天气、逐时与逐日预报、气象预警及空气质量，支持和风天气与彩云天气。",
+      "plugin.configs.provider.label": "天气源",
+      "plugin.configs.provider.options.qweather.label": "和风天气",
+      "plugin.configs.provider.options.qweather.description": "新版经纬度 API，使用 API Host 与 API Key",
+      "plugin.configs.provider.options.caiyun.label": "彩云天气",
+      "plugin.configs.provider.options.caiyun.description": "v2.6；大陆坐标使用 GCJ-02，其他地区使用 WGS84",
+      "plugin.configs.caiyunToken.label": "彩云 Token",
+      "plugin.configs.qweatherHost.label": "和风 API Host（例如 abc.qweatherapi.com）",
+      "plugin.configs.temperatureUnit.label": "温度单位",
+      "plugin.configs.temperatureUnit.options.celsius.label": "摄氏度",
+      "plugin.configs.temperatureUnit.options.fahrenheit.label": "华氏度",
+      "plugin.configs.pressureUnit.label": "气压单位",
+      "plugin.configs.pressureUnit.options.hectopascal.label": "百帕",
+      "plugin.configs.pressureUnit.options.pascal.label": "帕斯卡",
+      "plugin.configs.windSpeedUnit.label": "风速单位",
+      "plugin.configs.windSpeedUnit.options.kilometer_per_hour.label": "千米/小时",
+      "plugin.configs.windSpeedUnit.options.meter_per_second.label": "米/秒",
+      "plugin.configs.windSpeedUnit.options.mile_per_hour.label": "英里/小时",
+      "plugin.configs.visibilityUnit.label": "能见度单位",
+      "plugin.configs.visibilityUnit.options.kilometer.label": "千米",
+      "plugin.configs.visibilityUnit.options.meter.label": "米",
+      "plugin.configs.precipitationUnit.label": "降水单位",
+      "plugin.configs.precipitationUnit.options.millimeter.label": "毫米",
+      "plugin.configs.precipitationUnit.options.inch.label": "英寸",
+      "plugin.configs.qweatherApiKey.label": "和风 API Key"
+    },
+    "en": {
+      "plugin.name": "Weather",
+      "plugin.description": "Current weather, hourly and daily forecasts, weather alerts, and air quality with QWeather and Caiyun.",
+      "plugin.configs.provider.label": "Weather provider",
+      "plugin.configs.provider.options.qweather.label": "QWeather",
+      "plugin.configs.provider.options.qweather.description": "Coordinate-based API using an API Host and API Key",
+      "plugin.configs.provider.options.caiyun.label": "Caiyun",
+      "plugin.configs.provider.options.caiyun.description": "v2.6; uses GCJ-02 in mainland China and WGS84 elsewhere",
+      "plugin.configs.caiyunToken.label": "Caiyun token",
+      "plugin.configs.qweatherHost.label": "QWeather API Host (e.g. abc.qweatherapi.com)",
+      "plugin.configs.temperatureUnit.label": "Temperature unit",
+      "plugin.configs.temperatureUnit.options.celsius.label": "Celsius",
+      "plugin.configs.temperatureUnit.options.fahrenheit.label": "Fahrenheit",
+      "plugin.configs.pressureUnit.label": "Pressure unit",
+      "plugin.configs.pressureUnit.options.hectopascal.label": "Hectopascals",
+      "plugin.configs.pressureUnit.options.pascal.label": "Pascals",
+      "plugin.configs.windSpeedUnit.label": "Wind speed unit",
+      "plugin.configs.windSpeedUnit.options.kilometer_per_hour.label": "Kilometers per hour",
+      "plugin.configs.windSpeedUnit.options.meter_per_second.label": "Meters per second",
+      "plugin.configs.windSpeedUnit.options.mile_per_hour.label": "Miles per hour",
+      "plugin.configs.visibilityUnit.label": "Visibility unit",
+      "plugin.configs.visibilityUnit.options.kilometer.label": "Kilometers",
+      "plugin.configs.visibilityUnit.options.meter.label": "Meters",
+      "plugin.configs.precipitationUnit.label": "Precipitation unit",
+      "plugin.configs.precipitationUnit.options.millimeter.label": "Millimeters",
+      "plugin.configs.precipitationUnit.options.inch.label": "Inches",
+      "plugin.configs.qweatherApiKey.label": "QWeather API Key"
+    }
+  }
+}
