@@ -360,6 +360,27 @@
   background: white;
 }
 
+/* Chart */
+.components :global([data-slot='chart']) {
+  --muted-foreground: white;
+}
+
+.components :global([data-slot='chart'] .recharts-cartesian-axis-tick-value) {
+  fill: white;
+}
+
+.components :global([data-slot='chart'] .recharts-tooltip-wrapper > div) {
+  width: max-content;
+  min-width: 0;
+  border: 0;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--ui-glass-background) 50%, transparent);
+  color: var(--ui-glass-foreground);
+  -webkit-backdrop-filter: var(--ui-glass-filter);
+  backdrop-filter: var(--ui-glass-filter);
+  box-shadow: var(--ui-glass-shadow);
+}
+
 /* Tabs */
 .components :global([data-slot='tabs-list']) {
   --muted: rgb(255 255 255 / 8%);
@@ -371,6 +392,15 @@
   --foreground: white;
   --input: rgb(255 255 255 / 20%);
   --muted-foreground: rgb(255 255 255 / 60%);
+}
+
+.components :global([data-slot='tabs-indicator']) {
+  background: rgb(255 255 255 / 15%);
+}
+
+.components :global([data-slot='tabs-list']:has([data-slot='tabs-indicator']) [data-slot='tabs-trigger'][data-active]) {
+  background: transparent;
+  box-shadow: none;
 }
 
 /* Sidebar */

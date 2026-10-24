@@ -1,0 +1,20 @@
+.wave {
+  animation: rainfall-wave 5s linear infinite;
+}
+
+.backWave {
+  animation: rainfall-wave 7s linear infinite reverse;
+}
+
+@keyframes rainfall-wave {
+  to {
+    transform: translateX(-80px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wave,
+  .backWave {
+    animation: none;
+  }
+}
