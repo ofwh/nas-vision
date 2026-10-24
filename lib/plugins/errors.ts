@@ -9,6 +9,14 @@ export const codes = {
   ENDPOINT_NOT_FOUND: 1303000,
   REQUEST_FAILED: 1303001,
   INVALID_PATH: 1303002,
+  STORAGE_INVALID_PARAMS: 1304000,
+  STORAGE_APP_REQUIRED: 1304001,
+  STORAGE_NOT_FOUND: 1304002,
+  STORAGE_READ_FAILED: 1304003,
+  STORAGE_SAVE_FAILED: 1304004,
+  STORAGE_DELETE_FAILED: 1304005,
+  STORAGE_ID_AMBIGUOUS: 1304006,
+  STORAGE_APP_MISMATCH: 1304007,
 } as const;
 
 export const messages = {
@@ -23,6 +31,14 @@ export const messages = {
     ENDPOINT_NOT_FOUND: '插件接口不存在。',
     REQUEST_FAILED: '插件请求失败，请稍后重试。',
     INVALID_PATH: '插件接口路径无效。',
+    STORAGE_INVALID_PARAMS: '插件数据参数无效。',
+    STORAGE_APP_REQUIRED: '所属应用必须为插件类型。',
+    STORAGE_NOT_FOUND: '插件数据不存在。',
+    STORAGE_READ_FAILED: '无法读取插件数据。',
+    STORAGE_SAVE_FAILED: '无法保存插件数据。',
+    STORAGE_DELETE_FAILED: '无法删除插件数据。',
+    STORAGE_ID_AMBIGUOUS: '数据 ID 对应多条记录，无法确定更新目标。',
+    STORAGE_APP_MISMATCH: '应用不属于指定插件。',
   },
   en: {
     NOT_FOUND: 'Plugin not found.',
@@ -35,5 +51,13 @@ export const messages = {
     ENDPOINT_NOT_FOUND: 'Plugin endpoint not found.',
     REQUEST_FAILED: 'Plugin request failed. Please try again.',
     INVALID_PATH: 'The plugin endpoint path is invalid.',
+    STORAGE_INVALID_PARAMS: 'The plugin data parameters are invalid.',
+    STORAGE_APP_REQUIRED: 'The app must be a plugin app.',
+    STORAGE_NOT_FOUND: 'Plugin data not found.',
+    STORAGE_READ_FAILED: 'Unable to read plugin data.',
+    STORAGE_SAVE_FAILED: 'Unable to save plugin data.',
+    STORAGE_DELETE_FAILED: 'Unable to delete plugin data.',
+    STORAGE_ID_AMBIGUOUS: 'The data ID matches multiple records. The update target is ambiguous.',
+    STORAGE_APP_MISMATCH: 'The app does not belong to the specified plugin.',
   },
 };

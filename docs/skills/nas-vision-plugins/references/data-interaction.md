@@ -36,6 +36,17 @@
 
 `config.update(values)` 返回 `{ success, data }`，失败会 reject；成功后更新 `['/api/plugin/query', { id: name }]` 并清理该插件 endpoint 的请求缓存，不立即重新验证。自定义聚合或分页缓存需自行处理失效与重载。
 
+## 应用数据存储
+
+使用 `usePluginStorage(appId)` 存取应用数据，`appId` 为应用列表中的应用 ID。参数与返回类型引用 [types/plugins.ts](../../../../types/plugins.ts) 中的 `PluginStorage*` 定义。
+
+- `query` 在组件或自定义 hook 顶层调用；默认查询应用全部数据，传 `null` 暂停查询，`data` 默认 `[]`。
+- `update` 无 `id` 时新增，有 `id` 时更新。更新按数据 ID 定位，重复 ID 返回错误；`data` 完整替换，省略 `key` 时保存为 `null`。
+- `delete` 有 `id` 时删除单条，省略时删除应用全部数据。
+- 写操作由用户事件触发，成功后刷新实际所属应用的查询缓存，失败由调用方捕获。
+
+数据按应用隔离，应用内 ID 唯一；删除应用时级联删除所属数据。存储通过宿主接口访问，分层、鉴权及响应遵守 [API 规范](../../../api.md)。
+
 ## 上传
 
 上传 hook 返回 `{ success, progress, data, error, isLoading }`，进度为 0–100，`data` 为业务数据。`formData` 改变会自动上传，不暴露 `trigger`。在事件中创建 FormData 并存入 state，避免每次渲染重建而重复上传。

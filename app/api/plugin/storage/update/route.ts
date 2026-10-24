@@ -1,0 +1,18 @@
+import { handleApi, errorResponse } from '@/lib/api/server';
+import { okResponse, readParams } from '@/lib/api';
+import service from '@/lib/services/plugin-storage';
+import type { PluginStorageCreateParams, PluginStorageUpdateParams, PluginStorageUpdateRes } from '@/types/plugins';
+
+export async function POST(request: Request) {
+  return handleApi(async () => {
+    const parsed = await readParams<PluginStorageCreateParams | PluginStorageUpdateParams>(request);
+
+    if (!parsed.ok) {
+      return errorResponse(parsed.error);
+    }
+
+    const result = await service.update(parsed.value);
+
+    return result.ok ? okResponse<PluginStorageUpdateRes>({ item: result.value }) : errorResponse(result.error);
+  }, 'plugin.STORAGE_SAVE_FAILED');
+}

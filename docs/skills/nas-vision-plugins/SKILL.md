@@ -1,6 +1,6 @@
 ---
 name: nas-vision-plugins
-description: 在 NAS Vision 创建、接入或维护插件时，指导模块注册、manifest、配置、内部导航、插件内多语言与 API 数据交互。适用于本项目插件框架，不用于浏览器扩展或 Codex 插件安装。
+description: 在 NAS Vision 创建、接入或维护插件时，指导模块注册、manifest、配置、内部导航、插件内多语言、应用数据存储与 API 数据交互。适用于本项目插件框架，不用于浏览器扩展或 Codex 插件安装。
 ---
 
 # NAS Vision 插件开发
@@ -13,6 +13,7 @@ description: 在 NAS Vision 创建、接入或维护插件时，指导模块注�
 | ---------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | 创建插件、注册、配置   | [目录与配置](references/architecture.md)                                     | `types/plugins.ts`、`components/plugins/index.ts`                        |
 | 导航、请求、上传、缓存 | [数据交互](references/data-interaction.md)                                   | `hooks/usePlugin.ts`、`lib/plugins/client.ts`、`lib/services/plugins.ts` |
+| 应用数据存储           | [应用数据存储](references/data-interaction.md#应用数据存储)                  | `hooks/usePluginStorage.ts`、`lib/services/plugin-storage.ts`            |
 | 创建最小展示插件       | [最小插件](references/minimal-plugin.md)                                     | 仅使用模块注册与展示能力                                                 |
 | 调整配置表单           | [目录与配置](references/architecture.md#配置)                                | `components/business/AppConfig/AppPluginConfigForm.tsx`                  |
 | 样式命名与隔离         | [样式规范](references/architecture.md#样式规范)                              | `components/plugins/<插件>/styles/`                                      |
@@ -46,7 +47,7 @@ description: 在 NAS Vision 创建、接入或维护插件时，指导模块注�
 
 1. 按实际功能添加文件，在根入口导出模块并加入静态注册表。
 2. 通过现有应用配置流程选择插件并保存；注册本身不会创建应用条目。
-3. 按需接入配置、数据请求和内部导航；数据视图处理加载、空态与错误，写操作成功后刷新受影响缓存。
+3. 按需接入配置、[应用数据存储](references/data-interaction.md#应用数据存储)、数据请求和内部导航；数据视图处理加载、空态与错误，写操作成功后刷新受影响缓存。
 4. 按[窗口与公共组件](#窗口与公共组件)选择窗口方案；主窗口选项由 manifest 声明，宿主统一解释，内部子窗口单独配置。
 
 仅检查任务涉及的行为与文件，不新增测试用例。报告实际执行的检查；类型与格式检查不代表浏览器交互或外部服务已验证。

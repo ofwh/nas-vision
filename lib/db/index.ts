@@ -4,4 +4,8 @@ import * as schema from './schema';
 
 const url = process.env.DATABASE_URL ?? './data/data.db';
 
-export const db = drizzle(new Database(url), { schema });
+const sqlite = new Database(url);
+
+sqlite.pragma('foreign_keys = ON');
+
+export const db = drizzle(sqlite, { schema });
