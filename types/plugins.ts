@@ -60,3 +60,20 @@ export type PluginListItem = Pick<PluginManifest, 'name' | 'description' | 'icon
   id: string;
 };
 export type PluginListRes = { plugins: PluginListItem[] };
+
+export type PluginStorageItem = {
+  appId: string;
+  id: string;
+  key: string | null;
+  data: JsonObject;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type PluginStorageQueryParams = { appId: string; id?: string; ids?: string[]; key?: string };
+export type PluginStorageCreateParams = { appId: string; key?: string | null; data: JsonObject };
+export type PluginStorageUpdateParams = { id: string; key?: string | null; data: JsonObject };
+export type PluginStorageDeleteParams = { appId: string; id?: string };
+export type PluginStorageQueryRes = PluginStorageItem[];
+export type PluginStorageUpdateRes = { item: PluginStorageItem };
+export type PluginStorageDeleteRes = { appId: string; id?: string };

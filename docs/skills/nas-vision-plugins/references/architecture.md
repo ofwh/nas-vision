@@ -26,7 +26,7 @@ components/plugins/<plugin-id>/
 - 无业务接口时，根入口导出空的 `PluginApi`，无需创建 `api/` 或 service。
 - 优先通过 `className` 使用 Tailwind 样式；需要独立样式文件时放在 `styles/`，由使用组件导入。命名与作用域遵守[样式规范](#样式规范)，定制公共 UI 时遵守 AGENTS.md。
 - 私有静态资源通过模块导入解析 URL；JSON 中的相对资源路径不会自动解析。动态资源由插件 API 提供。
-- 私有 repository 与 schema 留在插件目录；接入数据库前确认服务端导出隔离，见技能入口的核心边界。
+- 按应用保存的 JSON 业务数据优先复用[应用数据存储](data-interaction.md#应用数据存储)。需要专用表或查询能力时，再增加插件私有 repository 与 schema，并确认服务端导出隔离，见技能入口的核心边界。
 
 ## 样式规范
 
@@ -96,4 +96,6 @@ export const manifest = definition as PluginManifest;
 
 ## API 边界
 
-接口使用现有 `app/api/plugin/[pluginName]/[...slug]/route.ts` 分发，无需为每个插件新增 Next.js route。插件 API 的 handler 契约、错误响应和请求工具见[数据交互](data-interaction.md#服务端)。
+插件私有业务接口使用现有 `app/api/plugin/[pluginName]/[...slug]/route.ts` 分发，无需为每个插件新增 Next.js route。插件 API 的 handler 契约、错误响应和请求工具见[数据交互](data-interaction.md#服务端)。
+
+框架提供的[应用数据存储](data-interaction.md#应用数据存储)通过宿主接口访问，无需在插件的 `PluginApi` 中注册。

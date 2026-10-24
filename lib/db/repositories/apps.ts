@@ -28,6 +28,12 @@ export function selectAll(): AppItem[] {
   return db.select().from(apps).orderBy(asc(apps.rank), asc(apps.id)).all().map(toItem);
 }
 
+export function selectById(id: string): AppItem | null {
+  const row = db.select().from(apps).where(eq(apps.id, id)).get();
+
+  return row ? toItem(row) : null;
+}
+
 export function selectLastRank(): string | null {
   return db.select({ rank: apps.rank }).from(apps).orderBy(desc(apps.rank), desc(apps.id)).limit(1).get()?.rank ?? null;
 }

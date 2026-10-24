@@ -47,14 +47,14 @@ service 的约定：
 
 ## 错误归属
 
-| 范围         | 定义位置                                              | 响应处理     |
-| ------------ | ----------------------------------------------------- | ------------ |
-| 公共错误     | `lib/api/codes.ts`、`lib/api/messages/{locale}.json`  | `lib/api`    |
-| 宿主业务错误 | `lib/errors/<业务>.ts`，经 `lib/errors/index.ts` 聚合 | `lib/api`    |
-| 插件框架错误 | `lib/plugins/errors.ts`                               | 宿主分发层   |
-| 插件私有错误 | `components/plugins/<插件>/api/errors.ts`             | 插件自身 API |
+| 范围         | 定义位置                                              | 响应处理          |
+| ------------ | ----------------------------------------------------- | ----------------- |
+| 公共错误     | `lib/api/codes.ts`、`lib/api/messages/{locale}.json`  | `lib/api`         |
+| 宿主业务错误 | `lib/errors/<业务>.ts`，经 `lib/errors/index.ts` 聚合 | `lib/api`         |
+| 插件框架错误 | `lib/plugins/errors.ts`                               | 宿主 API / 分发层 |
+| 插件私有错误 | `components/plugins/<插件>/api/errors.ts`             | 插件自身 API      |
 
-service 判断业务错误，API 负责响应适配。公共模块不导入、聚合或导出插件私有错误码、类型与文案。插件接口仅通过插件根入口的 `api` 接入宿主。
+service 判断业务错误，API 负责响应适配。公共模块不导入、聚合或导出插件私有错误码、类型与文案。插件私有业务接口仅通过插件根入口的 `api` 接入宿主。
 
 宿主业务错误文件导出 `codes`、`messages`；业务层通过 `appError(code, params?)` 表达错误，API 用 `errorResponse(error)` 构造信封。服务端需要当前语言时使用 `lib/api/server` 的 `errorResponse`；客户端本地错误文案使用 `errorMessage(error, locale)`。
 
