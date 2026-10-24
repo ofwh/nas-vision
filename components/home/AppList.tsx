@@ -7,7 +7,7 @@ import 'swiper/css';
 import { Loading } from '@/components/common/Loading';
 import { useSession } from '@/lib/auth-client';
 import { useAppList } from '@/stores/app-list';
-import styles from './AppList.module.css';
+import styles from '@/styles/AppList.module.css';
 import { AppItem } from './AppItem';
 import { AppPage, APP_PAGE_CAPACITY } from './AppPage';
 

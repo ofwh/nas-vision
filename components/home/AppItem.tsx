@@ -5,6 +5,7 @@ import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { WindowModal } from '@/components/common/WindowModal';
 import { PluginPageContext, usePlugin } from '@/hooks/usePlugin';
+import { useSidebar } from '@/hooks/useSidebar';
 import { Loading } from '@/components/common/Loading';
 import { useAppList } from '@/stores/app-list';
 import type { AppItem as AppRecord } from '@/lib/services/apps';
@@ -56,6 +57,11 @@ function AppPluginDialog({
   const t = useTranslations();
   const PluginView = plugin.component;
   const size = plugin.manifest?.size;
+  const { setType } = useSidebar();
+
+  useEffect(() => {
+    setType('apps');
+  }, [setType]);
 
   return (
     <WindowModal
