@@ -14,11 +14,13 @@ export type MusicItem = {
 };
 export type PlaybackMode = 'sequential' | 'shuffle' | 'repeatOne';
 export type Section = 'recent' | 'albums' | 'artists' | 'songs' | 'starred' | 'playlists' | 'search';
+export type NavidromeSearchKind = 'song' | 'artist' | 'album';
 export type NavidromeListParams = {
   section: Section;
   id?: string;
   kind?: MusicItem['kind'];
   query?: string;
+  searchKind?: NavidromeSearchKind;
   offset?: number;
 };
 export type NavidromeListRes = { items: MusicItem[]; hasMore: boolean; title?: string };

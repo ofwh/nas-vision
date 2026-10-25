@@ -23,7 +23,7 @@
     "loadingPlaylists": "正在加载歌单…",
     "retryPlaylists": "歌单加载失败，重试",
     "emptyPlaylists": "点击右侧加号，创建你的第一张歌单",
-    "back": "返回资料库",
+    "back": "返回上一级",
     "refresh": "刷新资料库",
     "refreshFailed": "操作已完成，资料库刷新失败，请手动刷新。",
     "discovering": "正在寻找好音乐…",
@@ -41,11 +41,13 @@
   "search": {
     "title": "“{query}”的搜索结果",
     "label": "搜索音乐",
-    "placeholder": "搜索歌曲、专辑与歌手",
+    "placeholder": "搜索歌曲",
     "submit": "搜索",
     "clear": "清除搜索",
     "empty": "没有找到相关音乐",
-    "emptyHint": "换个关键词，再听见一些新声音。"
+    "emptyHint": "换个关键词，再听见一些新声音。",
+    "artistPlaceholder": "搜索歌手",
+    "albumPlaceholder": "搜索专辑"
   },
   "player": {
     "queue": "播放队列",
@@ -64,13 +66,14 @@
     "shuffle": "随机播放",
     "volume": "音量",
     "notStarted": "播放未开始，请点击播放重试。",
-    "unavailable": "无法播放这首歌曲。",
+    "unavailable": "不可播放",
     "playFailed": "无法播放，请检查服务连接或音频格式。",
     "loadFailed": "音频加载失败，请检查连接或尝试其他歌曲。",
     "sequential": "顺序播放",
     "repeatOne": "单曲循环",
     "mute": "静音",
-    "unmute": "取消静音"
+    "unmute": "取消静音",
+    "allUnavailable": "当前列表没有可播放的歌曲。"
   },
   "errors": {
     "CONFIG_INVALID": "请在插件设置中填写有效的 Navidrome 服务地址、用户名和密码。",

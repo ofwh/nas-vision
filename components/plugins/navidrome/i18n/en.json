@@ -23,7 +23,7 @@
     "loadingPlaylists": "Loading playlists…",
     "retryPlaylists": "Unable to load playlists. Retry",
     "emptyPlaylists": "Click the plus button to create your first playlist",
-    "back": "Back to library",
+    "back": "Go back",
     "refresh": "Refresh library",
     "refreshFailed": "The operation completed, but the library could not be refreshed. Please refresh manually.",
     "discovering": "Finding your music…",
@@ -41,11 +41,13 @@
   "search": {
     "title": "Search results for “{query}”",
     "label": "Search music",
-    "placeholder": "Search songs, albums and artists",
+    "placeholder": "Search songs",
     "submit": "Search",
     "clear": "Clear search",
     "empty": "No matching music",
-    "emptyHint": "Try another keyword and discover something new."
+    "emptyHint": "Try another keyword and discover something new.",
+    "artistPlaceholder": "Search artists",
+    "albumPlaceholder": "Search albums"
   },
   "player": {
     "queue": "Play queue",
@@ -64,13 +66,14 @@
     "shuffle": "Shuffle",
     "volume": "Volume",
     "notStarted": "Playback did not start. Press play to retry.",
-    "unavailable": "Unable to play this song.",
+    "unavailable": "Unavailable",
     "playFailed": "Unable to play. Check the connection or audio format.",
     "loadFailed": "Unable to load audio. Check the connection or try another song.",
     "sequential": "Sequential playback",
     "repeatOne": "Repeat current track",
     "mute": "Mute",
-    "unmute": "Unmute"
+    "unmute": "Unmute",
+    "allUnavailable": "No playable songs remain in this list."
   },
   "errors": {
     "CONFIG_INVALID": "Configure a valid Navidrome server URL, username and password in plugin settings.",

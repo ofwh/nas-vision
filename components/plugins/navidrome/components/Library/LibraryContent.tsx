@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { MusicItem } from '../../types';
 import LibraryStatus from './LibraryStatus';
@@ -41,8 +41,8 @@ export default function LibraryContent({
   onStar,
   onLoadMore,
 }: LibraryContentProps) {
-  const cards = items.filter((item) => item.kind !== 'song');
-  const songs = items.filter((item) => item.kind === 'song');
+  const cards = useMemo(() => items.filter((item) => item.kind !== 'song'), [items]);
+  const songs = useMemo(() => items.filter((item) => item.kind === 'song'), [items]);
 
   return (
     <main className="flex min-h-0 min-w-0 flex-1 flex-col">
