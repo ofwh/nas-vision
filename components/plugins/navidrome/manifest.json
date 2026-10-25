@@ -5,10 +5,10 @@
   "icon": "",
   "status": "on",
   "size": {
-    "width": 1240,
-    "height": 760
+    "width": 1024,
+    "height": 600
   },
-  "mode": "floating",
+  "mode": "native",
   "header": false,
   "fit": true,
   "resizable": true,

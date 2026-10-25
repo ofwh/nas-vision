@@ -4,6 +4,7 @@ import { songKeys } from '../utils/playback';
 
 type PlaybackState = {
   queue: MusicItem[];
+  unavailable: ReadonlySet<string>;
   source: string | null;
   index: number;
   playback: number;
@@ -15,7 +16,7 @@ type PlaybackState = {
   duration: number;
   volume: number;
   muted: boolean;
-  error: 'notStarted' | 'playFailed' | 'loadFailed' | null;
+  error: 'notStarted' | 'playFailed' | 'loadFailed' | 'allUnavailable' | null;
 };
 
 type PlaybackStore = PlaybackState & {
@@ -33,7 +34,7 @@ type PlaybackStore = PlaybackState & {
 };
 
 function selectSong(state: PlaybackState, index: number): PlaybackState {
-  if (!state.queue[index]) {
+  if (!state.queue[index] || state.unavailable.has(state.queue[index].id)) {
     return state;
   }
 
@@ -45,12 +46,45 @@ function selectSong(state: PlaybackState, index: number): PlaybackState {
     time: 0,
     duration: state.queue[index].duration ?? 0,
     error: null,
-    remaining: state.remaining.filter((position) => position !== index),
+    remaining: state.mode === 'shuffle' ? state.remaining.filter((position) => position !== index) : [],
     history:
-      state.mode === 'shuffle' && state.index >= 0 && state.index !== index
+      state.mode === 'shuffle' &&
+      state.index >= 0 &&
+      state.index !== index &&
+      !state.unavailable.has(state.queue[state.index].id)
         ? [...state.history, state.index].slice(-Math.max(1, state.queue.length))
         : state.history,
   };
+}
+
+function playableIndices(state: PlaybackState): number[] {
+  return state.queue.flatMap((song, index) => (state.unavailable.has(song.id) ? [] : [index]));
+}
+
+function stopPlayback(state: PlaybackState): PlaybackState {
+  return {
+    ...state,
+    index: -1,
+    playback: state.playback + (state.index === -1 ? 0 : 1),
+    remaining: [],
+    history: [],
+    playing: false,
+    time: 0,
+    duration: 0,
+    error: 'allUnavailable',
+  };
+}
+
+function adjacentSong(state: PlaybackState, direction: 1 | -1): PlaybackState {
+  for (let step = 1; step <= state.queue.length; step += 1) {
+    const index = (((state.index + direction * step) % state.queue.length) + state.queue.length) % state.queue.length;
+
+    if (!state.unavailable.has(state.queue[index].id)) {
+      return selectSong(state, index);
+    }
+  }
+
+  return stopPlayback(state);
 }
 
 function nextSong(state: PlaybackState): PlaybackState {
@@ -58,13 +92,21 @@ function nextSong(state: PlaybackState): PlaybackState {
     return state;
   }
 
-  if (state.mode !== 'shuffle' || state.queue.length === 1) {
-    return selectSong(state, (state.index + 1) % state.queue.length);
+  if (state.mode !== 'shuffle') {
+    return adjacentSong(state, 1);
   }
 
-  const candidates = state.remaining.length
-    ? state.remaining
-    : state.queue.map((_, index) => index).filter((index) => index !== state.index);
+  const available = playableIndices(state);
+
+  if (!available.length) {
+    return stopPlayback(state);
+  }
+
+  const availableSet = new Set(available);
+  const remaining = state.remaining.filter((index) => availableSet.has(index));
+  const candidates = remaining.length
+    ? remaining
+    : available.filter((index) => available.length === 1 || index !== state.index);
 
   return selectSong({ ...state, remaining: candidates }, candidates[Math.floor(Math.random() * candidates.length)]);
 }
@@ -74,6 +116,19 @@ export function createPlaybackStore() {
     let audio: HTMLAudioElement | null = null;
     let command = 0;
     let releaseAudio: (() => void) | undefined;
+
+    function failCurrentSong() {
+      command += 1;
+      set((current) => {
+        const song = current.queue[current.index];
+
+        if (!song || current.unavailable.has(song.id)) {
+          return current;
+        }
+
+        return nextSong({ ...current, unavailable: new Set([...current.unavailable, song.id]) });
+      });
+    }
 
     function playAudio(restart: boolean) {
       const element = audio;
@@ -102,15 +157,28 @@ export function createPlaybackStore() {
             get().setDuration(element.duration);
           }
         })
-        .catch(() => {
-          if (audio === element && command === request && get().playback === playback) {
-            set({ playing: false, error: restart ? 'notStarted' : 'playFailed' });
+        .catch((cause: unknown) => {
+          if (audio !== element || command !== request || get().playback !== playback) {
+            return;
           }
+
+          if (cause instanceof DOMException && cause.name === 'AbortError') {
+            return;
+          }
+
+          if (cause instanceof DOMException && cause.name === 'NotAllowedError') {
+            set({ playing: false, error: 'notStarted' });
+
+            return;
+          }
+
+          failCurrentSong();
         });
     }
 
     return {
       queue: [],
+      unavailable: new Set<string>(),
       source: null,
       index: 0,
       playback: 0,
@@ -129,11 +197,20 @@ export function createPlaybackStore() {
             return current;
           }
 
-          const index = selectedIndex ?? (current.mode === 'shuffle' ? Math.floor(Math.random() * songs.length) : 0);
-
-          if (!songs[index]) {
+          if (selectedIndex !== undefined && !songs[selectedIndex]) {
             return current;
           }
+
+          const available = songs.flatMap((song, index) => (current.unavailable.has(song.id) ? [] : [index]));
+
+          if (!available.length) {
+            return stopPlayback({ ...current, queue: songs, source });
+          }
+
+          const index =
+            selectedIndex === undefined
+              ? available[current.mode === 'shuffle' ? Math.floor(Math.random() * available.length) : 0]
+              : (available.find((index) => index >= selectedIndex) ?? available[0]);
 
           const keys = songKeys(songs);
           const previousKeys = songKeys(current.queue);
@@ -177,30 +254,38 @@ export function createPlaybackStore() {
             return current;
           }
 
-          if (current.mode === 'shuffle') {
-            const index = current.history.at(-1);
-
-            if (index === undefined) {
-              return nextSong(current);
-            }
-
-            return {
-              ...selectSong(current, index),
-              history: current.history.slice(0, -1),
-              remaining: [current.index, ...current.remaining].filter(
-                (position, i, positions) => position !== index && positions.indexOf(position) === i,
-              ),
-            };
+          if (current.mode !== 'shuffle') {
+            return adjacentSong(current, -1);
           }
 
-          return selectSong(current, (current.index - 1 + current.queue.length) % current.queue.length);
+          const available = playableIndices(current);
+
+          if (!available.length) {
+            return stopPlayback(current);
+          }
+
+          const availableSet = new Set(available);
+          const history = current.history.filter((index) => availableSet.has(index));
+          const index = history.at(-1);
+
+          if (index === undefined) {
+            return nextSong(current);
+          }
+
+          return {
+            ...selectSong(current, index),
+            history: history.slice(0, -1),
+            remaining: [...new Set([current.index, ...current.remaining])].filter(
+              (position) => position !== index && availableSet.has(position),
+            ),
+          };
         });
       },
       changeMode: () => {
         set((current) => ({
           ...current,
           mode: current.mode === 'sequential' ? 'shuffle' : current.mode === 'shuffle' ? 'repeatOne' : 'sequential',
-          remaining: current.queue.map((_, index) => index).filter((index) => index !== current.index),
+          remaining: playableIndices(current).filter((index) => index !== current.index),
           history: [],
         }));
       },
@@ -233,7 +318,11 @@ export function createPlaybackStore() {
         listen('timeupdate', () => set({ time: element.currentTime }));
         listen('loadedmetadata', () => get().setDuration(element.duration));
         listen('durationchange', () => get().setDuration(element.duration));
-        listen('error', () => set({ playing: false, error: 'loadFailed' }));
+        listen('error', () => {
+          if (element.error?.code !== MediaError.MEDIA_ERR_ABORTED) {
+            failCurrentSong();
+          }
+        });
         listen('ended', () => {
           if (get().mode === 'repeatOne') {
             playAudio(true);
@@ -267,6 +356,12 @@ export function createPlaybackStore() {
       },
       toggle: () => {
         if (!audio || !get().queue[get().index]) {
+          return;
+        }
+
+        if (get().unavailable.has(get().queue[get().index].id)) {
+          get().next();
+
           return;
         }
 

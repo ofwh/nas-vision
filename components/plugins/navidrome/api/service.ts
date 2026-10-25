@@ -53,6 +53,7 @@ export async function list(params: NavidromeListParams, config: PluginConfig): P
     !Number.isInteger(offset) ||
     offset < 0 ||
     offset > 100000 ||
+    (params.searchKind !== undefined && !['song', 'artist', 'album'].includes(params.searchKind)) ||
     (params.query !== undefined && (typeof params.query !== 'string' || params.query.length > 256))
   ) {
     throw new NavidromeError('PARAMS_INVALID');
@@ -110,26 +111,19 @@ export async function list(params: NavidromeListParams, config: PluginConfig): P
       return { items: [], hasMore: false };
     }
 
+    const searchKind = params.section === 'songs' ? 'song' : (params.searchKind ?? 'song');
     const data = await json(config, 'search3', {
       query: query ?? '',
-      songCount: String(limit),
+      songCount: searchKind === 'song' ? String(limit) : '0',
       songOffset: String(offset),
-      albumCount: params.section === 'songs' ? '0' : String(limit),
+      albumCount: searchKind === 'album' ? String(limit) : '0',
       albumOffset: String(offset),
-      artistCount: params.section === 'songs' ? '0' : String(limit),
+      artistCount: searchKind === 'artist' ? String(limit) : '0',
       artistOffset: String(offset),
     });
-    const result = data.searchResult3;
-    const found = [
-      ...items(result?.artist, 'artist'),
-      ...items(result?.album, 'album'),
-      ...items(result?.song, 'song'),
-    ];
+    const found = items(data.searchResult3?.[searchKind], searchKind);
 
-    return {
-      items: found,
-      hasMore: [result?.artist, result?.album, result?.song].some((group) => group?.length === limit),
-    };
+    return { items: found, hasMore: found.length === limit };
   }
 
   const data = await json(config, 'getAlbumList2', {
