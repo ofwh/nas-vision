@@ -28,7 +28,10 @@ import { cn } from '@/lib/utils';
 export function WindowContent({ title, left, right, children, className }: WindowContentProps) {
   return (
     <section className={cn('flex h-full min-h-0 min-w-0 flex-col text-white', className)}>
-      <header className="grid h-18 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-3 px-6 py-4">
+      <header
+        data-window-drag-handle=""
+        className="grid h-18 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-3 px-6 py-4"
+      >
         <div className="flex min-w-0 items-center justify-start gap-3">{left}</div>
         <h2 className="truncate text-center text-base font-bold">{title}</h2>
         <div className="flex min-w-0 items-center justify-end gap-3">{right}</div>
@@ -92,7 +95,9 @@ export function SplitWindowModal({
       {(controls) => (
         <SidebarProvider className="min-h-0 flex-1 overflow-hidden bg-[#545458]/25">
           <div className="flex w-50 shrink-0 flex-col overflow-hidden bg-[#545458]/50 text-white">
-            <div className="flex shrink-0 items-center px-6 pt-5 pb-5">{controls}</div>
+            <div data-window-drag-handle="" className="flex shrink-0 items-center px-6 pt-5 pb-5">
+              {controls}
+            </div>
             <Sidebar collapsible="none" className="min-h-0 w-full flex-1 bg-transparent text-white">
               {sidebar.header != null ? (
                 <SidebarHeader className="shrink-0 px-6 pt-0 pb-4 text-xl font-bold">{sidebar.header}</SidebarHeader>

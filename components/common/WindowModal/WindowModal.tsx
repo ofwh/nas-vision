@@ -34,6 +34,7 @@ function WindowModalContent({
   fit,
   transparent = false,
   resizable = false,
+  draggable = true,
   className,
   ...props
 }: WindowModalProps) {
@@ -104,11 +105,12 @@ function WindowModalContent({
           onClose={onClose}
           className={maximizedStyles?.className}
           resizable={resizable && !maximized}
+          draggable={draggable && headerMode !== 'floating' && !maximized}
           transparent={isTransparent}
           title={title}
           header={
             showHeader && mode === 'native' ? (
-              <NativeHeader header={typeof header === 'object' ? header : undefined} />
+              <NativeHeader header={typeof header === 'object' || typeof header === 'function' ? header : undefined} />
             ) : undefined
           }
           style={resolvedStyle}

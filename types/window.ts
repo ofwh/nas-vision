@@ -1,4 +1,4 @@
-import type { CSSProperties, LazyExoticComponent, ReactElement, ReactNode } from 'react';
+import type { CSSProperties, LazyExoticComponent, PointerEventHandler, ReactElement, ReactNode } from 'react';
 
 export type HeaderMode = 'controls' | 'floating' | 'native';
 
@@ -41,6 +41,7 @@ export type LiquidGlassModalProps = {
   closeOnOverlay?: boolean;
   fit?: boolean;
   resizable?: boolean;
+  draggable?: boolean;
   header?: ReactNode;
   footer?: ReactNode;
   className?: string;
@@ -48,7 +49,8 @@ export type LiquidGlassModalProps = {
 };
 
 export type HeaderContent = { left?: ReactNode; center?: ReactNode; right?: ReactNode };
-export type WindowModalHeader = boolean | HeaderContent;
+export type WindowHeaderRenderProps = { onDragStart: PointerEventHandler<HTMLElement> };
+export type WindowModalHeader = boolean | HeaderContent | ((props: WindowHeaderRenderProps) => HeaderContent);
 
 export type WindowModalProps = Omit<LiquidGlassModalProps, 'children' | 'header'> & {
   showClose?: boolean;
