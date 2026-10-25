@@ -18,6 +18,7 @@ export function ControlsHeader({
 
   return (
     <header
+      data-window-drag-handle=""
       className={cn(
         'grid min-h-12 shrink-0 grid-cols-[minmax(0,1fr)_minmax(0,auto)_minmax(0,1fr)] items-center gap-3 px-5 text-white',
         maximized && 'bg-[#202024]',

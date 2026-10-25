@@ -6,6 +6,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { Dialog, DialogOverlay, DialogPortal, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { WindowDragContext, useWindowDrag } from '@/hooks/useWindowDrag';
 import type { LiquidGlassModalProps, ModalSize } from '@/types/window';
 import styles from '@/styles/LiquidGlassModal.module.css';
 
@@ -112,95 +113,105 @@ export function LiquidGlassModal({
   closeOnOverlay = true,
   fit = true,
   resizable = false,
+  draggable = true,
   header,
   footer,
   className,
   children,
 }: LiquidGlassModalProps) {
   const hasAutoHeight = size.height === undefined && style?.height === undefined;
+  const { startDrag, ...dragHandlers } = useWindowDrag(draggable);
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        onOpenChange(next);
-        if (!next) {
-          onClose?.();
-        }
-      }}
-      modal={modal}
-      disablePointerDismissal={!closeOnOverlay}
-    >
-      <DialogPortal className={cn(top && 'relative z-[1100]')}>
-        {modal ? (
-          <DialogOverlay
-            forceRender
-            className={cn(
-              'supports-backdrop-filter:backdrop-blur-none',
-              transparent ? 'bg-transparent' : 'bg-black/25',
-            )}
-          />
-        ) : null}
-
-        <DialogPrimitive.Viewport className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
-          <DialogPrimitive.Popup
-            className={cn(
-              'pointer-events-auto relative flex flex-col gap-3 outline-none [--window-radius:calc(var(--spacing)*5)]',
-              resizable && 'min-h-40 min-w-60',
-              className,
-            )}
-            style={{
-              width: size.width,
-              height: size.height,
-              ...style,
-            }}
-          >
-            <DialogTitle className="sr-only">{title}</DialogTitle>
-            {header != null ? (
-              <LiquidGlass
-                transparent={transparent}
-                className="max-w-full shrink-0 self-center rounded-full"
-                contentClassName="flex min-w-0 items-center justify-center p-1"
-              >
-                {header}
-              </LiquidGlass>
-            ) : null}
-            <LiquidGlass
-              transparent={transparent}
+    <WindowDragContext.Provider value={startDrag}>
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          onOpenChange(next);
+          if (!next) {
+            onClose?.();
+          }
+        }}
+        modal={modal}
+        disablePointerDismissal={!closeOnOverlay}
+      >
+        <DialogPortal className={cn(top && 'relative z-[1100]')}>
+          {modal ? (
+            <DialogOverlay
+              forceRender
               className={cn(
-                'flex min-h-0 min-w-0 flex-col rounded-(--window-radius)',
-                hasAutoHeight ? 'flex-auto' : 'flex-1',
+                'supports-backdrop-filter:backdrop-blur-none',
+                transparent ? 'bg-transparent' : 'bg-black/25',
               )}
-              contentClassName={cn(
-                'relative flex min-h-0 min-w-0 flex-col overflow-hidden',
-                hasAutoHeight ? 'flex-auto' : 'flex-1',
+            />
+          ) : null}
+
+          <DialogPrimitive.Viewport className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
+            <DialogPrimitive.Popup
+              {...dragHandlers}
+              data-window-popup=""
+              data-window-draggable={draggable || undefined}
+              className={cn(
+                'pointer-events-auto relative flex flex-col gap-3 outline-none [--window-radius:calc(var(--spacing)*5)]',
+                styles.popup,
+                resizable && 'min-h-40 min-w-60',
+                className,
               )}
+              style={{
+                width: size.width,
+                height: size.height,
+                ...style,
+                left: draggable ? 'var(--window-x, 0px)' : 0,
+                top: draggable ? 'var(--window-y, 0px)' : 0,
+              }}
             >
-              <ScrollArea
-                className={cn(
-                  'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden [&>[data-slot=scroll-area-viewport]]:flex [&>[data-slot=scroll-area-viewport]]:h-auto [&>[data-slot=scroll-area-viewport]]:min-h-0 [&>[data-slot=scroll-area-viewport]]:flex-1 [&>[data-slot=scroll-area-viewport]]:flex-col [&>[data-slot=scroll-area-viewport]]:overscroll-contain',
-                  !fit && '[&>[data-slot=scroll-area-viewport]]:p-5',
-                )}
-              >
-                {children}
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
-            </LiquidGlass>
-            {footer != null ? (
-              <div className="absolute bottom-0 left-1/2 z-10 max-w-full shrink-0 -translate-x-1/2 translate-y-1/2 self-center">
+              <DialogTitle className="sr-only">{title}</DialogTitle>
+              {header != null ? (
                 <LiquidGlass
                   transparent={transparent}
-                  className="rounded-full"
-                  contentClassName="flex items-center justify-center gap-2 p-2"
+                  className="max-w-full shrink-0 self-center rounded-full"
+                  contentClassName="flex min-w-0 items-center justify-center p-1"
                 >
-                  {footer}
+                  <div className="flex min-w-0 flex-1 items-center justify-center">{header}</div>
                 </LiquidGlass>
-              </div>
-            ) : null}
-            {resizable ? <ResizeHandle /> : null}
-          </DialogPrimitive.Popup>
-        </DialogPrimitive.Viewport>
-      </DialogPortal>
-    </Dialog>
+              ) : null}
+              <LiquidGlass
+                transparent={transparent}
+                className={cn(
+                  'flex min-h-0 min-w-0 flex-col rounded-(--window-radius)',
+                  hasAutoHeight ? 'flex-auto' : 'flex-1',
+                )}
+                contentClassName={cn(
+                  'relative flex min-h-0 min-w-0 flex-col overflow-hidden',
+                  hasAutoHeight ? 'flex-auto' : 'flex-1',
+                )}
+              >
+                <ScrollArea
+                  className={cn(
+                    'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden [&>[data-slot=scroll-area-viewport]]:flex [&>[data-slot=scroll-area-viewport]]:h-auto [&>[data-slot=scroll-area-viewport]]:min-h-0 [&>[data-slot=scroll-area-viewport]]:flex-1 [&>[data-slot=scroll-area-viewport]]:flex-col [&>[data-slot=scroll-area-viewport]]:overscroll-contain',
+                    !fit && '[&>[data-slot=scroll-area-viewport]]:p-5',
+                  )}
+                >
+                  {children}
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+              </LiquidGlass>
+              {footer != null ? (
+                <div className="absolute bottom-0 left-1/2 z-10 max-w-full shrink-0 -translate-x-1/2 translate-y-1/2 self-center">
+                  <LiquidGlass
+                    transparent={transparent}
+                    className="rounded-full"
+                    contentClassName="flex items-center justify-center gap-2 p-2"
+                  >
+                    {footer}
+                  </LiquidGlass>
+                </div>
+              ) : null}
+              {resizable ? <ResizeHandle /> : null}
+            </DialogPrimitive.Popup>
+          </DialogPrimitive.Viewport>
+        </DialogPortal>
+      </Dialog>
+    </WindowDragContext.Provider>
   );
 }
