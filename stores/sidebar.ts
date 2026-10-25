@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { create } from 'zustand';
 
 export type SidebarContentProps = {
@@ -17,9 +17,11 @@ export type SidebarMenu = {
   name: string;
   label: string;
   type: SidebarMenuType;
-  icon: LucideIcon;
+  icon: LucideIcon | ReactElement;
+  disabled?: boolean;
+  defaultActive?: boolean;
   auth?: boolean;
-  onClick: (context: SidebarClickContext) => void;
+  onClick?: (context: SidebarClickContext) => void;
   render?: (props: SidebarContentProps) => ReactNode;
   onDeactivate?: () => void;
   order?: number;
@@ -69,7 +71,7 @@ function reconcileSelection(state: Pick<SidebarStore, 'items' | 'type' | 'signed
   return {
     activeId: visibleItems.some((item) => item.name === state.activeId)
       ? state.activeId
-      : (visibleItems[0]?.name ?? null),
+      : (visibleItems.find((item) => item.menu.defaultActive)?.name ?? visibleItems[0]?.name ?? null),
     openedName: visibleItems.some((item) => item.name === state.openedName) ? state.openedName : null,
   };
 }
@@ -117,10 +119,13 @@ export const useSidebarStore = create<SidebarStore>((set, get) => ({
   activeId: null,
   openedName: null,
   close: (name) =>
-    set((state) => ({
-      openedName: state.openedName === name ? null : state.openedName,
-      activeId: state.activeId === name ? (selectSidebarItems(state)[0]?.name ?? null) : state.activeId,
-    })),
+    set((state) =>
+      reconcileSelection({
+        ...state,
+        activeId: state.activeId === name ? null : state.activeId,
+        openedName: state.openedName === name ? null : state.openedName,
+      }),
+    ),
   register: (menus, only = false, owner) =>
     set((state) => {
       const entries = new Map(state.items.map((item) => [item.name, item]));
@@ -130,7 +135,11 @@ export const useSidebarStore = create<SidebarStore>((set, get) => ({
       }
       const items = [...entries.values()].sort((a, b) => (a.menu.order ?? 0) - (b.menu.order ?? 0));
 
-      return { items, ...reconcileSelection({ ...state, items }) };
+      const defaultItem = selectSidebarItems({ ...state, items }).find(
+        (item) => item.menu.defaultActive && !state.items.some((previous) => previous.name === item.name),
+      );
+
+      return { items, ...reconcileSelection({ ...state, items, activeId: defaultItem?.name ?? state.activeId }) };
     }),
   unmount: (name) =>
     set((state) => {
@@ -154,7 +163,7 @@ export const useSidebarStore = create<SidebarStore>((set, get) => ({
     const { items, activeId } = state;
     const item = selectSidebarItems(state).find((item) => item.name === name);
 
-    if (!item) {
+    if (!item || item.menu.disabled) {
       return;
     }
 
@@ -163,7 +172,7 @@ export const useSidebarStore = create<SidebarStore>((set, get) => ({
     }
 
     set((state) => ({ activeId: name, openedName: activeId === name ? state.openedName : null }));
-    item.menu.onClick({
+    item.menu.onClick?.({
       open: () => {
         const state = get();
 

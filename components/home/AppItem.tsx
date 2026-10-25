@@ -1,5 +1,7 @@
 'use client';
 
+import { AppWindow } from 'lucide-react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
@@ -11,17 +13,50 @@ import { MarqueeText } from '@/components/common/MarqueeText';
 import { useAppList } from '@/stores/app-list';
 import type { AppItem as AppRecord } from '@/lib/services/apps';
 
+function useAppSidebar(name: string, image: string) {
+  const { register, setType } = useSidebar();
+
+  useEffect(() => {
+    setType('apps');
+    register([
+      {
+        name: 'current-app',
+        label: name,
+        type: 'apps',
+        icon: image ? (
+          <Image
+            src={image}
+            alt=""
+            width={24}
+            height={24}
+            unoptimized
+            className="h-full w-full rounded-full object-cover"
+          />
+        ) : (
+          AppWindow
+        ),
+        disabled: true,
+        defaultActive: true,
+        order: Number.POSITIVE_INFINITY,
+      },
+    ]);
+  }, [image, name, register, setType]);
+}
+
 function AppUrlDialog({
   name,
+  image,
   url,
   config,
   onClose,
 }: {
   name: string;
+  image: string;
   url: string;
   config: AppRecord['config'];
   onClose: () => void;
 }) {
+  useAppSidebar(name, image);
   const width = typeof config.width === 'number' && config.width > 0 ? config.width : 1280;
   const height = typeof config.height === 'number' && config.height > 0 ? config.height : 800;
 
@@ -46,11 +81,13 @@ function AppUrlDialog({
 
 function AppPluginDialog({
   name,
+  image,
   page,
   plugin,
   onClose,
 }: {
   name: string;
+  image: string;
   page: ReturnType<typeof usePlugin>['page'];
   plugin: ReturnType<typeof usePlugin>['app'];
   onClose: () => void;
@@ -58,11 +95,8 @@ function AppPluginDialog({
   const t = useTranslations();
   const PluginView = plugin.component;
   const size = plugin.manifest?.size;
-  const { setType } = useSidebar();
 
-  useEffect(() => {
-    setType('apps');
-  }, [setType]);
+  useAppSidebar(name, image);
 
   return (
     <WindowModal
@@ -187,7 +221,16 @@ export function AppItem({ id, name, image, type, url, external, config }: AppRec
             {/* 放大走 transform，不占布局；长出来的部分靠 z-10 的文案盖住 */}
             <div className="group/icon relative h-32 w-32 rounded-full transition-transform duration-500 ease-out hover:scale-110">
               <LiquidGlass className="h-full w-full rounded-full" contentClassName="h-full">
-                {image ? <img src={image} alt="" className="h-full w-full rounded-full object-cover" /> : null}
+                {image ? (
+                  <Image
+                    src={image}
+                    alt=""
+                    width={128}
+                    height={128}
+                    unoptimized
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                ) : null}
               </LiquidGlass>
               <span
                 aria-hidden
@@ -205,8 +248,12 @@ export function AppItem({ id, name, image, type, url, external, config }: AppRec
 
         <div className="h-full w-5" />
       </div>
-      {page.isOpen ? <AppPluginDialog name={name} page={page} plugin={plugin} onClose={closePlugin} /> : null}
-      {open ? <AppUrlDialog name={name} url={address} config={config} onClose={() => setOpen(false)} /> : null}
+      {page.isOpen ? (
+        <AppPluginDialog name={name} image={image} page={page} plugin={plugin} onClose={closePlugin} />
+      ) : null}
+      {open ? (
+        <AppUrlDialog name={name} image={image} url={address} config={config} onClose={() => setOpen(false)} />
+      ) : null}
     </>
   );
 }
