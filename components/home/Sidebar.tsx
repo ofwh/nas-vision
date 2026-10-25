@@ -1,6 +1,6 @@
 'use client';
 
-import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, isValidElement, useEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { useSession } from '@/lib/auth-client';
@@ -27,6 +27,7 @@ type SidebarEntry = {
   name: string;
   label: string;
   icon: SidebarItem['menu']['icon'];
+  disabled: boolean;
   index: number;
   exiting: boolean;
 };
@@ -36,6 +37,7 @@ function sidebarEntries(items: SidebarItem[]): SidebarEntry[] {
     name: item.name,
     label: item.menu.label,
     icon: item.menu.icon,
+    disabled: item.menu.disabled ?? false,
     index,
     exiting: false,
   }));
@@ -125,7 +127,7 @@ function SidebarContent() {
 
   const [hover, setHover] = useState({ index: 0, visible: false, sliding: false });
   const hoveredItem = items[hover.index];
-  const showHover = hover.visible && !!hoveredItem && hoveredItem.name !== activeId;
+  const showHover = hover.visible && !!hoveredItem && !hoveredItem.menu.disabled && hoveredItem.name !== activeId;
 
   useEffect(() => {
     const list = listRef.current;
@@ -171,7 +173,8 @@ function SidebarContent() {
           >
             <div
               role="button"
-              tabIndex={item.exiting ? -1 : 0}
+              tabIndex={item.exiting || item.disabled ? -1 : 0}
+              aria-disabled={item.disabled || undefined}
               inert={item.exiting}
               aria-hidden={item.exiting || undefined}
               aria-label={item.label}
@@ -192,7 +195,7 @@ function SidebarContent() {
                   }));
                 }
               }}
-              className={`group/item absolute inset-0 cursor-pointer ${item.exiting ? styles.exit : styles.enter}`}
+              className={`group/item absolute inset-0 ${item.disabled ? 'cursor-default' : 'cursor-pointer'} ${item.exiting ? styles.exit : styles.enter}`}
             >
               {active ? <div className="absolute inset-y-0 right-3 left-3 rounded-full bg-white/15" /> : null}
 
@@ -201,7 +204,11 @@ function SidebarContent() {
                   active ? 'text-white' : 'text-white/85'
                 }`}
               >
-                <item.icon size={ICON_SIZE} strokeWidth={ICON_STROKE} aria-hidden />
+                {isValidElement(item.icon) ? (
+                  item.icon
+                ) : (
+                  <item.icon size={ICON_SIZE} strokeWidth={ICON_STROKE} aria-hidden />
+                )}
               </span>
 
               <span
