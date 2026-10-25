@@ -15,6 +15,7 @@ export const APP_ICONS: readonly string[] = [
   '/static/icons/Calibre.png',
   '/static/icons/ChatGPT.png',
   '/static/icons/Chrome.png',
+  '/static/icons/ClashCat.png',
   '/static/icons/ClashX.png',
   '/static/icons/Claude.png',
   '/static/icons/Cloudflare.png',
@@ -98,7 +99,3 @@ export const APP_ICONS: readonly string[] = [
   '/static/icons/Youtube.png',
   '/static/icons/ZLibrary.png',
 ];
-
-const icons = { APP_ICONS };
-
-export default icons;
