@@ -1,12 +1,13 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LiquidGlass } from '@/components/common/LiquidGlass';
 import { WindowModal } from '@/components/common/WindowModal';
 import { PluginPageContext, usePlugin } from '@/hooks/usePlugin';
 import { useSidebar } from '@/hooks/useSidebar';
 import { Loading } from '@/components/common/Loading';
+import { MarqueeText } from '@/components/common/MarqueeText';
 import { useAppList } from '@/stores/app-list';
 import type { AppItem as AppRecord } from '@/lib/services/apps';
 
@@ -122,9 +123,6 @@ export function AppItem({ id, name, image, type, url, external, config }: AppRec
     },
     [id],
   );
-  const barRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLSpanElement>(null);
-  const [overflow, setOverflow] = useState(0);
   const [open, setOpen] = useState(false);
   const address = url.trim();
 
@@ -172,26 +170,6 @@ export function AppItem({ id, name, image, type, url, external, config }: AppRec
     }
   };
 
-  useEffect(() => {
-    const bar = barRef.current;
-    const text = textRef.current;
-
-    if (!bar || !text) {
-      return;
-    }
-
-    const measure = () => setOverflow(Math.max(0, text.scrollWidth - bar.clientWidth));
-
-    measure();
-
-    const observer = new ResizeObserver(measure);
-
-    observer.observe(bar);
-    observer.observe(text);
-
-    return () => observer.disconnect();
-  }, [name]);
-
   return (
     <>
       <div className="group flex h-52 w-60">
@@ -217,18 +195,11 @@ export function AppItem({ id, name, image, type, url, external, config }: AppRec
               />
             </div>
 
-            <div
-              ref={barRef}
-              className="relative z-10 flex h-5.5 max-w-50 items-center overflow-hidden rounded-md text-sm text-white"
-            >
-              <span
-                ref={textRef}
-                className={overflow > 0 ? 'group-hover:animate-marquee whitespace-nowrap' : 'whitespace-nowrap'}
-                style={{ '--marquee-shift': `-${overflow}px` } as CSSProperties}
-              >
-                {name}
-              </span>
-            </div>
+            <MarqueeText
+              text={name}
+              className="relative z-10 flex h-5.5 max-w-50 items-center rounded-md text-sm text-white"
+              animationClassName="group-hover/app:animate-marquee group-focus-visible/app:animate-marquee"
+            />
           </button>
         </div>
 

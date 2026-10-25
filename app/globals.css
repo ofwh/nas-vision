@@ -84,9 +84,8 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/** 跑马灯：2 × 1.5s alternate 一个来回；位移量由 AppItem 从 --marquee-shift 传进来。 */
 @theme {
-  --animate-marquee: marquee 1.5s linear 2 alternate;
+  --animate-marquee: marquee var(--marquee-duration, 1.5s) linear 2 alternate;
 
   @keyframes marquee {
     from {
