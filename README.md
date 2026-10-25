@@ -1,5 +1,7 @@
 # NAS Vision
 
+一款仿 Apple Vision Pro 视图的 NAS 导航页
+
 ## 环境变量
 
 复制 `.env.example` 为 `.env`，按需修改认证密钥、数据目录和网络配置。
@@ -58,6 +60,21 @@ docker compose --env-file .env -f docker/docker-compose.local.yml up -d
 ```bash
 docker compose --env-file .env -f docker/docker-compose.yml up -d --pull always
 ```
+
+## 截屏预览
+
+<table>
+  <tr>
+    <td width="33%"><img src="docs/public/assets/Home.png" alt="Home" /></td>
+    <td width="33%"><img src="docs/public/assets/Setting.png" alt="Setting" /></td>
+    <td width="33%"><img src="docs/public/assets/AppEdit.png" alt="AppEdit" /></td>
+  </tr>
+  <tr>
+    <td width="33%"><img src="docs/public/assets/Weather.png" alt="Weather" /></td>
+    <td width="33%"><img src="docs/public/assets/Navidrome.png" alt="Navidrome" /></td>
+    <td width="33%"><img src="docs/public/assets/Window.png" alt="Window" /></td>
+  </tr>
+</table>
 
 ## 开发文档
 

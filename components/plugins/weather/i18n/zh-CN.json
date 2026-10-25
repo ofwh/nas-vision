@@ -234,10 +234,10 @@
   },
   "card": {
     "realtime": "实时天气",
-    "hourly": "分时预报",
+    "hourly": "小时预报",
     "daily": "天气预报",
-    "hourly_details": "分时天气",
-    "hourly_temperature": "分时温度",
+    "hourly_details": "小时天气",
+    "hourly_temperature": "小时温度",
     "uv": "紫外线指数",
     "wind": "风向",
     "humidity": "湿度",
