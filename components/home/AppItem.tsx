@@ -11,6 +11,7 @@ import { useSidebar } from '@/hooks/useSidebar';
 import { Loading } from '@/components/common/Loading';
 import { MarqueeText } from '@/components/common/MarqueeText';
 import { useAppList } from '@/stores/app-list';
+import { useWindowsStore } from '@/stores/windows';
 import type { AppItem as AppRecord } from '@/lib/services/apps';
 
 function useAppSidebar(name: string, image: string) {
@@ -140,9 +141,22 @@ export function AppItem({ id, name, image, type, url, external, config }: AppRec
   const activePluginId = useAppList((state) => state.activePluginId);
   const setActivePluginId = useAppList((state) => state.setActivePluginId);
   const launchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const closePlugin = () => {
+  const [open, setOpen] = useState(false);
+  const closeApp = () => {
+    if (launchTimer.current !== null) {
+      clearTimeout(launchTimer.current);
+      launchTimer.current = null;
+    }
+
     page.close();
-    setActivePluginId(null);
+    setOpen(false);
+    const state = useAppList.getState();
+
+    if (state.activePluginId === id) {
+      state.setActivePluginId(null);
+    }
+
+    useWindowsStore.getState().unregister(`app:${id}`);
   };
 
   useEffect(
@@ -154,10 +168,11 @@ export function AppItem({ id, name, image, type, url, external, config }: AppRec
       if (useAppList.getState().activePluginId === id) {
         useAppList.getState().setActivePluginId(null);
       }
+
+      useWindowsStore.getState().unregister(`app:${id}`);
     },
     [id],
   );
-  const [open, setOpen] = useState(false);
   const address = url.trim();
 
   const openPage = () => {
@@ -166,6 +181,7 @@ export function AppItem({ id, name, image, type, url, external, config }: AppRec
         return;
       }
 
+      useWindowsStore.getState().register({ id: `app:${id}`, type: 'plugin', close: closeApp });
       setActivePluginId(id);
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -200,6 +216,7 @@ export function AppItem({ id, name, image, type, url, external, config }: AppRec
     } else if (external === 'replace') {
       window.location.assign(target.href);
     } else if (external === 'iframe') {
+      useWindowsStore.getState().register({ id: `app:${id}`, type: 'url', close: closeApp });
       setOpen(true);
     }
   };
@@ -249,11 +266,9 @@ export function AppItem({ id, name, image, type, url, external, config }: AppRec
         <div className="h-full w-5" />
       </div>
       {page.isOpen ? (
-        <AppPluginDialog name={name} image={image} page={page} plugin={plugin} onClose={closePlugin} />
+        <AppPluginDialog name={name} image={image} page={page} plugin={plugin} onClose={closeApp} />
       ) : null}
-      {open ? (
-        <AppUrlDialog name={name} image={image} url={address} config={config} onClose={() => setOpen(false)} />
-      ) : null}
+      {open ? <AppUrlDialog name={name} image={image} url={address} config={config} onClose={closeApp} /> : null}
     </>
   );
 }

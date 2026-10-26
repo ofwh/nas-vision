@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { SettingsDialog } from '@/components/business/SettingsDialog';
 import { Sidebar } from '@/components/home/Sidebar';
 import { useAppList } from '@/stores/app-list';
+import { useWindowsStore } from '@/stores/windows';
 import { useSidebarStore, type SidebarMenu } from '@/stores/sidebar';
 
 export function HomeSidebar() {
@@ -15,7 +16,14 @@ export function HomeSidebar() {
   useEffect(() => {
     const { register } = useSidebarStore.getState();
     const menus: SidebarMenu[] = [
-      { name: 'home', label: t('home'), type: 'common', icon: House, order: 0, onClick: () => {} },
+      {
+        name: 'home',
+        label: t('home'),
+        type: 'common',
+        icon: House,
+        order: 0,
+        onClick: () => useWindowsStore.getState().closeAll(),
+      },
       {
         name: 'settings',
         label: t('settings'),

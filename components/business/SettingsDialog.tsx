@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useEffect, useId } from 'react';
 import { LayoutGrid, Palette, UserRound } from 'lucide-react';
 import { Account } from '@/components/business/Account/Account';
 import { Appearance } from '@/components/business/Appearance/Appearance';
@@ -8,12 +9,24 @@ import { AppConfig } from '@/components/business/AppConfig/AppConfig';
 import { SplitWindowModal } from '@/components/common/SplitWindowModal';
 import type { SplitWindowMenuItem } from '@/types/window';
 import { useSession } from '@/lib/auth-client';
+import { useWindowsStore } from '@/stores/windows';
 
 export type SettingsPage = 'account' | 'apps' | 'appearance';
 
 export function SettingsDialog({ initialPage, onClose }: { initialPage: SettingsPage; onClose: () => void }) {
+  const instanceId = useId();
+  const windowId = `settings:${instanceId}`;
   const t = useTranslations();
   const { data: session } = useSession();
+
+  useEffect(() => {
+    const { register, unregister } = useWindowsStore.getState();
+
+    register({ id: windowId, type: 'settings', close: onClose });
+
+    return () => unregister(windowId);
+  }, [onClose, windowId]);
+
   const items: SplitWindowMenuItem[] = [
     { type: 'item', id: 'account', label: t('account.title'), icon: <UserRound strokeWidth={1.7} />, content: Account },
     {
@@ -46,7 +59,7 @@ export function SettingsDialog({ initialPage, onClose }: { initialPage: Settings
       sidebar={{ header: t('settings.title'), items }}
       onOpenChange={(open) => {
         if (!open) {
-          onClose();
+          useWindowsStore.getState().close(windowId);
         }
       }}
     />
